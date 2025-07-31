@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Compiled Qt files
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.qmlc
+*.qrc
+*.pro.user
+*.qrc.py
+
+# Audio / MIDI files (if temporary)
+*.wav
+*.mp3
+*.midi
+*.mid
+
+# Lilypond generated files
+*.pdf
+*.ps
+*.ly~
+*.png
+*.svg
+
+# Log files
+*.log
+
+# Build files (if using setuptools/pyinstaller later)
+build/
+dist/
+*.spec
+
+# Misc
+*.bak
+*.tmp
+*.swp
