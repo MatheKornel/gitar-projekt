@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
+
 from filter import BandpassFilter
 from audio_files import Audio
 from spectrograms import Spectrogram
+from note_recognition import ShortTimeFT
 
 m = tk.Tk()
 m.geometry("600x300")
@@ -39,11 +41,19 @@ def show_spectrogram():
     if current_audio:
         spec = Spectrogram(current_audio.original, current_audio.filtered, current_audio.fs)
     spec.spectrograms()
+
+def show_note_rec():
+    global current_audio
+    if current_audio:
+        stft = ShortTimeFT(current_audio.filtered)
+    stft.note_rec()
         
 
 open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
 open_button.place(x=0, y=0)
 spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
 spectrogram_button.place(x=95, y=0)
+note_rec_button = ttk.Button(m, text="STFT indítása", command=show_note_rec)
+note_rec_button.place(x=255, y=0)
 
 m.mainloop()
