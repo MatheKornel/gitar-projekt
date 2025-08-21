@@ -1,4 +1,4 @@
-from audiofiles import Audio
+from audio_files import Audio
 from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ class Spectrogram:
         f1, t1, Sxx1 = signal.spectrogram(self.original, self.fs)
         f2, t2, Sxx2 = signal.spectrogram(self.filtered, self.fs)
 
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
 
         ax1.pcolormesh(t1, f1, 10*np.log10(Sxx1+1e-10), shading='gouraud')
         ax1.set_title("Eredeti jel spektrogramja")

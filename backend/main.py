@@ -2,13 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
-import numpy as np
 from filter import BandpassFilter
-from audiofiles import Audio
+from audio_files import Audio
 from spectrograms import Spectrogram
 
 m = tk.Tk()
-m.geometry("1300x700")
+m.geometry("600x300")
 m.title("Gitár projekt")
 
 def file_load():
@@ -43,8 +42,8 @@ def show_spectrogram():
         
 
 open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
-open_button.pack()
+open_button.place(x=0, y=0)
 spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
-spectrogram_button.pack()
+spectrogram_button.place(x=95, y=0)
 
 m.mainloop()
