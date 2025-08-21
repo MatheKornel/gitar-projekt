@@ -1,15 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
-import scipy
-from scipy import signal
 import soundfile as sf
-import librosa
-import librosa.display
 import numpy as np
-import matplotlib.pyplot as plt
 from filter import BandpassFilter
 from audiofiles import Audio
+from spectrograms import Spectrogram
 
 m = tk.Tk()
 m.geometry("1300x700")
@@ -39,36 +35,16 @@ def file_load():
         global current_audio
         current_audio = audio
 
-def spectrograms():
-    global original, filtered, fs
-
-    if original is None or filtered is None:
-        print("Load a file!")
-        return
-
-    f1, t1, Sxx1 = signal.spectrogram(original, fs)
-    f2, t2, Sxx2 = signal.spectrogram(filtered, fs)
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
-
-    ax1.pcolormesh(t1, f1, 10*np.log10(Sxx1+1e-10), shading='gouraud')
-    ax1.set_title("Eredeti jel spektrogramja")
-    ax1.set_ylabel('Frekvencia [Hz]')
-    ax1.set_xlabel('Idő [sec]')
-
-    ax2.pcolormesh(t2, f2, 10*np.log10(Sxx2+1e-10), shading='gouraud')
-    ax2.set_title("Szűrt jel spektrogramja")
-    ax2.set_ylabel('Frekvencia [Hz]')
-    ax2.set_xlabel('Idő [sec]')
-
-    print("Spectrograms shown.")
-    plt.tight_layout()
-    plt.show()
+def show_spectrogram():
+    global current_audio
+    if current_audio:
+        spec = Spectrogram(current_audio.original, current_audio.filtered, current_audio.fs)
+    spec.spectrograms()
         
 
 open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
 open_button.pack()
-spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=spectrograms)
+spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
 spectrogram_button.pack()
 
 m.mainloop()
