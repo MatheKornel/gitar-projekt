@@ -8,25 +8,14 @@ import librosa
 import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
+from filter import BandpassFilter
+from audiofiles import Audio
 
 m = tk.Tk()
-m.geometry("1000x600")
+m.geometry("1300x700")
 m.title("Gitár projekt")
 
-original = None
-filtered = None
-fs = None
-
-def bandpass_filter(original, fs, lowcut, highcut, order=5):
-    nyq = fs*0.5
-    low = lowcut/nyq
-    high = highcut/nyq
-    b, a = signal.butter(order, [low, high], btype='band')
-    filtered = signal.filtfilt(b, a, original)
-    return filtered
-
 def file_load():
-    global original, filtered, fs
 
     path = fd.askopenfilename(
         title="Fájl kiválasztása",
@@ -38,12 +27,17 @@ def file_load():
         print(f"Mintavételi frekvencia: {fs} Hz")
 
         if len(original.shape)>1:
-            original=original.mean(axis=1)
+            original = original.mean(axis=1)
     
-    filtered = bandpass_filter(original, fs, lowcut=70, highcut=2800, )
-    output_path = path.replace(".wav", "_filtered.wav")
-    sf.write(output_path, filtered, fs)
-    print("Filtering done.")
+        bpf = BandpassFilter(original)
+        filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
+        output_path = path.replace(".wav", "_filtered.wav")
+        sf.write(output_path, filtered, fs)
+        print("Filtering done.")
+
+        audio = Audio(original=original, filtered=filtered, fs=fs)
+        global current_audio
+        current_audio = audio
 
 def spectrograms():
     global original, filtered, fs
