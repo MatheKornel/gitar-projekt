@@ -1,8 +1,10 @@
+#Library importok
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
 
+#Fájl importok
 from filter import BandpassFilter
 from audio_files import Audio
 from spectrograms import Spectrogram
@@ -12,6 +14,7 @@ m = tk.Tk()
 m.geometry("600x300")
 m.title("Gitár projekt")
 
+#Fájl betöltése és zajszűrés
 def file_load():
 
     path = fd.askopenfilename(
@@ -36,19 +39,21 @@ def file_load():
         global current_audio
         current_audio = audio
 
+#Spektrogram megjelenítése a betöltött hanganyagból - szűrés előtti és utáni állapot
 def show_spectrogram():
     global current_audio
     if current_audio:
         spec = Spectrogram(current_audio.original, current_audio.filtered, current_audio.fs)
     spec.spectrograms()
 
+#STFT elvégzése
 def show_note_rec():
     global current_audio
     if current_audio:
         stft = ShortTimeFT(current_audio.filtered)
-    stft.note_rec()
+    stft.note_rec(5)
         
-
+#Alkalmazás dolgai
 open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
 open_button.place(x=0, y=0)
 spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
