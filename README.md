@@ -12,6 +12,7 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
 - Python
 - NumPy
 - Librosa
+- Scipy
 - SoundFile
 - Tkinter
 
