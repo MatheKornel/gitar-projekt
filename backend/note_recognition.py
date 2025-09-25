@@ -18,7 +18,7 @@ class ShortTimeFT:
         dominant_freqs = freqs[dominant_bins]
 
         #HS
-        f0_candidates = []
+        all_f0 = []
         for i in range(len(dominant_freqs)):
             f0 = dominant_freqs[i]
             tau = fs/f0
@@ -34,32 +34,49 @@ class ShortTimeFT:
                         amp += float(magnitude[k, i])
                 salience = amp*s
                 s = s/2
+                salience = 1 / (1 + np.exp(-salience))
                 harmonics.append((round(freq, 4), round(amp, 4), round(salience, 4)))
-            #print(f"\nFrame {i}, f0={f0:.2f} Hz:")
-            #for l, (f, a, t) in enumerate(harmonics):
-            #    print(f"  Harmonic {l+1}: {f:.2f} Hz, amplitude={a:.2f}, salience={t:.2f}")
+                #print(harmonics)
             max_salience = max(harmonics, key=lambda x: x[2])
-            f0_candidates.append(max_salience[0])
+            f0_candidate = max_salience[0]
         
-        final_f0 = statistics.mode([round(f,1) for f in f0_candidates])
-        
-        def near_amp(freq):
-            for k, f in enumerate(freqs):
-                if abs(f - freq) <= 4:
-                    if np.mean(magnitude[k]) > 0.1:
+        #Ha felezem a frekvenciát, van-e számottevő salience értéke, tehát lehet-e alaphang
+            def near_salience(freq, tol = 4):
+                for f, m, s in harmonics:
+                    if abs(f - freq) <= tol and s > 0.4:
                         return True
-            return False
+                return False
 
-        temp = final_f0
-        best_f0 = final_f0
-        while temp > 75:
-            temp = temp/2
-            if near_amp(temp):
-                best_f0 = temp
-            else:
-                break
+            temp = f0_candidate
+            best_f0 = f0_candidate
+            while temp > 75:
+                temp = temp/2
+                if near_salience(temp):
+                    best_f0 = temp
+                else:
+                    break
+            #print(f"{best_f0}")
+            all_f0.append(round(best_f0, 2))
 
-        print(f"f0 = {best_f0:.2f} Hz")
+        def select_notes(f0_list, tol, min_frames):
+            notes = []
+            current_note = []
+            for f in f0_list:
+                if not current_note:
+                    current_note = [f]
+                elif abs(f - np.mean(current_note)) <= tol:
+                    current_note.append(f)
+                else:
+                    if len(current_note) >= min_frames:
+                        notes.append(round(np.mean(current_note), 2))
+            if current_note and len(current_note) >= min_frames:
+                notes.append(round(np.mean(current_note), 2))
+            return notes
+                
+        
+        all_notes = select_notes(all_f0, 2, 5)
+
+        print(f"All f0 frequencies: {all_notes}")
 
 
 
