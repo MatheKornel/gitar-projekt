@@ -33,8 +33,8 @@ class ShortTimeFT:
                     if (freqs[k] >= freq-4) and (freqs[k] <= freq+4):
                         amp += float(magnitude[k, i])
                 salience = amp*s
-                s = s/2
-                salience = 1 / (1 + np.exp(-salience))
+                s = s/4
+                salience = 1-np.exp(-salience)
                 harmonics.append((round(freq, 4), round(amp, 4), round(salience, 4)))
                 #print(harmonics)
             max_salience = max(harmonics, key=lambda x: x[2])
@@ -79,7 +79,7 @@ class ShortTimeFT:
             return notes
                 
         
-        all_notes = select_notes(all_f0, 2, 50)
+        all_notes = select_notes(all_f0, 2, 30)
 
         print(f"All f0 frequencies: {all_notes}")
 
