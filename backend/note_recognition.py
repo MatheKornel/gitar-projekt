@@ -69,12 +69,13 @@ class ShortTimeFT:
                 else:
                     if len(current_note) >= min_frames:
                         notes.append(round(np.mean(current_note), 2))
+                    current_note = [f]
             if current_note and len(current_note) >= min_frames:
                 notes.append(round(np.mean(current_note), 2))
             return notes
                 
         
-        all_notes = select_notes(all_f0, 2, 5)
+        all_notes = select_notes(all_f0, 2, 50)
 
         print(f"All f0 frequencies: {all_notes}")
 
