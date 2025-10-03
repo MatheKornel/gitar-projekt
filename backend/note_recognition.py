@@ -68,10 +68,14 @@ class ShortTimeFT:
                     current_note.append(f)
                 else:
                     if len(current_note) >= min_frames:
-                        notes.append(round(np.mean(current_note), 2))
+                        avg_note=round(np.mean(current_note), 2)
+                        if not notes or abs(avg_note - notes[-1]) > tol:
+                            notes.append(avg_note)
                     current_note = [f]
             if current_note and len(current_note) >= min_frames:
-                notes.append(round(np.mean(current_note), 2))
+                avg_note=round(np.mean(current_note), 2)
+                if not notes or abs(avg_note - notes[-1]) > tol:
+                    notes.append(avg_note)
             return notes
                 
         
