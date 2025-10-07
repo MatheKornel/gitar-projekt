@@ -42,7 +42,6 @@ class ShortTimeFT:
                 s = s/4
                 salience = 1-np.exp(-salience)
                 harmonics.append((freq, amp, salience))
-                #print(harmonics)
             max_salience = max(harmonics, key=lambda x: x[2])
             f0_candidate = max_salience[0]
         
@@ -61,7 +60,6 @@ class ShortTimeFT:
                     best_f0 = temp
                 else:
                     break
-            #print(f"{best_f0}")
             all_f0.append(best_f0)
 
         def select_notes(f0_list, tol, min_frames):
@@ -85,24 +83,36 @@ class ShortTimeFT:
             return notes
                 
         #Bináris keresés a guitar_notes-ban
-        def binary_serach(notes, value):
+        def binary_serach(notes, value, tol):
             left = 0
             right = len(notes) - 1
-            while True:
-                center = (left + right) / 2
-                if notes[center] > value:
-                    right = center - 1
+            while left <= right:
+                center = (left + right) // 2
+                if abs(notes[center] - value) <= tol:
+                    return True
                 elif notes[center] < value:
                     left = center + 1
-                if not (left <= right and notes[center] >= abs(notes[center] - value)):
-                    break
-            exist = left <= right
-            return exist
+                else:
+                    right = center - 1
+            return False
                 
 
         all_notes = select_notes(all_f0, 2, 30)
+        
+        final_notes = []
+        for f in all_notes:
+            if binary_serach(guitar_notes, f, 4):
+                final_notes.append(f)
+            else:
+                temp = f
+                while temp > 75:
+                    temp = temp / 2
+                    if binary_serach(guitar_notes, temp, 4):
+                        final_notes.append(temp)
+                        break
 
-        formatted_notes = [f"{float(f):.2f} Hz" for f in all_notes]
+
+        formatted_notes = [f"{float(f):.2f} Hz" for f in final_notes]
         print("All f0 frequencies:", ", ".join(formatted_notes))
 
 
