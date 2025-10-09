@@ -1,6 +1,8 @@
 import librosa as lb
 import numpy as np
 
+from onset_offset_detection import OnsetOffsetDetection
+
 class ShortTimeFT:
     def __init__(self, filtered):
         self.filtered = filtered
@@ -15,6 +17,8 @@ class ShortTimeFT:
             349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88, 523.25,
             554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61,
             880.00, 932.33, 987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51]
+        
+        onset = OnsetOffsetDetection(self.filtered)
 
         #STFT
         D = lb.stft(self.filtered, n_fft=nfft, hop_length=512, window="blackman", center=False)
@@ -36,7 +40,7 @@ class ShortTimeFT:
                 freq = m*(fs/tau)
                 amp = 0.0
                 for k in range(len(freqs)):
-                    if (freqs[k] >= freq-4) and (freqs[k] <= freq+4):
+                    if abs(freq - freqs[k]) <= 4.5:
                         amp += float(magnitude[k, i])
                 salience = amp*s
                 s = s/4
@@ -46,7 +50,7 @@ class ShortTimeFT:
             f0_candidate = max_salience[0]
         
         #Ha felezem a frekvenciát, van-e számottevő salience értéke, tehát lehet-e alaphang
-            def near_salience(freq, tol = 4):
+            def near_salience(freq, tol = 4.5):
                 for f, m, s in harmonics:
                     if abs(f - freq) <= tol and s > 0.4:
                         return True
@@ -83,7 +87,7 @@ class ShortTimeFT:
             return notes
                 
         #Bináris keresés a guitar_notes-ban
-        def binary_serach(notes, value, tol):
+        def serach_in_notes(notes, value, tol):
             left = 0
             right = len(notes) - 1
             while left <= right:
@@ -97,20 +101,21 @@ class ShortTimeFT:
             return False
                 
 
-        all_notes = select_notes(all_f0, 2, 30)
+        all_notes = select_notes(all_f0, 4.5, 50)
         
         final_notes = []
         for f in all_notes:
-            if binary_serach(guitar_notes, f, 4):
+            if serach_in_notes(guitar_notes, f, 4.5):
                 final_notes.append(f)
             else:
                 temp = f
                 while temp > 75:
                     temp = temp / 2
-                    if binary_serach(guitar_notes, temp, 4):
+                    if serach_in_notes(guitar_notes, temp, 4.5):
                         final_notes.append(temp)
                         break
 
+        onsets = onset.onset_detect()
 
         formatted_notes = [f"{float(f):.2f} Hz" for f in final_notes]
         print("All f0 frequencies:", ", ".join(formatted_notes))
