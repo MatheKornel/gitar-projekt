@@ -118,10 +118,22 @@ class ShortTimeFT:
                     if serach_in_notes(guitar_notes, temp, 4.5):
                         final_notes.append(temp)
                         break
-
+        
+        # Eddigi hangok összevetése az onset-ekkel, csak azokat a hangokat tartjuk meg amihez tartozik onset érték
         onsets = onset.onset_detect(min_gap=0.3)
+        times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=512)
+        f0_times = list(zip(times, all_f0))
+        filtered_final_notes = []
+        time_tol = 0.1
+        freq_tol = 4.5
+        for fn in final_notes:
+            for (t, f) in f0_times:
+                if abs(f - fn) <= freq_tol:
+                    if np.any(np.abs(onsets - t) <= time_tol):
+                        filtered_final_notes.append(fn)
+                        break
 
-        formatted_notes = [f"{float(f):.2f} Hz" for f in final_notes]
+        formatted_notes = [f"{float(f):.2f} Hz" for f in filtered_final_notes]
         print("All f0 frequencies:", ", ".join(formatted_notes))
         print("Onset times (s):", ", ".join([f"{float(t):.2f}" for t in onsets]))
 
