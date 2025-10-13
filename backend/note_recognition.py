@@ -10,6 +10,8 @@ class ShortTimeFT:
     def note_rec(self, max_harmonics):
         nfft = 4096
         fs = 44100
+
+        # Gitár hangok frekvenciái
         guitar_notes = [
             82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 123.47, 130.81,
             138.59, 146.83, 155.56, 164.81, 174.61, 185.00, 196.00, 207.65,
@@ -66,6 +68,7 @@ class ShortTimeFT:
                     break
             all_f0.append(best_f0)
 
+        # Kiválasztom a hangokat, hogy ne legyenek ismétlődések
         def select_notes(f0_list, tol, min_frames):
             notes = []
             current_note = []
@@ -103,6 +106,7 @@ class ShortTimeFT:
 
         all_notes = select_notes(all_f0, 4.5, 50)
         
+        # Utolsó szűrés, hogy csak valódi, gitáron játszható hangok maradjanak
         final_notes = []
         for f in all_notes:
             if serach_in_notes(guitar_notes, f, 4.5):
@@ -115,10 +119,11 @@ class ShortTimeFT:
                         final_notes.append(temp)
                         break
 
-        onsets = onset.onset_detect()
+        onsets = onset.onset_detect(min_gap=0.3)
 
         formatted_notes = [f"{float(f):.2f} Hz" for f in final_notes]
         print("All f0 frequencies:", ", ".join(formatted_notes))
+        print("Onset times (s):", ", ".join([f"{float(t):.2f}" for t in onsets]))
 
 
 
