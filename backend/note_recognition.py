@@ -132,10 +132,11 @@ class ShortTimeFT:
                     if np.any(np.abs(onsets - t) <= time_tol):
                         filtered_final_notes.append(fn)
                         break
+        final_onsets = onsets[0:len(filtered_final_notes)]
 
         formatted_notes = [f"{float(f):.2f} Hz" for f in filtered_final_notes]
         print("All f0 frequencies:", ", ".join(formatted_notes))
-        print("Onset times (s):", ", ".join([f"{float(t):.2f}" for t in onsets]))
+        print("Onset times (s):", ", ".join([f"{float(t):.2f}" for t in final_onsets]))
 
 
 

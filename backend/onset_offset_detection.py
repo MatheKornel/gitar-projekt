@@ -33,7 +33,7 @@ class OnsetOffsetDetection:
 
         # Csúcskeresés
         min_distance = int(self.fs * 0.05)
-        peaks, _ = sig.find_peaks(env_smooth, distance=min_distance, prominence=0.25)
+        peaks, _ = sig.find_peaks(env_smooth, distance=min_distance, prominence=0.40)
         times = np.linspace(0, len(self.filtered) / self.fs, len(env_smooth))
         onset_times = times[peaks]
 
