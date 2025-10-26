@@ -8,75 +8,46 @@ class ShortTimeFT:
         self.filtered = filtered
         self.fs = 44100
 
-    # egyetlen frame-re kiszámoljuk az alaphangot
-    def get_f0_from_frame(self, i, dominant_freqs, magnitude, freqs, fs, max_harmonics, guitar_notes):
+    # egyetlen frame-re kiszámoljuk az alaphangot, lentről felfele építkezve
+    # minden egyes létező hangra kiszámolok egy pontszámot (salience) és a legjobbat választom
+    def get_f0_from_frame(self, i, magnitude, freqs, fs, max_harmonics, guitar_notes):
         
-        # Keresés a guitar_notes-ban
-        def serach_in_notes(notes, value, tol):
-            left = 0
-            right = len(notes) - 1
-            while left <= right:
-                center = (left + right) // 2
-                if abs(notes[center] - value) <= tol:
-                    return True
-                elif notes[center] < value:
-                    left = center + 1
-                else:
-                    right = center - 1
-            return False
-        
-        # HS
-        f0 = dominant_freqs[i]
-        if f0 == 0:
-            return None
-        tau = fs / f0
-        harmonics = []
-        s = 1.0
-        for j in range(max_harmonics):
-            m = j + 1
-            freq = m * (fs / tau)
-            amp = 0.0
-            nearby_bins = np.where(np.abs(freqs - freq) <= 4.5)[0]
-            if nearby_bins.size > 0:
-                amp = np.sum(magnitude[nearby_bins, i])
-            
-            salience = amp * s
-            s /= 4
-            salience = 1 - np.exp(-salience)
-            harmonics.append((freq, amp, salience))
-        
-        if not harmonics:
-            return None
-        
-        max_salience = max(harmonics, key=lambda x: x[2])
-        f0_candidate = max_salience[0]
-        f0_candidate_amp = max_salience[1]
+        f0_candidate_salience = []
 
-        # ha felezem a frekvenciát, van-e számottevő salience értéke, tehát lehet-e alaphang
-        def near_salience(freq, tol = 4.5, amp_treshold = 0.1):
-            nearby_bins = np.where(np.abs(freqs - freq) <= tol)[0] # megkeressük a frekvenciához közeli bin-eket
-            if nearby_bins.size == 0:
-                return False
-            amp = np.sum(magnitude[nearby_bins, i]) # kiolvassuk az amplitúdót
-            if amp > (f0_candidate_amp * amp_treshold) and amp > 0.01:
-                return True
-            return False
-
-        temp = f0_candidate
-        best_f0 = f0_candidate
-        while temp > 75:
-            temp = temp / 2
-            if near_salience(temp):
-                best_f0 = temp
-            else:
-                break
+        # végigmegyek az összes gitárhangon
+        for f0_candidate in guitar_notes:
             
-        if serach_in_notes(guitar_notes, best_f0, 4.5): #először megróbáljuk visszaadni ha benne van a guitar_notes-ban
-            return best_f0
-        else:
-            if serach_in_notes(guitar_notes, f0_candidate, 4.5): #ha nem, akkor az eredeti felezés nélküli f0_candidate-et
-                return f0_candidate
-        return None
+            # a túl mélyeket és túl magasakat kihagyom
+            if f0_candidate < 75 or f0_candidate > fs / (2 * max_harmonics):
+                continue
+
+            salience = 0.0
+            s = 1.0
+
+            # felharmonikusok összeadása
+            for m in range(1, max_harmonics + 1):
+                freq = f0_candidate * m
+                if freq > fs / 2:
+                    break
+                
+                nearby_bins = np.where(np.abs(freqs - freq) <= 4.5)[0]
+                amp = 0.0
+                if nearby_bins.size > 0:
+                    amp = np.sum(magnitude[nearby_bins, i])
+                
+                salience += amp * s 
+                s /= 2.0
+            
+            if salience > 0.01: # küszöb a zaj ellen
+                f0_candidate_salience.append((f0_candidate, salience))
+
+        # kiválasztom a legjobbat
+        if not f0_candidate_salience:
+            return None
+
+        best_candidate, best_salience = max(f0_candidate_salience, key=lambda x: x[1])
+        
+        return best_candidate
 
 
     def note_rec(self, max_harmonics):
@@ -103,8 +74,6 @@ class ShortTimeFT:
         D = lb.stft(self.filtered, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
         magnitude = np.abs(D)
-        dominant_bins = magnitude.argmax(axis=0)
-        dominant_freqs = freqs[dominant_bins]
 
         # frame-ekhez tartozó időpontok
         times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length)
@@ -115,14 +84,14 @@ class ShortTimeFT:
             start_frame = onset_frame_idx + 2
             end_frame = onset_frame_idx + 10 # veszünk egy 8 fram-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
 
-            if end_frame >= len(dominant_freqs):
-                end_frame = len(dominant_freqs) - 1
+            if end_frame >= magnitude.shape[1]:
+                end_frame = magnitude.shape[1] - 1
             if start_frame >= end_frame:
                 continue
 
             f0_candidates = []
             for i in range(start_frame, end_frame):
-                f0 = self.get_f0_from_frame(i, dominant_freqs, magnitude, freqs, fs, max_harmonics, guitar_notes)
+                f0 = self.get_f0_from_frame(i, magnitude, freqs, fs, max_harmonics, guitar_notes)
                 if f0 is not None:
                     f0_candidates.append(f0)
 
