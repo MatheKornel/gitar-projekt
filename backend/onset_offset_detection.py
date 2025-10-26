@@ -25,11 +25,16 @@ class OnsetOffsetDetection:
         P = num_freqs // Q
         envelopes = [np.mean(S_mag[i * P:(i + 1) * P, :], axis=0) for i in range(Q)]
 
-        # Középső sávokat átlagoljuk
-        env = np.mean(envelopes[3:7], axis=0)
-        env = env / np.max(env)
-        env_smooth = sig.medfilt(env, kernel_size=9)
-        env_smooth = np.convolve(env_smooth, np.ones(5)/5, mode='same')
+        # végigmegyünk az összes sávon és megkeressük a globális maximumot az összes sáv összes ideje közül
+        all_envs = np.array(envelopes[0:8]) 
+        global_max = np.max(all_envs) + 1e-9
+        # mindent ehhez normalizálunk
+        normalized_envelopes = all_envs / global_max
+
+        # vesszük a sávok maximumát és conclove nélkül, hogy a halk csúcsokat is megtaláljuk
+        env = np.max(normalized_envelopes, axis=0)
+        env_smooth = sig.medfilt(env, kernel_size=7)
+        #env_smooth = np.convolve(env_smooth, np.ones(5)/5, mode='same')
 
         total_duration_sec = len(self.filtered) / self.fs # az egész jel hossza másodpercben
         samples_per_sec_in_env = len(env_smooth) / total_duration_sec # hány minta van másodpercenként az envelope-ban
@@ -40,7 +45,7 @@ class OnsetOffsetDetection:
             min_dist_samples = 1
         
         # Csúcsdetektálás
-        peaks, _ = sig.find_peaks(env_smooth, distance=min_dist_samples, prominence=0.25)
+        peaks, _ = sig.find_peaks(env_smooth, distance=min_dist_samples, prominence=0.08, height=0.05)
 
         # Időpontok számítása
         times = np.linspace(0, total_duration_sec, len(env_smooth))
