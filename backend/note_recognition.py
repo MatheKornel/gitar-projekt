@@ -22,7 +22,6 @@ class ShortTimeFT:
                 continue
 
             salience = 0.0
-            s = 1.0
 
             # felharmonikusok összeadása
             for m in range(1, max_harmonics + 1):
@@ -35,8 +34,7 @@ class ShortTimeFT:
                 if nearby_bins.size > 0:
                     amp = np.sum(magnitude[nearby_bins, i])
                 
-                salience += amp * s 
-                s /= 2.0
+                salience += amp
             
             if salience > 0.01: # küszöb a zaj ellen
                 f0_candidate_salience.append((f0_candidate, salience))
