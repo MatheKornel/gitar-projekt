@@ -31,17 +31,19 @@ class OnsetOffsetDetection:
         env_smooth = sig.medfilt(env, kernel_size=9)
         env_smooth = np.convolve(env_smooth, np.ones(5)/5, mode='same')
 
-        # Csúcskeresés
-        min_distance = int(self.fs * 0.05)
-        peaks, _ = sig.find_peaks(env_smooth, distance=min_distance, prominence=0.40)
-        times = np.linspace(0, len(self.filtered) / self.fs, len(env_smooth))
+        total_duration_sec = len(self.filtered) / self.fs # az egész jel hossza másodpercben
+        samples_per_sec_in_env = len(env_smooth) / total_duration_sec # hány minta van másodpercenként az envelope-ban
+
+        min_dist_samples = int(min_gap * samples_per_sec_in_env) # minimális távolság mintában
+        # ha véletlen 0 lenne akkor legyen 1
+        if min_dist_samples < 1:
+            min_dist_samples = 1
+        
+        # Csúcsdetektálás
+        peaks, _ = sig.find_peaks(env_smooth, distance=min_dist_samples, prominence=0.25)
+
+        # Időpontok számítása
+        times = np.linspace(0, total_duration_sec, len(env_smooth))
         onset_times = times[peaks]
-
-        # Szűrés minimális időköz alapján
-        filtered_onsets = [onset_times[0]]
-        for t in onset_times[1:]:
-            if t - filtered_onsets[-1] > min_gap:
-                filtered_onsets.append(t)
-        onset_times = np.array(filtered_onsets)
-
         return onset_times
+
