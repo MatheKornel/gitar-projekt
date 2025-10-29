@@ -18,7 +18,7 @@ class ShortTimeFT:
         for f0_candidate in guitar_notes:
             
             # a túl mélyeket és túl magasakat kihagyom
-            if f0_candidate < 75 or f0_candidate > fs / (2 * max_harmonics):
+            if f0_candidate < 75:
                 continue
 
             salience = 0.0
@@ -64,7 +64,7 @@ class ShortTimeFT:
         
         # onset detektálás
         onset = OnsetOffsetDetection(self.filtered, fs=self.fs)
-        onsets = onset.onset_detect(min_gap=0.3)
+        onsets = onset.onset_detect(min_gap=0.2)
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
@@ -100,7 +100,16 @@ class ShortTimeFT:
             stable_f0 = np.median(f0_candidates) # legstabilabb f0 az ablakból
             note_idx = np.argmin(np.abs(guitar_notes - stable_f0))
             recognized_note = guitar_notes[note_idx]
-            final_notes.append((onset, recognized_note))
+            resonance_treshold_sec = 1.75
+            is_duplicate = False
+            if final_notes:
+                last_t, last_f = final_notes[-1]
+                time_diff = onset - last_t
+                freq_diff = abs(recognized_note - last_f)
+                if freq_diff < 1.0 and time_diff < resonance_treshold_sec:
+                    is_duplicate = True
+            if not is_duplicate:
+                final_notes.append((onset, recognized_note))
 
         if not final_notes:
             print("Nincs felismert hang a hanganyagban.")

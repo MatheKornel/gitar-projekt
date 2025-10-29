@@ -16,7 +16,7 @@ class OnsetOffsetDetection:
             self.fs = 8000
 
         # Maga az S-transzformáció
-        S = st.st(self.filtered, lo=75, hi=1350)
+        S = st.st(self.filtered, lo=75, hi=3000)
         S_mag = np.abs(S)
 
         # Frekvenciasávokra bontás és envelope készítés
@@ -25,14 +25,12 @@ class OnsetOffsetDetection:
         P = num_freqs // Q
         envelopes = [np.mean(S_mag[i * P:(i + 1) * P, :], axis=0) for i in range(Q)]
 
-        # végigmegyünk az összes sávon és megkeressük a globális maximumot az összes sáv összes ideje közül
-        all_envs = np.array(envelopes[0:8]) 
-        global_max = np.max(all_envs) + 1e-9
-        # mindent ehhez normalizálunk
-        normalized_envelopes = all_envs / global_max
+        # összegezzük a sáv energiáját
+        env = np.sum(np.array(envelopes), axis=0)
 
-        # vesszük a sávok maximumát és conclove nélkül, hogy a halk csúcsokat is megtaláljuk
-        env = np.max(normalized_envelopes, axis=0)
+        # Normalizáljuk a végső összeget
+        env = env / (np.max(env) + 1e-9)
+
         env_smooth = sig.medfilt(env, kernel_size=7)
         #env_smooth = np.convolve(env_smooth, np.ones(5)/5, mode='same')
 
@@ -45,7 +43,7 @@ class OnsetOffsetDetection:
             min_dist_samples = 1
         
         # Csúcsdetektálás
-        peaks, _ = sig.find_peaks(env_smooth, distance=min_dist_samples, prominence=0.08, height=0.05)
+        peaks, _ = sig.find_peaks(env_smooth, distance=min_dist_samples, prominence=0.1, height=0.05)
 
         # Időpontok számítása
         times = np.linspace(0, total_duration_sec, len(env_smooth))
