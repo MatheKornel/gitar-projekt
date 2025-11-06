@@ -86,6 +86,7 @@ class ShortTimeFT:
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
+        '''
         # STFT
         D = lb.stft(self.filtered, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
@@ -93,12 +94,29 @@ class ShortTimeFT:
 
         # frame-ekhez tartozó időpontok
         times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length)
-        
+        '''
+
         final_notes = []
+        resonance_treshold_sec = 1.75
+        freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
+        
         for onset in onsets:
-            onset_frame_idx = np.argmin(np.abs(times - onset)) # onset-hez tartozó frame indexe
-            start_frame = onset_frame_idx + 2
-            end_frame = onset_frame_idx + 10 # veszünk egy 8 frame-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
+
+            start_samlpe = int(onset * fs)
+            end_sample = start_samlpe + int(fs * 1.0) # mindig az onset körüli 1 másodperces ablakot vizsgáljuk
+            
+            if end_sample > len(self.filtered):
+                continue # ilyenkor nincs elég adat
+
+            audio_slice = self.filtered[start_samlpe:end_sample]
+
+            # STFT számolása csak a szeletre
+            D = lb.stft(audio_slice, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
+            magnitude = np.abs(D)
+            times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length)
+            
+            start_frame = 2
+            end_frame = 10 # veszünk egy 8 frame-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
 
             if end_frame >= magnitude.shape[1]:
                 end_frame = magnitude.shape[1] - 1
@@ -118,7 +136,8 @@ class ShortTimeFT:
             stable_f0 = np.median(f0_candidates) # legstabilabb f0 az ablakból
             note_idx = np.argmin(np.abs(guitar_notes - stable_f0))
             recognized_note = guitar_notes[note_idx]
-            resonance_treshold_sec = 1.75
+
+            # rezonancia szűrés
             is_duplicate = False
             if final_notes:
                 last_t, last_f = final_notes[-1]
