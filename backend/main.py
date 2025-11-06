@@ -33,7 +33,7 @@ def file_load():
         filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
         output_path = path.replace(".wav", "_filtered.wav")
         sf.write(output_path, filtered, fs)
-        print("Filtering done.")
+        print("Szűrés elvégezve.")
 
         audio = Audio(original=original, filtered=filtered, fs=fs)
         global current_audio

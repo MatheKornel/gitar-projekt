@@ -29,6 +29,6 @@ class Spectrogram:
         ax2.set_ylabel('Frekvencia [Hz]')
         ax2.set_xlabel('Idő [sec]')
 
-        print("Spectrograms shown.")
+        print("Spektrogramok megjelenítve.")
         plt.tight_layout()
         plt.show()
