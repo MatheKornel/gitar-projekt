@@ -61,7 +61,7 @@ class ShortTimeFT:
         if not f0_candidate_salience:
             return None
 
-        best_candidate, best_salience = max(f0_candidate_salience, key=lambda x: x[1])
+        best_candidate, _ = max(f0_candidate_salience, key=lambda x: x[1])
         
         return best_candidate
 
@@ -86,46 +86,51 @@ class ShortTimeFT:
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
-        '''
-        # STFT
-        D = lb.stft(self.filtered, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
-        freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
-        magnitude = np.abs(D)
-
-        # frame-ekhez tartozó időpontok
-        times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length)
-        '''
-
-        final_notes = []
+        notes_with_offsets = []
         resonance_treshold_sec = 1.75
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
         
-        for onset in onsets:
+        for i in range(len(onsets)):
+            onset = onsets[i]
 
             start_samlpe = int(onset * fs)
-            end_sample = start_samlpe + int(fs * 1.0) # mindig az onset körüli 1 másodperces ablakot vizsgáljuk
+            slice_end_time = onset + 5.0 # alapértelmezetten 5 mp után vége
+
+            for k in range(i + 1, len(onsets)): # megkeressük a következő onset-et
+                next_onset = onsets[k]
+                time_diff_k = next_onset - onset
+                if time_diff_k >= resonance_treshold_sec:
+                    slice_end_time = next_onset + 0.1
+                    break
+
+            slice_end_time = min(onset + 5.0, slice_end_time) # de amúgy a szelet vége legyen a következő onset közelében
+
+            end_sample = int(slice_end_time * fs)
             
             if end_sample > len(self.filtered):
-                continue # ilyenkor nincs elég adat
+                end_sample = len(self.filtered)
+
+            if (end_sample - start_samlpe) < (fs * 0.1): # ha túl rövid a szelet, kihagyom
+                continue
 
             audio_slice = self.filtered[start_samlpe:end_sample]
 
             # STFT számolása csak a szeletre
             D = lb.stft(audio_slice, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
             magnitude = np.abs(D)
-            times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length)
+            # frame-ekhez tartozó időpontok
+            times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length) + onset # az onset-től induló időket kell tartalmaznia
             
-            start_frame = 2
-            end_frame = 10 # veszünk egy 8 frame-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
+            onset_frame_idx = np.argmin(np.abs(times - onset))
+            start_frame = onset_frame_idx + 2
+            end_frame = min(onset_frame_idx + 10, magnitude.shape[1] - 1) # veszünk egy 8 frame-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
 
-            if end_frame >= magnitude.shape[1]:
-                end_frame = magnitude.shape[1] - 1
             if start_frame >= end_frame:
                 continue
 
             f0_candidates = []
-            for i in range(start_frame, end_frame):
-                f0 = self.get_f0_from_frame(i, magnitude, freqs, fs, max_harmonics, guitar_notes)
+            for j in range(start_frame, end_frame):
+                f0 = self.get_f0_from_frame(j, magnitude, freqs, fs, max_harmonics, guitar_notes)
                 if f0 is not None:
                     f0_candidates.append(f0)
 
@@ -139,51 +144,46 @@ class ShortTimeFT:
 
             # rezonancia szűrés
             is_duplicate = False
-            if final_notes:
-                last_t, last_f = final_notes[-1]
+            if notes_with_offsets:
+                last_t, last_f, _ = notes_with_offsets[-1]
                 time_diff = onset - last_t
                 freq_diff = abs(recognized_note - last_f)
                 if freq_diff < 1.0 and time_diff < resonance_treshold_sec:
                     is_duplicate = True
-            if not is_duplicate:
-                final_notes.append((onset, recognized_note))
-
-        if not final_notes:
-            print("Nincs felismert hang a hanganyagban.")
-            return []
+            if is_duplicate:
+                continue
         
-        # OFFSET DETEKTÁLÁS
+            # OFFSET DETEKTÁLÁS
 
-        notes_with_offsets = []
-        for i in range(len(final_notes)):
-            onset_t, f0 = final_notes[i]
-            onset_frame = np.argmin(np.abs(times - onset_t))
+            f0 = recognized_note
             peak_salience = 0.0
-            peak_frame = onset_frame + 2 # kezdjük egy kicsit később az onset után
+            peak_frame = start_frame
 
-            for j in range(onset_frame + 2, onset_frame + 10):
-                if j >= magnitude.shape[1]:
-                    break
+            for j in range(start_frame, end_frame):
                 current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics)
                 if current_salience > peak_salience:
                     peak_salience = current_salience
-                    peak_frame = j
+                    peak_frame = j # ez most a szeleten belüli frame index
 
             if peak_salience < 0.01:
-                notes_with_offsets.append((onset_t, f0, onset_t + 0.1)) # ha a hang túl rövid adok neki egy fix hosszt
+                notes_with_offsets.append((onset, f0, onset + 0.1)) # ha a hang túl rövid adok neki egy fix hosszt
                 continue
 
             salience_treshold = peak_salience * 0.25 # a küszöb legyen a csúcs valahány százaléka
             stop_time = float('inf') # a következő onset-nél elvágjuk
-            if i + 1 < len(final_notes):
-                next_onset_t, _ = final_notes[i + 1]
-                stop_time = next_onset_t
+
+            for k in range(i + 1, len(onsets)): # megkeressük a következő onset-et
+                next_onset = onsets[k]
+                time_diff_k = next_onset - onset
+                if time_diff_k >= resonance_treshold_sec:
+                    stop_time = next_onset
+                    break
 
             offset_time = times[peak_frame] # elkezdjük követni a lecsengést
             for j in range(peak_frame + 1, magnitude.shape[1]):
                 current_time = times[j]
                 if current_time >= stop_time:
-                    offset_time = stop_time # ha új hang kezdődik akkor picit előtte elvágjuk a hangot
+                    offset_time = stop_time - 0.01 # ha új hang kezdődik akkor picit előtte elvágjuk a hangot
                     break
                 current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics)
                 if current_salience < salience_treshold:
@@ -191,7 +191,7 @@ class ShortTimeFT:
                     break
                 offset_time = current_time
 
-            notes_with_offsets.append((onset_t, f0, offset_time))
+            notes_with_offsets.append((onset, f0, offset_time))
 
         for t_on, f, t_off in notes_with_offsets:
             print(f"Felismert hang: {f:.2f} Hz, onset: {t_on:.2f} s, offset: {t_off:.2f} s")
