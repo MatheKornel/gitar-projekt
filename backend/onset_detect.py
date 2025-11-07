@@ -3,7 +3,7 @@ import numpy as np
 import scipy.signal as sig
 import librosa
 
-class OnsetOffsetDetection:
+class OnsetDetect:
     def __init__(self, filtered, fs = 44100):
         self.filtered = filtered
         self.fs = fs

@@ -1,7 +1,7 @@
 import librosa as lb
 import numpy as np
 
-from onset_offset_detection import OnsetOffsetDetection
+from onset_detect import OnsetDetect
 
 class ShortTimeFT:
     def __init__(self, filtered):
@@ -81,7 +81,7 @@ class ShortTimeFT:
             880.00, 932.33, 987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51]
         
         # ONSET DETEKTÁLÁS
-        onset = OnsetOffsetDetection(self.filtered, fs=self.fs)
+        onset = OnsetDetect(self.filtered, fs=self.fs)
         onsets = onset.onset_detect(min_gap=0.2)
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
