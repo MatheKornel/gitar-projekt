@@ -2,6 +2,7 @@ import librosa as lb
 import numpy as np
 
 from onset_detect import OnsetDetect
+from note_event import NoteEvent
 
 class ShortTimeFT:
     def __init__(self, filtered):
@@ -145,7 +146,8 @@ class ShortTimeFT:
             # rezonancia szűrés
             is_duplicate = False
             if notes_with_offsets:
-                last_t, last_f, _ = notes_with_offsets[-1]
+                last_t = notes_with_offsets[-1].onset
+                last_f = notes_with_offsets[-1].freq
                 time_diff = onset - last_t
                 freq_diff = abs(recognized_note - last_f)
                 if freq_diff < 1.0 and time_diff < resonance_treshold_sec:
@@ -191,10 +193,11 @@ class ShortTimeFT:
                     break
                 offset_time = current_time
 
-            notes_with_offsets.append((onset, f0, offset_time))
+            event = NoteEvent(onset, offset_time, f0)
+            notes_with_offsets.append(event) # minden egyes hangról egy NoteEvent objektumot tárolunk el
 
-        for t_on, f, t_off in notes_with_offsets:
-            print(f"Felismert hang: {f:.2f} Hz, onset: {t_on:.2f} s, offset: {t_off:.2f} s")
+        for note in notes_with_offsets:
+            print(f"Felismert hang: {note.note_name} - {note.freq:.2f} Hz, onset: {note.onset:.2f} s, offset: {note.offset:.2f} s")
 
         return notes_with_offsets
 

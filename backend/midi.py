@@ -18,13 +18,9 @@ class MidiExporter:
 
         # esemény lista -- minden hanghoz tartozik note_on és note_off esemény
         events = []
-        for t_on, f0, t_off in notes:
-            midi_note = int(np.round(69 + 12 * np.log2(f0 / 440.0))) # frekvencia átváltása midi hangra
-            if 0 <= midi_note <= 127:
-                events.append({'time_sec': t_on, 'type': 'note_on', 'note': midi_note})
-                events.append({'time_sec': t_off, 'type': 'note_off', 'note': midi_note})
-            else:
-                print(f"Hiba: A {f0} Hz frekvencia kívül nem konvertálható MIDI hanggá.")
+        for note in notes:
+            events.append({'time_sec': note.onset, 'type': 'note_on', 'note': note.midi_note, 'velocity': note.velocity})
+            events.append({'time_sec': note.offset, 'type': 'note_off', 'note': note.midi_note, 'velocity': note.velocity})
         
         events.sort(key=lambda x: x['time_sec']) # időrendbe rendezés
 
