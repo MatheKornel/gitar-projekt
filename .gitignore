@@ -39,10 +39,10 @@ Thumbs.db
 *.qrc.py
 
 # Audio / MIDI files (if temporary)
-*.wav
+#*.wav
 *.mp3
 *.midi
-*.mid
+#*.mid
 
 # Lilypond generated files
 *.pdf
