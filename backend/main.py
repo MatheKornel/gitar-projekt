@@ -11,6 +11,7 @@ from audio_files import Audio
 from spectrograms import Spectrogram
 from note_recognition import ShortTimeFT
 from midi import MidiExporter
+from sheet_music_exporter import SheetMusicExporter
 
 m = tk.Tk()
 m.geometry("600x300")
@@ -81,15 +82,46 @@ def save_midi():
     output_midi_path = os.path.join("MIDI_files", file_name)
 
     exporter.create_midi(current_notes, output_midi_path)
-        
+
+# Kotta generálás és megjelenítés
+def generate_sheet_music():
+    global current_notes, original_filepath, image_reference, active_score_window
+    if not current_notes:
+        print("Nincsenek felismert hangok a kottához.")
+        return
+    
+    if not original_filepath:
+        print("Nincs eredeti fájlnév a mentéshez.")
+        return
+    
+    base_name = os.path.basename(original_filepath)
+    file_name = os.path.splitext(base_name)[0]
+
+    exporter = SheetMusicExporter(tempo=120)
+    pdf_path = exporter.create_score(current_notes, file_basename=file_name)
+
+    if pdf_path:
+        #print(f"PNG generálva: {png_path}")
+        print(f"PDF generálva: {pdf_path}")
+    else:
+        print("Kotta generálása sikertelen.")
+
+
+
 #Alkalmazás dolgai
 open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
 open_button.place(x=0, y=0)
+
 spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
 spectrogram_button.place(x=95, y=0)
+
 note_rec_button = ttk.Button(m, text="STFT indítása", command=show_note_rec)
 note_rec_button.place(x=255, y=0)
+
 midi_export_button = ttk.Button(m, text="MIDI exportálása", command=save_midi)
 midi_export_button.place(x=338, y=0)
+
+sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
+sheet_music_button.place(x=440, y=0)
 
 m.mainloop()
