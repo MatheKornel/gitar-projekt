@@ -45,7 +45,7 @@ Thumbs.db
 #*.mid
 
 # Lilypond generated files
-*.pdf
+#*.pdf
 *.ps
 *.ly~
 *.png
