@@ -4,6 +4,8 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
 import os
+import librosa as lb
+import numpy as np
 
 #Fájl importok
 from filter import BandpassFilter
@@ -19,6 +21,7 @@ m.title("Gitár projekt")
 
 current_audio = None
 current_notes = None
+current_tempo = 120
 original_filepath = ""
 
 #Fájl betöltése és zajszűrés
@@ -55,8 +58,10 @@ def show_spectrogram():
 
 #STFT elvégzése
 def show_note_rec():
-    global current_audio, current_notes
+    global current_audio, current_notes, current_tempo
     if current_audio:
+        tempo, _ = lb.beat.beat_track(y=current_audio.filtered, sr=current_audio.fs)
+        current_tempo = round(np.mean(tempo))
         stft = ShortTimeFT(current_audio.filtered)
         notes = stft.note_rec(5)
         current_notes = notes
@@ -85,7 +90,7 @@ def save_midi():
 
 # Kotta generálás és megjelenítés
 def generate_sheet_music():
-    global current_notes, original_filepath, image_reference, active_score_window
+    global current_notes, original_filepath, current_tempo
     if not current_notes:
         print("Nincsenek felismert hangok a kottához.")
         return
@@ -97,7 +102,7 @@ def generate_sheet_music():
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0]
 
-    exporter = SheetMusicExporter(tempo=120)
+    exporter = SheetMusicExporter(tempo=current_tempo)
     pdf_path = exporter.create_score(current_notes, file_basename=file_name)
 
     if pdf_path:
