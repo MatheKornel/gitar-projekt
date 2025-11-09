@@ -22,7 +22,7 @@ class SheetMusicExporter:
         part = stream.Part()
 
         part.append(meter.TimeSignature('4/4'))
-        part.clef = clef.BassClef() # basszuskulcs violinkulcs helyett a mélyebb hangok miatt
+        part.clef = clef.TrebleClef() # violinkulcs
         last_offset = 0.0
 
         for note_event in notes:
@@ -34,7 +34,7 @@ class SheetMusicExporter:
                 part.append(rest)
             
             n = note.Note() # hang létrehozása
-            n.pitch.midi = note_event.midi_note
+            n.pitch.midi = note_event.midi_note + 12 # oktávval feljebb, hogy "gitáros" kotta legyen
 
             note_quarter_length = note_event.duration / self.sec_per_beat # időtartam beállítása
             note_quarter_length = round(note_quarter_length * 8) / 8.0 # kvantálás 32-ed értékre
