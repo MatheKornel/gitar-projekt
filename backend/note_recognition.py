@@ -18,7 +18,8 @@ class ShortTimeFT:
             if freq > fs / 2:
                 break
             
-            nearby_bins = np.where(np.abs(freqs - freq) <= 4.5)[0]
+            tol_hz = max(freq * 0.03, 4.5)  # dinamikusabb tolerancia a magasabb hangok miatt
+            nearby_bins = np.where(np.abs(freqs - freq) <= tol_hz)[0]
             amp = 0.0
             if nearby_bins.size > 0:
                 amp = np.sum(magnitude[nearby_bins, i])
@@ -48,12 +49,16 @@ class ShortTimeFT:
                 if freq > fs / 2:
                     break
                 
-                nearby_bins = np.where(np.abs(freqs - freq) <= 4.5)[0]
+                tol_hz = max(freq * 0.03, 4.5)
+                nearby_bins = np.where(np.abs(freqs - freq) <= tol_hz)[0]
                 amp = 0.0
                 if nearby_bins.size > 0:
                     amp = np.sum(magnitude[nearby_bins, i])
                 
-                salience += amp
+                if m == 1:
+                    salience += amp * 1.0
+                else:
+                    salience += amp * 0.8 # felharmonikust csak egy kicsit büntetek
             
             if salience > 0.01: # küszöb a zaj ellen
                 f0_candidate_salience.append((f0_candidate, salience))
