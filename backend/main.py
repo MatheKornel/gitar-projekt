@@ -102,11 +102,10 @@ def generate_sheet_music():
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0]
 
-    exporter = SheetMusicExporter(tempo=current_tempo)
+    exporter = SheetMusicExporter(audio_tempo=current_tempo)
     pdf_path = exporter.create_score(current_notes, file_basename=file_name)
 
     if pdf_path:
-        #print(f"PNG generálva: {png_path}")
         print(f"PDF generálva: {pdf_path}")
     else:
         print("Kotta generálása sikertelen.")

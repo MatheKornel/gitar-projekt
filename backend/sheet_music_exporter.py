@@ -1,7 +1,5 @@
-import librosa as lb
-from music21 import stream, note, duration, meter, environment, clef
+from music21 import stream, note, duration, meter, environment, clef, tempo, lily, instrument
 import os
-import subprocess
 
 lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 
@@ -13,15 +11,18 @@ else:
     print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
 class SheetMusicExporter:
-    def __init__(self, tempo=120):
-        self.sec_per_beat = 60 / tempo
+    def __init__(self, audio_tempo=120):
+        self.sec_per_beat = 60 / audio_tempo
+        self.audio_tempo = audio_tempo
     
     # létrehozza a kottát a felismert hangok alapján, majd elmenti PDF formátumban és megjeleníti PNG-ként
     def create_score(self, notes, file_basename="output"):
         score = stream.Score()
-        part = stream.Part()
+        part = stream.Stream()
+        part.insert(0, instrument.Guitar()) # gitár hangszer hozzáadása
 
         part.append(meter.TimeSignature('4/4'))
+        part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef() # violinkulcs
         last_offset = 0.0
 
@@ -29,7 +30,7 @@ class SheetMusicExporter:
             pause_duration = note_event.onset - last_offset # szünet hozzáadása, ha szükséges
             if pause_duration > 0.05:
                 pause_quarter_length = pause_duration / self.sec_per_beat
-                pause_quarter_length = round(pause_quarter_length * 8) / 8.0 # kvantálás 32-ed értékre
+                pause_quarter_length = round(pause_quarter_length * 4) / 4.0 # kvantálás 32-ed értékre
                 rest = note.Rest(quarterLength=pause_quarter_length)
                 part.append(rest)
             
@@ -37,37 +38,30 @@ class SheetMusicExporter:
             n.pitch.midi = note_event.midi_note + 12 # oktávval feljebb, hogy "gitáros" kotta legyen
 
             note_quarter_length = note_event.duration / self.sec_per_beat # időtartam beállítása
-            note_quarter_length = round(note_quarter_length * 8) / 8.0 # kvantálás 32-ed értékre
+            note_quarter_length = round(note_quarter_length * 4) / 4.0 # kvantálás 32-ed értékre
+            if note_quarter_length == 0:
+                note_quarter_length = 1/32 # legyen legalább 32-ed érték
             n.duration = duration.Duration(quarterLength=note_quarter_length)
             part.append(n)
 
             last_offset = note_event.offset # frissítjük az utolsó offsetet
+        
+        final_part = part.makeMeasures().quantize(inPlace=False)
 
-        score.append(part)
-
-        # mentés PDF-be és PNG-be
+        # mentés PDF-be
         target_dir = "sheet_music"
         os.makedirs(target_dir, exist_ok=True)
 
-        base_output_path = os.path.join(target_dir, file_basename)
-        ly_file_path = f"{base_output_path}.ly"
-
         try:
-            # Lilypond
-            score.write('lilypond', fp=ly_file_path)
-
             # PDF
-            subprocess.run([lilypond_path, "-f", "pdf", "-o", base_output_path, ly_file_path], check=True, capture_output=True, text=True)
-            pdf_path = f"{base_output_path}.pdf"
-
-            # PNG
-            #subprocess.run([lilypond_path, "-f", "png", "-o", base_output_path, ly_file_path], check=True, capture_output=True, text=True)
-            #png_path = f"{base_output_path}.png"
+            pdf_path_full = os.path.join(target_dir, f"{file_basename}")
+            final_part.show('lily.pdf', fp=pdf_path_full)
+            pdf_path = pdf_path_full
 
             print(f"Kotta mentve: {target_dir}")
-            return (pdf_path)
+            return pdf_path
         except Exception as e:
             print(f"Hiba a kotta generálásánál: {e}")
-            return (None, None)
+            return None
         finally:
-            os.remove(ly_file_path)
+            os.remove(pdf_path_full)
