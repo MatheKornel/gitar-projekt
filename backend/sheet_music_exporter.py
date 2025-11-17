@@ -1,4 +1,4 @@
-from music21 import stream, note, duration, meter, environment, clef, tempo, lily, instrument
+from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
 import os
 
 lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
@@ -17,7 +17,6 @@ class SheetMusicExporter:
     
     # létrehozza a kottát a felismert hangok alapján, majd elmenti PDF formátumban és megjeleníti PNG-ként
     def create_score(self, notes, file_basename="output"):
-        score = stream.Score()
         part = stream.Stream()
         part.insert(0, instrument.Guitar()) # gitár hangszer hozzáadása
 

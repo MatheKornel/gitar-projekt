@@ -1,7 +1,7 @@
 from stockwell import st
 import numpy as np
 import scipy.signal as sig
-import librosa
+import librosa as lb
 
 class OnsetDetect:
     def __init__(self, filtered, fs = 44100):
@@ -12,7 +12,7 @@ class OnsetDetect:
 
         # a magas mintavételi frekvenciát lecsökkentjük gyorsítás miatt
         if (self.fs > 8000):
-            self.filtered = librosa.resample(self.filtered, orig_sr=self.fs, target_sr=8000)
+            self.filtered = lb.resample(self.filtered, orig_sr=self.fs, target_sr=8000)
             self.fs = 8000
         
         slice_duration_sec = 3.0 # 3 másodperces darabokat dolgozunk fel

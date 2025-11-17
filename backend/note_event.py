@@ -15,9 +15,3 @@ class NoteEvent:
         except Exception:
             self.midi_note = 0
             self.note_name = "Ismeretlen"
-
-    def __repr__(self):
-        return (f"<NoteEvent: {self.note_name} ({self.midi_note}) "
-                f"| On: {self.onset:.2f}s "
-                f"| Off: {self.offset:.2f}s "
-                f"| Dur: {self.duration:.2f}s>")
