@@ -120,13 +120,13 @@ open_button.place(x=0, y=0)
 spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
 spectrogram_button.place(x=95, y=0)
 
-note_rec_button = ttk.Button(m, text="STFT indítása", command=show_note_rec)
+note_rec_button = ttk.Button(m, text="Hangfelismerés", command=show_note_rec)
 note_rec_button.place(x=255, y=0)
 
 midi_export_button = ttk.Button(m, text="MIDI exportálása", command=save_midi)
-midi_export_button.place(x=338, y=0)
+midi_export_button.place(x=350, y=0)
 
 sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
-sheet_music_button.place(x=440, y=0)
+sheet_music_button.place(x=450, y=0)
 
 m.mainloop()
