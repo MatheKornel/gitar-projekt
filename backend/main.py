@@ -35,6 +35,7 @@ def file_load():
     
     if path:
         original_filepath = path
+        print(f"Betöltött fájl: {os.path.basename(original_filepath)}")
         original, fs = sf.read(path)
         print(f"Mintavételi frekvencia: {fs} Hz")
 
