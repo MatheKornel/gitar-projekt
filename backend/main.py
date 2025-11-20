@@ -73,7 +73,7 @@ def show_note_rec():
 
 # MIDI exportálás
 def save_midi():
-    global current_notes, original_filepath
+    global current_notes, original_filepath, current_tempo
     if not current_notes:
         print("Nincsenek felismert hangok a MIDI exportáláshoz.")
         return
@@ -82,7 +82,7 @@ def save_midi():
         print("Nincs eredeti fájlnév a mentéshez.")
         return
     
-    exporter = MidiExporter(tempo=120)
+    exporter = MidiExporter(tempo=current_tempo)
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0] + ".mid"
     output_midi_path = os.path.join("MIDI_files", file_name)
