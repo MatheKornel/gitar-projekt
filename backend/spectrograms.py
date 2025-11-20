@@ -23,11 +23,13 @@ class Spectrogram:
         ax1.set_title("Eredeti jel spektrogramja")
         ax1.set_ylabel('Frekvencia [Hz]')
         ax1.set_xlabel('Idő [sec]')
+        ax1.set_ylim(0, 10000)
 
         ax2.pcolormesh(t2, f2, 10*np.log10(Sxx2+1e-10), shading='gouraud')
         ax2.set_title("Szűrt jel spektrogramja")
         ax2.set_ylabel('Frekvencia [Hz]')
         ax2.set_xlabel('Idő [sec]')
+        ax2.set_ylim(0, 10000)
 
         print("Spektrogramok megjelenítve.")
         plt.tight_layout()
