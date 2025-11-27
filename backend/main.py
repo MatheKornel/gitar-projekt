@@ -23,17 +23,27 @@ current_audio = None
 current_notes = None
 current_tempo = 120
 original_filepath = ""
+last_opened_dir = None
 
 #Fájl betöltése és zajszűrés
 def file_load():
-    global current_audio, original_filepath, current_notes
+    global current_audio, original_filepath, current_notes, last_opened_dir
+
+    if last_opened_dir:
+        start_dir = last_opened_dir
+    else:
+        start_dir = os.path.join(os.path.expanduser("~"), "Music")
+        if not os.path.exists(start_dir):
+            start_dir = os.path.expanduser("~")
 
     path = fd.askopenfilename(
         title="Fájl kiválasztása",
-        filetypes=[("Hangfájl","*.mp3 *.wav")]
+        initialdir=start_dir,
+        filetypes=[("Hangfájl", "*.wav")]
     )
     
     if path:
+        last_opened_dir = os.path.dirname(path)
         original_filepath = path
         print(f"Betöltött fájl: {os.path.basename(original_filepath)}")
         original, fs = sf.read(path)
