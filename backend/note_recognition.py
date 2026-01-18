@@ -3,6 +3,7 @@ import numpy as np
 
 from onset_detect import OnsetDetect
 from note_event import NoteEvent
+from onset_histogram import OnsetHistogram
 
 class ShortTimeFT:
     def __init__(self, filtered):
@@ -72,7 +73,7 @@ class ShortTimeFT:
         return best_candidate
 
 
-    def note_rec(self, max_harmonics, tempo):
+    def note_rec(self, max_harmonics, tempo, histogram):
         nfft = 4096
         fs = 44100
         hop_length = 512
@@ -89,12 +90,19 @@ class ShortTimeFT:
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
         onset.make_envelope()
-        onsets = onset.get_onsets(min_gap=0.05)
+        temp_onsets = onset.get_onsets(min_gap=0.03)
+        histogram.calculate_iois(temp_onsets)
+        optimal_gap = histogram.find_optimal_gap()
+        onsets = onset.get_onsets(min_gap=optimal_gap)
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
         notes_with_offsets = []
-        resonance_treshold_sec = 1.75
+        resonance_treshold_sec = 0.0
+        if(optimal_gap < 0.25):
+            resonance_treshold_sec = optimal_gap * 1.5
+        else:
+            resonance_treshold_sec = 1.75
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
         
         for i in range(len(onsets)):
