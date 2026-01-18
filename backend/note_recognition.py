@@ -72,7 +72,7 @@ class ShortTimeFT:
         return best_candidate
 
 
-    def note_rec(self, max_harmonics):
+    def note_rec(self, max_harmonics, tempo):
         nfft = 4096
         fs = 44100
         hop_length = 512
@@ -88,7 +88,8 @@ class ShortTimeFT:
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
-        onsets = onset.onset_detect(min_gap=0.2)
+        onset.make_envelope()
+        onsets = onset.get_onsets(min_gap=0.05)
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 

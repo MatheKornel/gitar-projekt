@@ -74,7 +74,7 @@ def show_note_rec():
         tempo, _ = lb.beat.beat_track(y=current_audio.filtered, sr=current_audio.fs)
         current_tempo = round(np.mean(tempo))
         stft = ShortTimeFT(current_audio.filtered)
-        notes = stft.note_rec(5)
+        notes = stft.note_rec(5, current_tempo)
         current_notes = notes
         if notes:
             print("Elemzés kész.")
