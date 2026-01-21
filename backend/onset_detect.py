@@ -54,14 +54,17 @@ class OnsetDetect:
         self.envelope = sig.medfilt(self.envelope, kernel_size=7)
         return self.envelope
     
-    def get_onsets(self, min_gap = 0.2):
+    def get_onsets(self, envelope_window, min_gap = 0.2, prominence = 0.05):
         min_dist_samples = int(min_gap * self.fs) # minimális távolság mintában
         # ha véletlen 0 lenne akkor legyen 1
         if min_dist_samples < 1:
             min_dist_samples = 1
 
+        max_val = np.max(envelope_window) if len(envelope_window) > 0 else 0
+        height = max(0.02, max_val * 0.1)
+
         # csúcsdetektálás
-        peaks, _ = sig.find_peaks(self.envelope, distance=min_dist_samples, prominence=0.05, height=0.02)
+        peaks, _ = sig.find_peaks(envelope_window, distance=min_dist_samples, prominence=prominence, height=height)
         onset_times = peaks / self.fs
         return onset_times
 

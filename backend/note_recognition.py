@@ -71,6 +71,37 @@ class ShortTimeFT:
         best_candidate, _ = max(f0_candidate_salience, key=lambda x: x[1])
         
         return best_candidate
+    
+    
+    def onsets_in_window(self, onset, envelope, histogram, windows_size = 5.0, hop_size = 1.0):
+        onsets = []
+        duration = len(envelope) / onset.fs
+        starts = np.arange(0, duration, hop_size)
+
+        for step_start in starts:
+            step_end = step_start + hop_size
+            window_start = max(0, step_start + hop_size / 2 - windows_size / 2)
+            window_end = min(duration, window_start + windows_size)
+
+            envelope_cut_start = int(window_start * onset.fs)
+            envelope_cut_end = int(window_end * onset.fs)
+            envelope_window = envelope[envelope_cut_start:envelope_cut_end]
+
+            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.2)
+            histogram.calculate_iois(temp_onsets, min=0.05)
+            optimal_gap = histogram.find_optimal_gap()
+
+            current_prominence = 0.02 if optimal_gap < 0.1 else 0.40
+
+            relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence)
+            absolute_onsets = relative_onsets + window_start
+            final_onsets = [t for t in absolute_onsets if step_start <= t < step_end]
+            onsets.extend(final_onsets)
+        
+        onsets = np.unique(onsets)
+        onsets.sort()
+        histogram.last_optimal_gap = 0.35
+        return onsets
 
 
     def note_rec(self, max_harmonics, tempo, histogram):
@@ -89,46 +120,54 @@ class ShortTimeFT:
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
-        onset.make_envelope()
+        envelope = onset.make_envelope()
+        onsets = self.onsets_in_window(onset, envelope, histogram)
+
+        '''
         temp_onsets = onset.get_onsets(min_gap=0.03)
         histogram.calculate_iois(temp_onsets)
         optimal_gap = histogram.find_optimal_gap()
         onsets = onset.get_onsets(min_gap=optimal_gap)
+        '''
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
         notes_with_offsets = []
+        '''
         resonance_treshold_sec = 0.0
         if(optimal_gap < 0.25):
             resonance_treshold_sec = optimal_gap * 1.5
         else:
             resonance_treshold_sec = 1.75
+        '''
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
         
         for i in range(len(onsets)):
             onset = onsets[i]
 
-            start_samlpe = int(onset * fs)
+            start_sample = int(onset * fs)
             slice_end_time = onset + 5.0 # alapértelmezetten 5 mp után vége
-
+            
+            '''
             for k in range(i + 1, len(onsets)): # megkeressük a következő onset-et
                 next_onset = onsets[k]
                 time_diff_k = next_onset - onset
                 if time_diff_k >= resonance_treshold_sec:
                     slice_end_time = next_onset + 0.1
                     break
-
-            slice_end_time = min(onset + 5.0, slice_end_time) # de amúgy a szelet vége legyen a következő onset közelében
+            '''
+            next_onset = onsets[i+1] if i < len(onsets) -1 else (onset + 5.0)
+            slice_end_time = min(onset + 5.0, next_onset + 0.1) # de amúgy a szelet vége legyen a következő onset közelében
 
             end_sample = int(slice_end_time * fs)
             
             if end_sample > len(self.filtered):
                 end_sample = len(self.filtered)
 
-            if (end_sample - start_samlpe) < (fs * 0.1): # ha túl rövid a szelet, kihagyom
+            if (end_sample - start_sample) < (fs * 0.1): # ha túl rövid a szelet, kihagyom
                 continue
 
-            audio_slice = self.filtered[start_samlpe:end_sample]
+            audio_slice = self.filtered[start_sample:end_sample]
 
             # STFT számolása csak a szeletre
             D = lb.stft(audio_slice, n_fft=nfft, hop_length=hop_length, window="blackman", center=False)
@@ -137,7 +176,7 @@ class ShortTimeFT:
             times = lb.frames_to_time(np.arange(D.shape[1]), sr=fs, hop_length=hop_length) + onset # az onset-től induló időket kell tartalmaznia
             
             onset_frame_idx = np.argmin(np.abs(times - onset))
-            start_frame = onset_frame_idx + 2
+            start_frame = onset_frame_idx + 1
             end_frame = min(onset_frame_idx + 10, magnitude.shape[1] - 1) # veszünk egy 8 frame-es ablakot az onset után, elkerülhetjük a pengetés kezdeti zaját
 
             if start_frame >= end_frame:
@@ -162,9 +201,13 @@ class ShortTimeFT:
             if notes_with_offsets:
                 last_t = notes_with_offsets[-1].onset
                 last_f = notes_with_offsets[-1].freq
+
                 time_diff = onset - last_t
                 freq_diff = abs(recognized_note - last_f)
-                if freq_diff < 1.0 and time_diff < resonance_treshold_sec:
+
+                resonance_treshold = 0.05 if time_diff < 0.15 else 0.15
+
+                if freq_diff < 1.0 and time_diff < resonance_treshold:
                     is_duplicate = True
             if is_duplicate:
                 continue
