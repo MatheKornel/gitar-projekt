@@ -187,24 +187,9 @@ class ShortTimeFT:
 
             salience_treshold = peak_salience * 0.25 # a küszöb legyen a csúcs valahány százaléka
 
-            '''
-            stop_time = float('inf') # a következő onset-nél elvágjuk
-            for k in range(i + 1, len(onsets)): # megkeressük a következő onset-et
-                next_onset = onsets[k]
-                time_diff_k = next_onset - onset
-                if time_diff_k >= resonance_treshold_sec:
-                    stop_time = next_onset
-                    break
-            '''
-
             offset_time = times[peak_frame] # elkezdjük követni a lecsengést
             for j in range(peak_frame + 1, magnitude.shape[1]):
                 current_time = times[j]
-                '''
-                if current_time >= stop_time:
-                    offset_time = stop_time - 0.01 # ha új hang kezdődik akkor picit előtte elvágjuk a hangot
-                    break
-                '''
                 current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics)
                 if current_salience < salience_treshold:
                     offset_time = current_time
