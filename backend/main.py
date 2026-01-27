@@ -23,7 +23,6 @@ m.title("Gitár projekt")
 
 current_audio = None
 current_notes = None
-current_tempo = 120
 original_filepath = ""
 last_opened_dir = None
 histogram = OnsetHistogram()
@@ -72,17 +71,21 @@ def show_spectrogram():
 
 #STFT elvégzése
 def show_note_rec():
-    global current_audio, current_notes, current_tempo
+    global current_audio, current_notes
     if current_audio:
         onset = OnsetDetect(current_audio.filtered, fs=current_audio.fs)
         stft = ShortTimeFT(current_audio.filtered)
         print("Elemzés folyamatban...")
+
         notes, envelope = stft.note_rec(5, histogram)
         temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
         histogram.calculate_iois(temp_onsets)
         histogram.find_optimal_gap()
         bpm = histogram.get_bpm()
-        current_tempo = bpm
+
+        bpm_entry.delete(0, tk.END)
+        bpm_entry.insert(0, str(bpm))
+
         print(f"BPM becslés: {bpm} BPM")
         current_notes = notes
         if notes:
@@ -92,7 +95,7 @@ def show_note_rec():
 
 # MIDI exportálás
 def save_midi():
-    global current_notes, original_filepath, current_tempo
+    global current_notes, original_filepath
     if not current_notes:
         print("Nincsenek felismert hangok a MIDI exportáláshoz.")
         return
@@ -101,7 +104,7 @@ def save_midi():
         print("Nincs eredeti fájlnév a mentéshez.")
         return
     
-    exporter = MidiExporter(tempo=current_tempo)
+    exporter = MidiExporter(tempo=int(bpm_entry.get()))
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0] + ".mid"
     output_midi_path = os.path.join("MIDI_files", file_name)
@@ -110,7 +113,7 @@ def save_midi():
 
 # Kotta generálás és megjelenítés
 def generate_sheet_music():
-    global current_notes, original_filepath, current_tempo
+    global current_notes, original_filepath
     if not current_notes:
         print("Nincsenek felismert hangok a kottához.")
         return
@@ -122,7 +125,7 @@ def generate_sheet_music():
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0]
 
-    exporter = SheetMusicExporter(audio_tempo=current_tempo)
+    exporter = SheetMusicExporter(audio_tempo=int(bpm_entry.get()))
     pdf_path = exporter.create_score(current_notes, file_basename=file_name)
 
     if pdf_path:
@@ -147,5 +150,11 @@ midi_export_button.place(x=350, y=0)
 
 sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
 sheet_music_button.place(x=450, y=0)
+
+bpm_label = ttk.Label(m, text="BPM:")
+bpm_label.place(x=0, y=30)
+bpm_entry = ttk.Entry(m, width=5)
+bpm_entry.insert(0, "120")
+bpm_entry.place(x=30, y=30)
 
 m.mainloop()
