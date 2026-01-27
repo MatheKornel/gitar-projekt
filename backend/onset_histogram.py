@@ -14,6 +14,7 @@ class OnsetHistogram:
         self.peaks = None
         self.bin_centers = None
         self.last_optimal_gap = 0.35
+        self.dominant_interval = 0.5
 
     # IOI --> Inter-Onset Intervals kiszámítása --> szomszédos hangok távolsága
     def calculate_iois(self, onsets, min = 0.05, max = 1.0):
@@ -27,18 +28,21 @@ class OnsetHistogram:
     # az optimális min_gap meghatározása az IOI-k alapján
     def find_optimal_gap(self):
         if len(self.iois) < 10:
+            '''
             if self.last_optimal_gap < 0.08:
                 self.optimal_gap = self.last_optimal_gap * 1.1
                 self.optimal_gap = min(self.optimal_gap, 0.35)
                 print(f"Kevés az adat a hisztogramhoz, ELŐZŐ min_gap = {self.last_optimal_gap:.3f}s lesz.")
             else:
-                self.optimal_gap = 0.35
-                print("Kevés az adat a hisztogramhoz, min_gap = 0.35s lesz.")
+            '''
+            self.optimal_gap = 0.35
+            print("Kevés az adat a hisztogramhoz, min_gap = 0.35s lesz.")
             self.last_optimal_gap = self.optimal_gap
             return self.optimal_gap
         
         fastest = np.percentile(self.iois, 40)
-        if fastest < 0.35:
+        if fastest < 0.08:
+            self.dominant_interval = fastest
             self.optimal_gap = max(0.04, fastest * 0.6)
             print(f"Gyakori gyors hangok miatt min_gap = {self.optimal_gap:.3f}s lesz.")
             self.last_optimal_gap = self.optimal_gap
@@ -73,6 +77,7 @@ class OnsetHistogram:
                     break 
             
             if best_peak_time is not None:
+                self.dominant_interval = best_peak_time
                 self.optimal_gap = np.clip(best_peak_time * 0.6, 0.05, 0.35)
             else:
                 print("Csak zajcsúcsok voltak, min_gap = 0.35s lesz.")
@@ -82,25 +87,23 @@ class OnsetHistogram:
             self.optimal_gap = 0.35
         self.last_optimal_gap = self.optimal_gap
         return self.optimal_gap
-    
-    def show_histogram(self):
-        
-        plt.figure(figsize=(10, 6))
-        
-        plt.hist(self.iois, bins=50, range=(0.06, 1.0), alpha=0.5, color='gray', label='Nyers IOI eloszlás') # nyers hisztogram
-        
-        plt.plot(self.bin_centers, self.smooth_hist, color='blue', linewidth=2, label='Simított eloszlás') # simított
-        
-        if len(self.peaks) > 0:
-            plt.plot(self.bin_centers[self.peaks], self.hist[self.peaks], "x", color='red', markersize=10, label='Csúcsok') # megtalált csúcsok megjelölése
-            first_peak = self.peaks[0]
-            plt.axvline(self.bin_centers[first_peak], color='green', linestyle='--', label=f'Választott: {self.bin_centers[first_peak]:.2f}s')
 
-        plt.title(f"IOI - Javasolt min_gap: {self.optimal_gap:.3f}s")
-        plt.xlabel("Időkülönbség (sec)")
-        plt.ylabel("Gyakoriság (db)")
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        plt.show()
+    def get_bpm(self):
+        if self.dominant_interval <= 0:
+            return 120
+        
+        bpm = 60.0 / self.dominant_interval
+        if self.dominant_interval < 0.18:
+            min_bpm = 100
+            max_bpm = 220
+        else:
+            min_bpm = 60
+            max_bpm = 160
+
+        while bpm > max_bpm:
+            bpm /= 2
+        while bpm < min_bpm:
+            bpm *= 2
+        return int(round(bpm))
 
     

@@ -15,6 +15,7 @@ from note_recognition import ShortTimeFT
 from midi import MidiExporter
 from sheet_music_exporter import SheetMusicExporter
 from onset_histogram import OnsetHistogram
+from onset_detect import OnsetDetect
 
 m = tk.Tk()
 m.geometry("700x300")
@@ -73,10 +74,16 @@ def show_spectrogram():
 def show_note_rec():
     global current_audio, current_notes, current_tempo
     if current_audio:
-        tempo, _ = lb.beat.beat_track(y=current_audio.filtered, sr=current_audio.fs)
-        current_tempo = round(np.mean(tempo))
+        onset = OnsetDetect(current_audio.filtered, fs=current_audio.fs)
         stft = ShortTimeFT(current_audio.filtered)
-        notes = stft.note_rec(5, current_tempo, histogram)
+        print("Elemzés folyamatban...")
+        notes, envelope = stft.note_rec(5, histogram)
+        temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
+        histogram.calculate_iois(temp_onsets)
+        histogram.find_optimal_gap()
+        bpm = histogram.get_bpm()
+        current_tempo = bpm
+        print(f"BPM becslés: {bpm} BPM")
         current_notes = notes
         if notes:
             print("Elemzés kész.")
@@ -140,8 +147,5 @@ midi_export_button.place(x=350, y=0)
 
 sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
 sheet_music_button.place(x=450, y=0)
-
-histogram_button = ttk.Button(m, text="Onset hisztogram", command=histogram.show_histogram)
-histogram_button.place(x=550, y=0)
 
 m.mainloop()

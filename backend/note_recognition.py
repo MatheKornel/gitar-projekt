@@ -91,7 +91,7 @@ class ShortTimeFT:
             histogram.calculate_iois(temp_onsets, min=0.05)
             optimal_gap = histogram.find_optimal_gap()
 
-            current_prominence = 0.02 if optimal_gap < 0.1 else 0.40
+            current_prominence = 0.02 if optimal_gap < 0.15 else 0.40
 
             relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence)
             absolute_onsets = relative_onsets + window_start
@@ -104,7 +104,7 @@ class ShortTimeFT:
         return onsets
 
 
-    def note_rec(self, max_harmonics, tempo, histogram):
+    def note_rec(self, max_harmonics, histogram):
         nfft = 4096
         fs = 44100
         hop_length = 512
@@ -121,7 +121,7 @@ class ShortTimeFT:
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
         envelope = onset.make_envelope()
-        onsets = self.onsets_in_window(onset, envelope, histogram)
+        onsets = self.onsets_in_window(onset, envelope, histogram, 5.0, 0.25)
 
         '''
         temp_onsets = onset.get_onsets(min_gap=0.03)
@@ -245,7 +245,7 @@ class ShortTimeFT:
         for note in notes_with_offsets:
             print(f"Felismert hang: {note.note_name} - {note.freq:.2f} Hz, onset: {note.onset:.2f} s, offset: {note.offset:.2f} s")
 
-        return notes_with_offsets
+        return notes_with_offsets, envelope
 
 
 
