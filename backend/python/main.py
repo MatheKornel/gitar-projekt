@@ -4,8 +4,6 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
 import os
-import librosa as lb
-import numpy as np
 
 #Fájl importok
 from filter import BandpassFilter

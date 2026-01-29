@@ -63,3 +63,17 @@ dist/
 *.bak
 *.tmp
 *.swp
+
+# --- C++ Build Artifacts ---
+*.exe
+*.obj
+*.o
+*.pdb
+*.ilk
+*.idb
+*.sdf
+*.ipch
+*.vc.db
+*.log
+*.tlog
+*.lastbuildstate
