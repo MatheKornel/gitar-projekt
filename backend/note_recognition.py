@@ -182,10 +182,12 @@ class ShortTimeFT:
                 time_diff = onset - last_t
                 freq_diff = abs(recognized_note - last_f)
 
-                resonance_treshold = 0.05 if time_diff < 0.15 else 0.15 # rezonancia küszöb idő alapján
-
-                if freq_diff < 1.0 and time_diff < resonance_treshold: # ha nagyon közel van az előző hanghoz időben és frekvenciában is, akkor rezonancia lehet
+                if time_diff < 0.05:
                     is_duplicate = True
+                else:
+                    resonance_treshold = 0.08 if time_diff < 0.15 else 0.25 # rezonancia küszöb idő alapján
+                    if freq_diff < 2.5 and time_diff < resonance_treshold: # ha nagyon közel van az előző hanghoz időben és frekvenciában is, akkor rezonancia lehet
+                        is_duplicate = True
             if is_duplicate:
                 continue
         
