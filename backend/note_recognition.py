@@ -73,7 +73,7 @@ class ShortTimeFT:
         return best_candidate
     
     
-    def onsets_in_window(self, onset, envelope, histogram, windows_size = 5.0, hop_size = 1.0):
+    def onsets_in_window(self, onset, envelope, histogram, windows_size = 1.8, hop_size = 0.2):
         onsets = []
         duration = len(envelope) / onset.fs
         starts = np.arange(0, duration, hop_size)
@@ -87,11 +87,11 @@ class ShortTimeFT:
             envelope_cut_end = int(window_end * onset.fs)
             envelope_window = envelope[envelope_cut_start:envelope_cut_end]
 
-            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.2)
+            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.18)
             histogram.calculate_iois(temp_onsets, min=0.05)
             optimal_gap = histogram.find_optimal_gap()
 
-            current_prominence = 0.02 if optimal_gap < 0.15 else 0.40
+            current_prominence = 0.02 if optimal_gap < 0.15 else 0.35
 
             relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence)
             absolute_onsets = relative_onsets + window_start
@@ -121,25 +121,11 @@ class ShortTimeFT:
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
         envelope = onset.make_envelope()
-        onsets = self.onsets_in_window(onset, envelope, histogram, 5.0, 0.25)
-
-        '''
-        temp_onsets = onset.get_onsets(min_gap=0.03)
-        histogram.calculate_iois(temp_onsets)
-        optimal_gap = histogram.find_optimal_gap()
-        onsets = onset.get_onsets(min_gap=optimal_gap)
-        '''
+        onsets = self.onsets_in_window(onset, envelope, histogram, 1.8, 0.2)
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
         notes_with_offsets = []
-        '''
-        resonance_treshold_sec = 0.0
-        if(optimal_gap < 0.25):
-            resonance_treshold_sec = optimal_gap * 1.5
-        else:
-            resonance_treshold_sec = 1.75
-        '''
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
         
         for i in range(len(onsets)):
@@ -148,14 +134,6 @@ class ShortTimeFT:
             start_sample = int(onset * fs)
             slice_end_time = onset + 5.0 # alapértelmezetten 5 mp után vége
             
-            '''
-            for k in range(i + 1, len(onsets)): # megkeressük a következő onset-et
-                next_onset = onsets[k]
-                time_diff_k = next_onset - onset
-                if time_diff_k >= resonance_treshold_sec:
-                    slice_end_time = next_onset + 0.1
-                    break
-            '''
             next_onset = onsets[i+1] if i < len(onsets) -1 else (onset + 5.0)
             slice_end_time = min(onset + 5.0, next_onset + 0.1) # de amúgy a szelet vége legyen a következő onset közelében
 

@@ -27,21 +27,18 @@ class OnsetHistogram:
     
     # az optimális min_gap meghatározása az IOI-k alapján
     def find_optimal_gap(self):
-        if len(self.iois) < 10:
-            '''
-            if self.last_optimal_gap < 0.08:
-                self.optimal_gap = self.last_optimal_gap * 1.1
-                self.optimal_gap = min(self.optimal_gap, 0.35)
+        if len(self.iois) < 5:
+            if self.last_optimal_gap < 0.1:
+                self.optimal_gap = min(0.20, self.last_optimal_gap * 1.2)
                 print(f"Kevés az adat a hisztogramhoz, ELŐZŐ min_gap = {self.last_optimal_gap:.3f}s lesz.")
             else:
-            '''
-            self.optimal_gap = 0.35
-            print("Kevés az adat a hisztogramhoz, min_gap = 0.35s lesz.")
+                self.optimal_gap = 0.35
+                print("Kevés az adat a hisztogramhoz, min_gap = 0.35s lesz.")
             self.last_optimal_gap = self.optimal_gap
             return self.optimal_gap
         
-        fastest = np.percentile(self.iois, 40)
-        if fastest < 0.08:
+        fastest = np.percentile(self.iois, 50)
+        if fastest < 0.1:
             self.dominant_interval = fastest
             self.optimal_gap = max(0.04, fastest * 0.6)
             print(f"Gyakori gyors hangok miatt min_gap = {self.optimal_gap:.3f}s lesz.")
