@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 class Spectrogram:
     def __init__(self, original, filtered, fs):
-        self.original = original
-        self.filtered = filtered
-        self.fs = fs
+        self.original = original # eredeti audio jel
+        self.filtered = filtered # szűrt audio jel
+        self.fs = fs # mintavételi frekvencia
     
     def spectrograms(self):
         if self.original is None or self.filtered is None:

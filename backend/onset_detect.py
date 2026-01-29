@@ -5,9 +5,9 @@ import librosa as lb
 
 class OnsetDetect:
     def __init__(self, filtered, fs = 44100):
-        self.filtered = filtered
-        self.fs = fs
-        self.envelope = None
+        self.filtered = filtered # szűrt audio jel
+        self.fs = fs # mintavételi frekvencia
+        self.envelope = None # onset envelope
 
     def make_envelope(self):
         # a magas mintavételi frekvenciát lecsökkentjük gyorsítás miatt
@@ -17,7 +17,7 @@ class OnsetDetect:
 
         slice_duration_sec = 3.0 # 3 másodperces darabokat dolgozunk fel
         slice_samples = int(slice_duration_sec * self.fs)
-        overlap_samples = int(0.5 * self.fs)
+        overlap_samples = int(0.5 * self.fs) # 0.5 másodperc átfedés
         step_samples = slice_samples - overlap_samples # lépésköz
         global_max = 1e-9 # globális maximum az envelope normalizálásához
         full_envelope = []
@@ -42,23 +42,21 @@ class OnsetDetect:
                 env_slice += np.mean(band, axis=0)
             
             current_max = np.max(env_slice)
-            if current_max > global_max:
-                global_max = current_max
+            global_max = current_max if current_max > global_max else global_max # globális maximum frissítése
             
-            valid_part = env_slice[:step_samples]
+            valid_part = env_slice[:step_samples] # csak az átfedés nélküli rész kell
             full_envelope.append(valid_part)
             current_sample += step_samples
         
         self.envelope = np.concatenate(full_envelope)
         self.envelope = self.envelope / global_max
-        self.envelope = sig.medfilt(self.envelope, kernel_size=7)
+        self.envelope = sig.medfilt(self.envelope, kernel_size=7) # medián szűrés a zaj csökkentésére
         return self.envelope
     
     def get_onsets(self, envelope_window, min_gap = 0.2, prominence = 0.05):
         min_dist_samples = int(min_gap * self.fs) # minimális távolság mintában
         # ha véletlen 0 lenne akkor legyen 1
-        if min_dist_samples < 1:
-            min_dist_samples = 1
+        min_dist_samples = 1 if min_dist_samples < 1 else min_dist_samples
 
         max_val = np.max(envelope_window) if len(envelope_window) > 0 else 0
         height = max(0.02, max_val * 0.1)

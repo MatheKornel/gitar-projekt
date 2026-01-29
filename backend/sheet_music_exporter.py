@@ -12,8 +12,8 @@ else:
 
 class SheetMusicExporter:
     def __init__(self, audio_tempo=120):
-        self.sec_per_beat = 60 / audio_tempo
-        self.audio_tempo = audio_tempo
+        self.sec_per_beat = 60 / audio_tempo # másodperc per negyedhang
+        self.audio_tempo = audio_tempo # tempó a kotta számára
     
     # létrehozza a kottát a felismert hangok alapján, majd elmenti PDF formátumban és megjeleníti PNG-ként
     def create_score(self, notes, file_basename="output"):
@@ -38,8 +38,7 @@ class SheetMusicExporter:
 
             note_quarter_length = note_event.duration / self.sec_per_beat # időtartam beállítása
             note_quarter_length = round(note_quarter_length * 4) / 4.0 # kvantálás 32-ed értékre
-            if note_quarter_length == 0:
-                note_quarter_length = 1/32 # legyen legalább 32-ed érték
+            note_quarter_length = 1/32 if note_quarter_length == 0 else note_quarter_length # legyen legalább 32-ed érték
             n.duration = duration.Duration(quarterLength=note_quarter_length)
             part.append(n)
 

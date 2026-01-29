@@ -3,8 +3,8 @@ import numpy as np
 
 class MidiExporter:
     def __init__(self, ppqn=480, tempo=120):
-        self.ppqn = ppqn
-        self.tempo = tempo
+        self.ppqn = ppqn # Pulses Per Quarter Note
+        self.tempo = tempo # BPM
         self.ticks_per_sec = self.ppqn * (self.tempo / 60) # 1 mp alatt hány tick van
     
     def create_midi(self, notes, output="output.mid"):

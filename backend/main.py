@@ -50,9 +50,8 @@ def file_load():
         print(f"Betöltött fájl: {os.path.basename(original_filepath)}")
         original, fs = sf.read(path)
         print(f"Mintavételi frekvencia: {fs} Hz")
-
-        if len(original.shape)>1:
-            original = original.mean(axis=1)
+        
+        original = original.mean(axis=1) if len(original.shape) > 1 else original
     
         bpf = BandpassFilter(original)
         filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
@@ -77,11 +76,11 @@ def show_note_rec():
         stft = ShortTimeFT(current_audio.filtered)
         print("Elemzés folyamatban...")
 
-        notes, envelope = stft.note_rec(5, histogram)
+        notes, envelope = stft.note_rec(5, histogram) # a hangok mellett az envelope-ot is visszaadja, hogy csak egyszer fusson le
         temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
         histogram.calculate_iois(temp_onsets)
         histogram.find_optimal_gap()
-        bpm = histogram.get_bpm()
+        bpm = histogram.get_bpm() # minden eddigi hisztogramos számolás itt a BPM miatt kell
 
         bpm_entry.delete(0, tk.END)
         bpm_entry.insert(0, str(bpm))

@@ -7,8 +7,8 @@ from onset_histogram import OnsetHistogram
 
 class ShortTimeFT:
     def __init__(self, filtered):
-        self.filtered = filtered
-        self.fs = 44100
+        self.filtered = filtered # szűrt audio jel
+        self.fs = 44100 # mintavételi frekvencia
 
     # egy adott frekvenciára kiszámolja a salience-t egy adott frame-ben
     def get_f0_salience(self, f0, i, magnitude, freqs, fs, max_harmonics):
@@ -72,35 +72,35 @@ class ShortTimeFT:
         
         return best_candidate
     
-    
+    # onset detektálás ablakonként, hisztogram alapján változó min_gap paraméterrel
     def onsets_in_window(self, onset, envelope, histogram, windows_size = 1.8, hop_size = 0.2):
         onsets = []
-        duration = len(envelope) / onset.fs
-        starts = np.arange(0, duration, hop_size)
+        duration = len(envelope) / onset.fs # jel hossza másodpercben
+        starts = np.arange(0, duration, hop_size) # ablakok kezdőpontjai
 
         for step_start in starts:
             step_end = step_start + hop_size
-            window_start = max(0, step_start + hop_size / 2 - windows_size / 2)
-            window_end = min(duration, window_start + windows_size)
+            window_start = max(0, step_start + hop_size / 2 - windows_size / 2) # ablak kezdete
+            window_end = min(duration, window_start + windows_size) # ablak vége
 
-            envelope_cut_start = int(window_start * onset.fs)
-            envelope_cut_end = int(window_end * onset.fs)
-            envelope_window = envelope[envelope_cut_start:envelope_cut_end]
+            envelope_cut_start = int(window_start * onset.fs) # kivágás kezdete
+            envelope_cut_end = int(window_end * onset.fs) # kivágás vége
+            envelope_window = envelope[envelope_cut_start:envelope_cut_end] # kivágott envelope ablak
 
-            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.18)
-            histogram.calculate_iois(temp_onsets, min=0.05)
-            optimal_gap = histogram.find_optimal_gap()
+            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.18) # érzékenyebb onset detektálás az ablakon belül
+            histogram.calculate_iois(temp_onsets, min=0.05) # kiszámoljuk az IOI-kat az ablakon belül
+            optimal_gap = histogram.find_optimal_gap() # meghatározzuk az optimális min_gap-et
 
-            current_prominence = 0.02 if optimal_gap < 0.15 else 0.35
+            current_prominence = 0.02 if optimal_gap < 0.15 else 0.35 # prominence beállítása az optimal_gap alapján
 
-            relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence)
-            absolute_onsets = relative_onsets + window_start
-            final_onsets = [t for t in absolute_onsets if step_start <= t < step_end]
+            relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence) # végleges onset detektálás az ablakon belül már az optimal_gap-pel
+            absolute_onsets = relative_onsets + window_start # abszolút időpontokra váltás
+            final_onsets = [t for t in absolute_onsets if step_start <= t < step_end] # csak az aktuális lépésbe eső onset-ek megtartása
             onsets.extend(final_onsets)
         
         onsets = np.unique(onsets)
         onsets.sort()
-        histogram.last_optimal_gap = 0.35
+        histogram.last_optimal_gap = 0.35 # alaphelyzetbe állítás
         return onsets
 
 
@@ -120,8 +120,8 @@ class ShortTimeFT:
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
-        envelope = onset.make_envelope()
-        onsets = self.onsets_in_window(onset, envelope, histogram, 1.8, 0.2)
+        envelope = onset.make_envelope() # teljes jel envelope-ja (időigényes, ezért csak egyszer számoljuk ki)
+        onsets = self.onsets_in_window(onset, envelope, histogram, 1.8, 0.2) # ablakos onset detektálás hisztogram alapján
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 
@@ -134,13 +134,12 @@ class ShortTimeFT:
             start_sample = int(onset * fs)
             slice_end_time = onset + 5.0 # alapértelmezetten 5 mp után vége
             
-            next_onset = onsets[i+1] if i < len(onsets) -1 else (onset + 5.0)
+            next_onset = onsets[i + 1] if i < len(onsets) - 1 else (onset + 5.0)
             slice_end_time = min(onset + 5.0, next_onset + 0.1) # de amúgy a szelet vége legyen a következő onset közelében
 
             end_sample = int(slice_end_time * fs)
             
-            if end_sample > len(self.filtered):
-                end_sample = len(self.filtered)
+            end_sample = len(self.filtered) if end_sample > len(self.filtered) else end_sample
 
             if (end_sample - start_sample) < (fs * 0.1): # ha túl rövid a szelet, kihagyom
                 continue
@@ -162,7 +161,7 @@ class ShortTimeFT:
 
             f0_candidates = []
             for j in range(start_frame, end_frame):
-                f0 = self.get_f0_from_frame(j, magnitude, freqs, fs, max_harmonics, guitar_notes)
+                f0 = self.get_f0_from_frame(j, magnitude, freqs, fs, max_harmonics, guitar_notes) # alaphang meghatározása az adott frame-ben
                 if f0 is not None:
                     f0_candidates.append(f0)
 
@@ -183,9 +182,9 @@ class ShortTimeFT:
                 time_diff = onset - last_t
                 freq_diff = abs(recognized_note - last_f)
 
-                resonance_treshold = 0.05 if time_diff < 0.15 else 0.15
+                resonance_treshold = 0.05 if time_diff < 0.15 else 0.15 # rezonancia küszöb idő alapján
 
-                if freq_diff < 1.0 and time_diff < resonance_treshold:
+                if freq_diff < 1.0 and time_diff < resonance_treshold: # ha nagyon közel van az előző hanghoz időben és frekvenciában is, akkor rezonancia lehet
                     is_duplicate = True
             if is_duplicate:
                 continue
@@ -197,7 +196,7 @@ class ShortTimeFT:
             peak_frame = start_frame
 
             for j in range(start_frame, end_frame):
-                current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics)
+                current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics) # salience számolás az adott frame-ben
                 if current_salience > peak_salience:
                     peak_salience = current_salience
                     peak_frame = j # ez most a szeleten belüli frame index

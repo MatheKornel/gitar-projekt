@@ -2,7 +2,7 @@ from scipy import signal
 
 class BandpassFilter:
     def __init__(self, original_audio):
-        self.original_audio = original_audio
+        self.original_audio = original_audio # eredeti audio jel
     
     def bandpass_filter(self, original, fs, lowcut, highcut, order=5):
         nyq = fs*0.5
