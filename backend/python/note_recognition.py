@@ -87,11 +87,17 @@ class ShortTimeFT:
             envelope_cut_end = int(window_end * onset.fs) # kivágás vége
             envelope_window = envelope[envelope_cut_start:envelope_cut_end] # kivágott envelope ablak
 
-            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.18) # érzékenyebb onset detektálás az ablakon belül
+            temp_onsets = onset.get_onsets(envelope_window,min_gap=0.03, prominence=0.08) # érzékenyebb onset detektálás az ablakon belül
             histogram.calculate_iois(temp_onsets, min=0.05) # kiszámoljuk az IOI-kat az ablakon belül
             optimal_gap = histogram.find_optimal_gap() # meghatározzuk az optimális min_gap-et
 
-            current_prominence = 0.02 if optimal_gap < 0.15 else 0.35 # prominence beállítása az optimal_gap alapján
+            # prominence beállítása az optimal_gap alapján
+            if optimal_gap < 0.15:
+                current_prominence = 0.02
+            elif optimal_gap < 0.25:
+                current_prominence = 0.1
+            else:
+                current_prominence = 0.25
 
             relative_onsets = onset.get_onsets(envelope_window, min_gap=optimal_gap, prominence=current_prominence) # végleges onset detektálás az ablakon belül már az optimal_gap-pel
             absolute_onsets = relative_onsets + window_start # abszolút időpontokra váltás

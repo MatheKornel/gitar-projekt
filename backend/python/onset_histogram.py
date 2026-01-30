@@ -7,13 +7,13 @@ class OnsetHistogram:
     def __init__(self):
         self.onsets = None # onset időpontok mp-ben
         self.iois = [] # ioi-k
-        self.optimal_gap = 0.35 # optimális min_gap
+        self.optimal_gap = 0.22 # optimális min_gap
         self.bin_edges = None # hisztogram bin élek
         self.hist = None # hisztogram értékek
         self.smooth_hist = None # simított hisztogram értékek
         self.peaks = None # hisztogram csúcsok indexei
         self.bin_centers = None # hisztogram bin közepek
-        self.last_optimal_gap = 0.35 # előző optimális min_gap
+        self.last_optimal_gap = 0.22 # előző optimális min_gap
         self.dominant_interval = 0.5 # domináns intervallum mp-ben
 
     # IOI --> Inter-Onset Intervals kiszámítása --> szomszédos hangok távolsága
@@ -28,17 +28,17 @@ class OnsetHistogram:
     # az optimális min_gap meghatározása az IOI-k alapján
     def find_optimal_gap(self):
         if len(self.iois) < 5: # túl kevés adat
-            if self.last_optimal_gap < 0.1:
-                self.optimal_gap = min(0.20, self.last_optimal_gap * 1.2)
+            if self.last_optimal_gap < 0.15:
+                self.optimal_gap = min(0.18, self.last_optimal_gap * 1.2)
                 print(f"Kevés az adat a hisztogramhoz, ELŐZŐ min_gap = {self.last_optimal_gap:.3f}s lesz.")
             else:
-                self.optimal_gap = 0.35
-                print("Kevés az adat a hisztogramhoz, min_gap = 0.35s lesz.")
+                self.optimal_gap = 0.22
+                print("Kevés az adat a hisztogramhoz, min_gap = 0.22s lesz.")
             self.last_optimal_gap = self.optimal_gap
             return self.optimal_gap
         
-        fastest = np.percentile(self.iois, 50)
-        if fastest < 0.1: # ha nagyon gyors hangok vannak
+        fastest = np.percentile(self.iois, 60)
+        if fastest < 0.18: # ha nagyon gyors hangok vannak
             self.dominant_interval = fastest
             self.optimal_gap = max(0.04, fastest * 0.6)
             print(f"Gyakori gyors hangok miatt min_gap = {self.optimal_gap:.3f}s lesz.")
@@ -76,13 +76,13 @@ class OnsetHistogram:
             
             if best_peak_time is not None:
                 self.dominant_interval = best_peak_time
-                self.optimal_gap = np.clip(best_peak_time * 0.6, 0.05, 0.35) # 50ms és 350ms közé szorítva
+                self.optimal_gap = np.clip(best_peak_time * 0.6, 0.05, 0.22) # 50ms és 350ms közé szorítva
             else:
-                print("Csak zajcsúcsok voltak, min_gap = 0.35s lesz.")
-                self.optimal_gap = 0.35
+                print("Csak zajcsúcsok voltak, min_gap = 0.22s lesz.")
+                self.optimal_gap = 0.22
         else:
-            print("Nem találtam csúcsot, min_gap = 0.35s lesz.")
-            self.optimal_gap = 0.35
+            print("Nem találtam csúcsot, min_gap = 0.22s lesz.")
+            self.optimal_gap = 0.22
         self.last_optimal_gap = self.optimal_gap
         return self.optimal_gap
 
