@@ -1,6 +1,9 @@
 #include <iostream>
+#include "fretboard.h"
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
+    auto fb = FretBoard();
+    const auto generatedFretBoard = fb.GenerateFretBoard();
+    ;
 }
