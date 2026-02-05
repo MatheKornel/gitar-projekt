@@ -2,7 +2,11 @@
 #include <memory>
 #include "note_position.h"
 
-struct FretBoard
+class FretBoard
 {
-    std::vector<std::vector<NotePosition>> GenerateFretBoard();
+public:
+    static const std::vector<NotePosition> GetPositions(const int midiNote);
+
+private:
+    static std::vector<std::vector<NotePosition>> GenerateFretBoard();
 };

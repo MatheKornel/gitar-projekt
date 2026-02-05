@@ -3,7 +3,9 @@
 
 int main()
 {
-    auto fb = FretBoard();
-    const auto generatedFretBoard = fb.GenerateFretBoard();
-    ;
+    auto positon = FretBoard::GetPositions(56);
+    for (const auto &pos : positon)
+    {
+        std::cout << "Hur: " << pos.stringIdx << "\tBund: " << pos.fretIdx << std::endl;
+    }
 }

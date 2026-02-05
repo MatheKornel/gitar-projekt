@@ -20,3 +20,14 @@ std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
     }
     return fretboard;
 }
+
+const std::vector<NotePosition> FretBoard::GetPositions(const int midiNote)
+{
+    static const std::vector<std::vector<NotePosition>> fretboard = GenerateFretBoard();
+    if (midiNote < 0 || midiNote >= fretboard.size())
+    {
+        const std::vector<NotePosition> empty;
+        return empty;
+    }
+    return fretboard[midiNote];
+}
