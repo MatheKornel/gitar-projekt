@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 import soundfile as sf
 import os
+import subprocess
 
 #Fájl importok
 from filter import BandpassFilter
@@ -75,6 +76,23 @@ def show_note_rec():
         print("Elemzés folyamatban...")
 
         notes, envelope = stft.note_rec(5, histogram) # a hangok mellett az envelope-ot is visszaadja, hogy csak egyszer fusson le
+
+        # C++ PSO optimalizálás (ideiglenesen tesztelés miatt itt)
+        cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\pso_fingering_optimization\\main.exe"
+        if os.path.exists(cpp_exe):
+            print("Ujjrend optimalizálás indítása...")
+            result = subprocess.run([cpp_exe],
+                                    cwd=r"D:\Sulis dolgok\gitar_projekt\backend\cpp\pso_fingering_optimization",
+                                    capture_output=True,
+                                    text=True)
+            print("C++ kimenet:")
+            print(result.stdout)
+            if result.returncode != 0:
+                print("C++ hiba:")
+                print(result.stderr)
+        else:
+            print(f"Nem találom a {cpp_exe} fájlt!")
+
         temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
         histogram.calculate_iois(temp_onsets)
         histogram.find_optimal_gap()
