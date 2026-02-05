@@ -1,5 +1,6 @@
 import librosa as lb
 import numpy as np
+import os
 
 from onset_detect import OnsetDetect
 from note_event import NoteEvent
@@ -108,6 +109,18 @@ class ShortTimeFT:
         onsets.sort()
         histogram.last_optimal_gap = 0.35 # alaphelyzetbe állítás
         return onsets
+    
+    def save_note_to_txt(self, notes, file_name="notes.txt"):
+        path = "D:\\Sulis dolgok\\gitar_projekt\\backend\cpp\\pso_fingering_optimization\\"
+        try:
+            with open(os.path.join(path, file_name), "w") as f:
+                f.write(f"{len(notes)}\n")
+                for note in notes:
+                    f.write(f"{int(note.midi_note)} {note.onset:.4f} {note.duration:.4f} {note.note_name}\n")
+            print(f"Hangok sikeresen elmentve: {file_name}")
+        except Exception as e:
+            print(f"Sikertelen mentés: {e}")
+
 
 
     def note_rec(self, max_harmonics, histogram):
@@ -229,6 +242,11 @@ class ShortTimeFT:
 
         for note in notes_with_offsets:
             print(f"Felismert hang: {note.note_name} - {note.freq:.2f} Hz, onset: {note.onset:.2f} s, offset: {note.offset:.2f} s")
+        
+        if notes_with_offsets:
+            self.save_note_to_txt(notes_with_offsets)
+        else:
+            print("Nincsenek hangok a fájlba mentéshez!")
 
         return notes_with_offsets, envelope
 
