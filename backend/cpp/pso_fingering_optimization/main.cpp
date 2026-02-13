@@ -1,6 +1,7 @@
 #include <iostream>
 #include "fretboard.h"
 #include "input_notes.h"
+#include "particle.h"
 
 int main()
 {
@@ -19,4 +20,9 @@ int main()
     {
         std::cout << note.GetNoteName() << "\t" << note.GetMidiNote() << "\t" << note.GetOnset() << "\t" << note.GetDuration() << std::endl;
     }
+
+    // Particle osztály tesztelése
+    Particle p = Particle(input.size());
+    p.Initialize(input);
+    ;
 }
