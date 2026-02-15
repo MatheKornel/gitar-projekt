@@ -9,7 +9,7 @@ class PSO
 {
 public:
     PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const int swarmSize);
-    std::vector<NotePosition> PsoAlgo(const int stopCondition);
+    std::vector<NotePosition> PsoAlgo(const int stopCondition, const int printInterval);
 
     std::vector<int> g_opt;
     double g_opt_fitness;
@@ -19,8 +19,8 @@ private:
     std::vector<InputNotes> notes;
 
     int dimension;
-    double phi_p = 1.494;
-    double phi_g = 1.494;
+    double phi_p = 2.0;
+    double phi_g = 1.0;
 
     void InitializePopulation(const int swarmSize);
     void Evaluation();

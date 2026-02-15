@@ -31,11 +31,11 @@ int main()
     */
 
     PSO pso(std::move(input), input.size(), 50);
-    const auto result = pso.PsoAlgo(2000);
+    const auto result = pso.PsoAlgo(5000, 100);
     std::cout << "Fitnesz: " << pso.g_opt_fitness << std::endl;
     std::cout << "Optimalis lefogasok:" << std::endl;
     for (size_t i = 0; i < result.size(); i++)
     {
-        std::cout << result[i].ToString() << std::endl;
+        std::cout << input[i].GetNoteName() << "\t" << result[i].ToString() << std::endl;
     }
 }

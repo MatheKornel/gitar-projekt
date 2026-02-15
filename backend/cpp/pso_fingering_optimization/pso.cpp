@@ -11,7 +11,7 @@ PSO::PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const 
     Evaluation();
 }
 
-std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition)
+std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printInterval)
 {
     for (size_t i = 0; i < stopCondition; i++)
     {
@@ -37,11 +37,7 @@ std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition)
             }
         }
         Evaluation();
-        if (g_opt_fitness == 0)
-        {
-            break;
-        }
-        if (i % 100 == 0)
+        if (i % printInterval == 0)
         {
             std::cout << "Iteracio: " << i << "\t Legjobb hiba (fitnesz): " << g_opt_fitness << "\n";
         }
@@ -95,11 +91,20 @@ double PSO::Fitness(const Particle &particle) const
     double total = 0;
     for (size_t i = 0; i < notes.size() - 1; i++)
     {
-        const int currentNote = particle.p[i];
-        const int nextNote = particle.p[i + 1];
-        NotePosition pos1 = FretBoard::GetPositions(notes[i].GetMidiNote())[currentNote];
-        NotePosition pos2 = FretBoard::GetPositions(notes[i + 1].GetMidiNote())[nextNote];
-        total += pos1.Distance(pos2);
+        const int currentNoteIdx = particle.p[i];
+        const int nextNoteIdx = particle.p[i + 1];
+        const auto &pos1 = FretBoard::GetPositions(notes[i].GetMidiNote());
+        const auto &pos2 = FretBoard::GetPositions(notes[i + 1].GetMidiNote());
+
+        if (currentNoteIdx >= pos1.size() || nextNoteIdx >= pos2.size())
+        {
+            return 1000000.0;
+        }
+
+        NotePosition currentPosition = pos1[currentNoteIdx];
+        NotePosition nextPosition = pos2[nextNoteIdx];
+        total += currentPosition.Distance(nextPosition);
+        total += currentPosition.GetFretIdx() * 0.5;
     }
     return total;
 }

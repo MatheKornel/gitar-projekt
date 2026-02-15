@@ -3,9 +3,32 @@
 
 NotePosition::NotePosition(const int newStringIdx, const int newFretIdx) : stringIdx(newStringIdx), fretIdx(newFretIdx) {}
 
-int NotePosition::Distance(const NotePosition &otherPos)
+double NotePosition::Distance(const NotePosition &otherPos)
 {
-    return abs(this->stringIdx - otherPos.stringIdx) + abs(this->fretIdx - otherPos.fretIdx);
+    const bool isOpenString = (this->fretIdx == 0 || otherPos.fretIdx == 0);
+    const int stringDiff = abs(this->stringIdx - otherPos.stringIdx);
+    const int fretDiff = abs(this->fretIdx - otherPos.fretIdx);
+
+    if (stringDiff == 0 && fretDiff == 0)
+    {
+        return 0.0;
+    }
+
+    const double stringWeight = 15.0;                   // húrváltás büntetés
+    const double fretWeight = isOpenString ? 0.1 : 1.0; // bundváltás büntetés
+
+    double cost = (stringWeight * stringDiff) + (fretWeight * fretDiff);
+    if (!isOpenString && fretDiff > 4)
+    {
+        cost += (fretDiff - 4) * 100.0;
+    }
+
+    if (stringDiff > 0 && fretDiff < 5 && !isOpenString)
+    {
+        cost += 20.0;
+    }
+
+    return cost;
 }
 
 int NotePosition::GetStringIdx() const { return stringIdx; }
