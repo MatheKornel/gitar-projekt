@@ -11,3 +11,8 @@ int NotePosition::Distance(const NotePosition &otherPos)
 int NotePosition::GetStringIdx() const { return stringIdx; }
 
 int NotePosition::GetFretIdx() const { return fretIdx; }
+
+std::string NotePosition::ToString() const
+{
+    return "Hur: " + std::to_string(stringIdx) + "\tBund: " + std::to_string(fretIdx);
+}

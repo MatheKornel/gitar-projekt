@@ -2,6 +2,7 @@
 #include "fretboard.h"
 #include "input_notes.h"
 #include "particle.h"
+#include "pso.h"
 
 int main()
 {
@@ -16,13 +17,25 @@ int main()
 
     // Fájl betöltés tesztelése
     const auto input = InputNotes::LoadNotes("notes.txt");
+    /*
     for (const auto &note : input)
     {
         std::cout << note.GetNoteName() << "\t" << note.GetMidiNote() << "\t" << note.GetOnset() << "\t" << note.GetDuration() << std::endl;
     }
-
+    */
+    /*
     // Particle osztály tesztelése
     Particle p = Particle(input.size());
     p.Initialize(input);
     ;
+    */
+
+    PSO pso(std::move(input), input.size(), 50);
+    const auto result = pso.PsoAlgo(2000);
+    std::cout << "Fitnesz: " << pso.g_opt_fitness << std::endl;
+    std::cout << "Optimalis lefogasok:" << std::endl;
+    for (size_t i = 0; i < result.size(); i++)
+    {
+        std::cout << result[i].ToString() << std::endl;
+    }
 }
