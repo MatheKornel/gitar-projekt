@@ -78,11 +78,11 @@ def show_note_rec():
         notes, envelope = stft.note_rec(5, histogram) # a hangok mellett az envelope-ot is visszaadja, hogy csak egyszer fusson le
 
         # C++ PSO optimalizálás (ideiglenesen tesztelés miatt itt)
-        cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\pso_fingering_optimization\\main.exe"
+        cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\main.exe"
         if os.path.exists(cpp_exe):
             print("Ujjrend optimalizálás indítása...")
             result = subprocess.run([cpp_exe],
-                                    cwd=r"D:\Sulis dolgok\gitar_projekt\backend\cpp\pso_fingering_optimization",
+                                    cwd=r"D:\Sulis dolgok\gitar_projekt\backend\cpp\viterbi_fingering_optimization",
                                     capture_output=True,
                                     text=True)
             print("C++ kimenet:")

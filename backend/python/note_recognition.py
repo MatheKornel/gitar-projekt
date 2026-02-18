@@ -111,7 +111,7 @@ class ShortTimeFT:
         return onsets
     
     def save_note_to_txt(self, notes, file_name="notes.txt"):
-        path = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\pso_fingering_optimization\\"
+        path = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\"
         try:
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(f"{len(notes)}\n")
