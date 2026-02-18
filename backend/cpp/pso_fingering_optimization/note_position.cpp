@@ -14,19 +14,22 @@ double NotePosition::Distance(const NotePosition &otherPos)
         return 0.0;
     }
 
-    const double stringWeight = 15.0;                   // húrváltás büntetés
-    const double fretWeight = isOpenString ? 0.1 : 1.0; // bundváltás büntetés
+    const double stringWeight = 2.5;                    // húrváltás büntetés
+    const double fretWeight = isOpenString ? 1.5 : 5.0; // bundváltás büntetés
 
     double cost = (stringWeight * stringDiff) + (fretWeight * fretDiff);
+
     if (!isOpenString && fretDiff > 4)
     {
-        cost += (fretDiff - 4) * 100.0;
+        cost += (fretDiff - 4) * 20.0;
     }
 
+    /*
     if (stringDiff > 0 && fretDiff < 5 && !isOpenString)
     {
         cost += 20.0;
     }
+    */
 
     return cost;
 }

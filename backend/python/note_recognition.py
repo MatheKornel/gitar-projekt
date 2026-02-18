@@ -116,7 +116,8 @@ class ShortTimeFT:
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(f"{len(notes)}\n")
                 for note in notes:
-                    f.write(f"{int(note.midi_note)} {note.onset:.4f} {note.duration:.4f} {note.note_name}\n")
+                    note_name = note.note_name.replace('\u266f', '#')
+                    f.write(f"{int(note.midi_note)} {note.onset:.4f} {note.duration:.4f} {note_name}\n")
             print(f"Hangok sikeresen elmentve: {file_name}")
         except Exception as e:
             print(f"Sikertelen mentés: {e}")

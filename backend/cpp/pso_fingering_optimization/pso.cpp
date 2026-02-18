@@ -3,19 +3,44 @@
 #include "random.h"
 #include "fretboard.h"
 #include <iostream>
+#include <omp.h>
 
-PSO::PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const int swarmSize) : notes(std::move(newNotes)), dimension(newDimension), g_opt_fitness(DBL_MAX)
+PSO::PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const int swarmSize, const int newLimit, const double newImprThreshold) : notes(std::move(newNotes)), dimension(newDimension), g_opt_fitness(DBL_MAX), limit(newLimit), imprThreshold(newImprThreshold)
 {
     g_opt.resize(dimension);
     InitializePopulation(swarmSize);
     Evaluation();
 }
 
+bool PSO::StopCondition()
+{
+    const double improvement = prev_g_opt_fitness - g_opt_fitness;
+    if (improvement > imprThreshold)
+    {
+        stagnationCounter = 0;
+        prev_g_opt_fitness = g_opt_fitness;
+        return false;
+    }
+    else
+    {
+        stagnationCounter++;
+        if (stagnationCounter >= limit)
+        {
+            return true;
+        }
+        return false;
+    }
+}
+
 std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printInterval)
 {
-    for (size_t i = 0; i < stopCondition; i++)
+    prev_g_opt_fitness = g_opt_fitness;
+    stagnationCounter = 0;
+    int i = 0;
+    double omega = 0.9;
+    while (!StopCondition())
     {
-        const double omega = 0.9 - (0.5 * i / stopCondition);
+        omega = 0.4 ? omega < 0.4 : omega * 0.995;
         CalculateVelocity(omega);
         for (auto &particle : P)
         {
@@ -41,11 +66,17 @@ std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printI
         {
             std::cout << "Iteracio: " << i << "\t Legjobb hiba (fitnesz): " << g_opt_fitness << "\n";
         }
+        i++;
+        if (i >= 10000)
+        {
+            break;
+        }
     }
+
     std::vector<NotePosition> optimalPositions;
-    for (size_t i = 0; i < notes.size(); i++)
+    for (size_t j = 0; j < notes.size(); j++)
     {
-        optimalPositions.emplace_back(FretBoard::GetPositions(notes[i].GetMidiNote())[g_opt[i]]);
+        optimalPositions.emplace_back(FretBoard::GetPositions(notes[j].GetMidiNote())[g_opt[j]]);
     }
     return optimalPositions;
 }
@@ -70,8 +101,10 @@ void PSO::InitializePopulation(const int swarmSize)
 
 void PSO::Evaluation()
 {
-    for (auto &particle : P)
+#pragma omp parallel for schedule(dynamic)
+    for (int i = 0; i < static_cast<int>(P.size()); i++)
     {
+        Particle &particle = P[i];
         const double p_fitness = Fitness(particle);
         if (p_fitness < particle.p_opt_fitness)
         {
@@ -79,8 +112,14 @@ void PSO::Evaluation()
             particle.p_opt = particle.p;
             if (p_fitness < g_opt_fitness)
             {
-                g_opt_fitness = p_fitness;
-                g_opt = particle.p;
+#pragma omp critical
+                {
+                    if (p_fitness < g_opt_fitness)
+                    {
+                        g_opt_fitness = p_fitness;
+                        g_opt = particle.p;
+                    }
+                }
             }
         }
     }
@@ -89,6 +128,14 @@ void PSO::Evaluation()
 double PSO::Fitness(const Particle &particle) const
 {
     double total = 0;
+    int firstNoteIdx = particle.p[0];
+    const NotePosition startPos = FretBoard::GetPositions(notes[0].GetMidiNote())[firstNoteIdx];
+
+    if (startPos.GetFretIdx() > 4 && startPos.GetFretIdx() != 0)
+    {
+        total += startPos.GetFretIdx() * 100.0;
+    }
+
     for (size_t i = 0; i < notes.size() - 1; i++)
     {
         const int currentNoteIdx = particle.p[i];
@@ -104,25 +151,27 @@ double PSO::Fitness(const Particle &particle) const
         NotePosition currentPosition = pos1[currentNoteIdx];
         NotePosition nextPosition = pos2[nextNoteIdx];
         total += currentPosition.Distance(nextPosition);
-        total += currentPosition.GetFretIdx() * 0.5;
+        total += currentPosition.GetFretIdx() * 1.5;
     }
     return total;
 }
 
 void PSO::CalculateVelocity(const double omega)
 {
-    for (auto &particle : P)
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < static_cast<int>(P.size()); i++)
     {
-        for (size_t i = 0; i < dimension; i++)
+        Particle &particle = P[i];
+        for (size_t j = 0; j < dimension; j++)
         {
             const double p_rnd = Random::GetRandomDouble(0.0, 1.0);
             const double g_rnd = Random::GetRandomDouble(0.0, 1.0);
 
-            double momentum = omega * particle.p_velo[i];
-            double local_move = phi_p * p_rnd * (particle.p_opt[i] - particle.p[i]);
-            double global_move = phi_g * g_rnd * (g_opt[i] - particle.p[i]);
+            double momentum = omega * particle.p_velo[j];
+            double local_move = phi_p * p_rnd * (particle.p_opt[j] - particle.p[j]);
+            double global_move = phi_g * g_rnd * (g_opt[j] - particle.p[j]);
 
-            particle.p_velo[i] = momentum + local_move + global_move;
+            particle.p_velo[j] = momentum + local_move + global_move;
         }
     }
 }
