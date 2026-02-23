@@ -73,6 +73,7 @@ class ShortTimeFT:
         
         return best_candidate
     
+    '''
     # onset detektálás ablakonként, hisztogram alapján változó min_gap paraméterrel
     def onsets_in_window(self, onset, envelope, histogram, windows_size = 1.8, hop_size = 0.2):
         onsets = []
@@ -109,6 +110,7 @@ class ShortTimeFT:
         onsets.sort()
         histogram.last_optimal_gap = 0.35 # alaphelyzetbe állítás
         return onsets
+    '''
     
     def save_note_to_txt(self, notes, file_name="notes.txt"):
         path = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\"
@@ -140,8 +142,13 @@ class ShortTimeFT:
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
+        onsets = onset.get_onsets(min_gap=0.05)
         envelope = onset.make_envelope() # teljes jel envelope-ja (időigényes, ezért csak egyszer számoljuk ki)
-        onsets = self.onsets_in_window(onset, envelope, histogram, 1.8, 0.2) # ablakos onset detektálás hisztogram alapján
+        #onsets = self.onsets_in_window(onset, envelope, histogram, 1.8, 0.2) # ablakos onset detektálás hisztogram alapján
+
+        # hisztogram most csak a bpm becsléshez
+        histogram.calculate_iois(onsets)
+        histogram.find_optimal_gap()
 
         print(f"Onsetek ({len(onsets)} db): {[round(t, 2) for t in onsets]}")
 

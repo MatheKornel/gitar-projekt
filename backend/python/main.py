@@ -71,7 +71,7 @@ def show_spectrogram():
 def show_note_rec():
     global current_audio, current_notes
     if current_audio:
-        onset = OnsetDetect(current_audio.filtered, fs=current_audio.fs)
+        #onset = OnsetDetect(current_audio.filtered, fs=current_audio.fs)
         stft = ShortTimeFT(current_audio.filtered)
         print("Elemzés folyamatban...")
 
@@ -93,10 +93,10 @@ def show_note_rec():
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
 
-        temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
-        histogram.calculate_iois(temp_onsets)
-        histogram.find_optimal_gap()
-        bpm = histogram.get_bpm() # minden eddigi hisztogramos számolás itt a BPM miatt kell
+        #temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
+        #histogram.calculate_iois(temp_onsets)
+        #histogram.find_optimal_gap()
+        bpm = histogram.get_bpm() # BPM becslése
 
         bpm_entry.delete(0, tk.END)
         bpm_entry.insert(0, str(bpm))
