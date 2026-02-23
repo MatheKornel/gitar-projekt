@@ -7,7 +7,7 @@ class OnsetDetect:
         self.filtered = filtered # szűrt audio jel
         self.fs = fs # mintavételi frekvencia
         self.envelope = None # onset envelope
-        self.hop_length = 512
+        self.hop_length = 512 # ablaklépés
 
     def make_envelope(self):
         # spektrogram készítés STFT-vel (spectral flux miatt ez kell ST helyett)

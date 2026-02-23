@@ -14,7 +14,6 @@ from note_recognition import ShortTimeFT
 from midi import MidiExporter
 from sheet_music_exporter import SheetMusicExporter
 from onset_histogram import OnsetHistogram
-from onset_detect import OnsetDetect
 
 m = tk.Tk()
 m.geometry("700x300")
@@ -71,11 +70,10 @@ def show_spectrogram():
 def show_note_rec():
     global current_audio, current_notes
     if current_audio:
-        #onset = OnsetDetect(current_audio.filtered, fs=current_audio.fs)
         stft = ShortTimeFT(current_audio.filtered)
         print("Elemzés folyamatban...")
 
-        notes, envelope = stft.note_rec(5, histogram) # a hangok mellett az envelope-ot is visszaadja, hogy csak egyszer fusson le
+        notes = stft.note_rec(5, histogram)
 
         # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
         cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\main.exe"
@@ -93,9 +91,6 @@ def show_note_rec():
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
 
-        #temp_onsets = onset.get_onsets(envelope, min_gap=0.05, prominence=0.2)
-        #histogram.calculate_iois(temp_onsets)
-        #histogram.find_optimal_gap()
         bpm = histogram.get_bpm() # BPM becslése
 
         bpm_entry.delete(0, tk.END)
