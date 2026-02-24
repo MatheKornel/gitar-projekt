@@ -43,9 +43,9 @@ class OnsetDetect:
         delta = 0.02 # csendes zajok kiszűrése miatt
         adaptive_threshold = local_median + delta # adaptív küszöb a lokális medián alapján
 
-        min_gap = max(1, int(min_gap * self.fs / self.hop_length)) # minimum távolság frame-ekben
+        min_frame_dist = max(1, int(min_gap * self.fs / self.hop_length)) # minimum távolság frame-ekben
 
-        peaks, _ = sig.find_peaks(self.envelope, height=adaptive_threshold, distance=min_gap) # csúcsok keresése a küszöb felett és a minimum távolság figyelembevételével
+        peaks, _ = sig.find_peaks(self.envelope, height=adaptive_threshold, distance=min_frame_dist) # csúcsok keresése a küszöb felett és a minimum távolság figyelembevételével
         onset_times = times[peaks]
 
         return onset_times

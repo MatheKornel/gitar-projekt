@@ -1,7 +1,17 @@
 #include <iostream>
+#include <map>
+#include <string>
 #include "fretboard.h"
 #include "input_notes.h"
 #include "viterbi.h"
+
+std::map<int, std::string> stringNames = {
+    {0, "E"},
+    {1, "A"},
+    {2, "D"},
+    {3, "G"},
+    {4, "B"},
+    {5, "e"}};
 
 int main()
 {
