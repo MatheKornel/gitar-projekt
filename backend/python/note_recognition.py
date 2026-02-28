@@ -211,6 +211,7 @@ class ShortTimeFT:
 
         for note in notes_with_offsets:
             print(f"Felismert hang: {note.note_name} - {note.freq:.2f} Hz, onset: {note.onset:.2f} s, offset: {note.offset:.2f} s")
+        print(f"Felismert hangok száma: {len(notes_with_offsets)}")
         
         if notes_with_offsets:
             self.save_note_to_txt(notes_with_offsets)
