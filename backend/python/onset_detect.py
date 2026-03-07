@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.signal as sig
+import scipy.ndimage
 import librosa as lb
 
 class OnsetDetect:
@@ -20,6 +21,7 @@ class OnsetDetect:
 
         flux = np.sum(diff_rectified**2, axis=0) # energia összegzése minden frekvenciasávban (különbségek négyzetét összegezzük)
         self.envelope = np.insert(flux, 0, 0) # az első értékhez nincs előző, így oda 0-át teszünk
+        self.envelope = scipy.ndimage.gaussian_filter1d(self.envelope, sigma=1.5) # simítás Gauss-szűrővel, duplikátumok elkerülése végett
 
         if np.max(self.envelope) > 0:
             self.envelope /= np.max(self.envelope) # normalizálás a maxhoz

@@ -165,17 +165,11 @@ class ShortTimeFT:
             is_duplicate = False
             if notes_with_offsets:
                 last_t = notes_with_offsets[-1].onset
-                last_f = notes_with_offsets[-1].freq
-
                 time_diff = onset - last_t
-                freq_diff = abs(recognized_note - last_f)
 
                 if time_diff < 0.05:
                     is_duplicate = True
-                else:
-                    resonance_treshold = 0.08 if time_diff < 0.15 else 0.25 # rezonancia küszöb idő alapján
-                    if freq_diff < 2.5 and time_diff < resonance_treshold: # ha nagyon közel van az előző hanghoz időben és frekvenciában is, akkor rezonancia lehet
-                        is_duplicate = True
+
             if is_duplicate:
                 continue
         
@@ -195,15 +189,25 @@ class ShortTimeFT:
                 notes_with_offsets.append((onset, f0, onset + 0.1)) # ha a hang túl rövid adok neki egy fix hosszt
                 continue
 
-            salience_treshold = peak_salience * 0.25 # a küszöb legyen a csúcs valahány százaléka
+            salience_treshold = peak_salience * 0.1 # a küszöb legyen a csúcs valahány százaléka
 
             offset_time = times[peak_frame] # elkezdjük követni a lecsengést
+
+            next_onset_time = onsets[i + 1] if i < len(onsets) - 1 else (onset + 5.0) # ha nagyon összecsúszna az onset és offset, akkor a következő onset-ig követjük csak a lecsengést
+
             for j in range(peak_frame + 1, magnitude.shape[1]):
                 current_time = times[j]
+
+                if current_time >= next_onset_time:
+                    offset_time = next_onset_time - 0.01
+                    break
+
                 current_salience = self.get_f0_salience(f0, j, magnitude, freqs, fs, max_harmonics)
+
                 if current_salience < salience_treshold:
                     offset_time = current_time
                     break
+                
                 offset_time = current_time
 
             event = NoteEvent(onset, offset_time, f0)
