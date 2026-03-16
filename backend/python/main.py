@@ -14,6 +14,7 @@ from note_recognition import ShortTimeFT
 from midi import MidiExporter
 from sheet_music_exporter import SheetMusicExporter
 from onset_histogram import OnsetHistogram
+from data_to_txt_converter import DataToTxtConverter
 
 m = tk.Tk()
 m.geometry("700x300")
@@ -75,6 +76,9 @@ def show_note_rec():
 
         notes = stft.note_rec(5, histogram)
 
+        converter = DataToTxtConverter(notes)
+        converter.save_note_to_txt() # ideiglenes fájlba mentés a C++ programnak
+
         # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
         cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\main.exe"
         if os.path.exists(cpp_exe):
@@ -90,6 +94,9 @@ def show_note_rec():
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
+
+        test_file_name = os.path.splitext(os.path.basename(original_filepath))[0] + "_test.txt"
+        converter.save_to_test_txt(output_txt_path=test_file_name) # teszt fájlba mentés Excel-nek
 
         bpm = histogram.get_bpm() # BPM becslése
 

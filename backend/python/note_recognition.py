@@ -4,7 +4,6 @@ import os
 
 from onset_detect import OnsetDetect
 from note_event import NoteEvent
-from onset_histogram import OnsetHistogram
 
 class ShortTimeFT:
     def __init__(self, filtered):
@@ -73,20 +72,6 @@ class ShortTimeFT:
         
         return best_candidate
     
-    
-    def save_note_to_txt(self, notes, file_name="notes.txt"):
-        path = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\"
-        try:
-            with open(os.path.join(path, file_name), "w") as f:
-                f.write(f"{len(notes)}\n")
-                for note in notes:
-                    note_name = note.note_name.replace('\u266f', '#')
-                    f.write(f"{int(note.midi_note)} {note.onset:.4f} {note.duration:.4f} {note_name}\n")
-            print(f"Hangok sikeresen elmentve: {file_name}")
-        except Exception as e:
-            print(f"Sikertelen mentés: {e}")
-
-
 
     def note_rec(self, max_harmonics, histogram):
         nfft = 4096
@@ -216,11 +201,6 @@ class ShortTimeFT:
         for note in notes_with_offsets:
             print(f"Felismert hang: {note.note_name} - {note.freq:.2f} Hz, onset: {note.onset:.2f} s, offset: {note.offset:.2f} s")
         print(f"Felismert hangok száma: {len(notes_with_offsets)}")
-        
-        if notes_with_offsets:
-            self.save_note_to_txt(notes_with_offsets)
-        else:
-            print("Nincsenek hangok a fájlba mentéshez!")
 
         return notes_with_offsets
 

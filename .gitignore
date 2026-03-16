@@ -77,3 +77,6 @@ dist/
 *.log
 *.tlog
 *.lastbuildstate
+
+# -----
+test_txt_to_excel/
