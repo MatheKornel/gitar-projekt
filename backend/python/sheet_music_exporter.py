@@ -15,7 +15,7 @@ class SheetMusicExporter:
         self.sec_per_beat = 60 / audio_tempo # másodperc per negyedhang
         self.audio_tempo = audio_tempo # tempó a kotta számára
     
-    # létrehozza a kottát a felismert hangok alapján, majd elmenti PDF formátumban és megjeleníti PNG-ként
+    # létrehozza a kottát a felismert hangok alapján, majd elmenti PDF formátumban és megjeleníti
     def create_score(self, notes, file_basename="output"):
         part = stream.Stream()
         part.insert(0, instrument.Guitar()) # gitár hangszer hozzáadása
@@ -23,35 +23,49 @@ class SheetMusicExporter:
         part.append(meter.TimeSignature('4/4'))
         part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef() # violinkulcs
-        last_offset = 0.0
+        current_beat = 0.0
+        grid_resolution = 0.25 # 16-od értékekre kvantálás
 
-        for note_event in notes:
-            pause_duration = note_event.onset - last_offset # szünet hozzáadása, ha szükséges
-            if pause_duration > 0.05:
-                pause_quarter_length = pause_duration / self.sec_per_beat
-                pause_quarter_length = round(pause_quarter_length * 4) / 4.0 # kvantálás 32-ed értékre
-                rest = note.Rest(quarterLength=pause_quarter_length)
-                part.append(rest)
-            
+        for i, note_event in enumerate(notes):
+            beat_onset = note_event.onset / self.sec_per_beat # időpontok átszámítása negyedhangokra
+            beat_offset = note_event.offset / self.sec_per_beat
+
+            quant_onset = round(beat_onset / grid_resolution) * grid_resolution # kvantálás a legközelebbi grid pontokra
+            quant_offset = round(beat_offset / grid_resolution) * grid_resolution
+
+            if quant_offset <= quant_onset:
+                quant_offset = quant_onset + grid_resolution
+
+            if i < len(notes) - 1:
+                next_note = notes[i + 1]
+                next_beat_onset = next_note.onset / self.sec_per_beat
+                next_quant_onset = round(next_beat_onset / grid_resolution) * grid_resolution
+                gap = next_quant_onset - quant_offset
+                if gap < 0.5 and next_quant_onset > quant_onset:
+                    quant_offset = next_quant_onset # nagyon rövid szünetek elkerülése
+
+            if quant_offset <= quant_onset:
+                quant_offset = quant_onset + grid_resolution # ha 0-ra kvantálna, legalább egy 16-od érték legyen
+                
+            rest_duration = quant_onset - current_beat
+            if rest_duration > 0:
+                rest = note.Rest(quarterLength=rest_duration)
+                part.append(rest) # szünet hozzáadása, ha van
+
             n = note.Note() # hang létrehozása
             n.pitch.midi = note_event.midi_note + 12 # oktávval feljebb, hogy "gitáros" kotta legyen
-
-            note_quarter_length = note_event.duration / self.sec_per_beat # időtartam beállítása
-            note_quarter_length = round(note_quarter_length * 4) / 4.0 # kvantálás 32-ed értékre
-            note_quarter_length = 1/32 if note_quarter_length == 0 else note_quarter_length # legyen legalább 32-ed érték
-            n.duration = duration.Duration(quarterLength=note_quarter_length)
+            note_duration = quant_offset - quant_onset
+            n.duration = duration.Duration(quarterLength=note_duration)
             part.append(n)
-
-            last_offset = note_event.offset # frissítjük az utolsó offsetet
+            current_beat = quant_offset # frissítjük az aktuális beatet
         
-        final_part = part.makeMeasures().quantize(inPlace=False)
+        final_part = part.makeMeasures()
 
         # mentés PDF-be
         target_dir = "sheet_music"
         os.makedirs(target_dir, exist_ok=True)
 
         try:
-            # PDF
             pdf_path_full = os.path.join(target_dir, f"{file_basename}")
             final_part.show('lily.pdf', fp=pdf_path_full)
             pdf_path = pdf_path_full
