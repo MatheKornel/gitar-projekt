@@ -4,9 +4,9 @@ class DataToTxtConverter:
     def __init__(self, notes):
         self.notes = notes
 
-    def save_note_to_txt(self, file_name="notes.txt"):
+    def save_note_to_txt(self, algo, file_name="notes.txt"):
         notes = self.notes
-        path = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\"
+        path = f"D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\{algo}_fingering_optimization\\"
         try:
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(f"{len(notes)}\n")

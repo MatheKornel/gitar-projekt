@@ -25,6 +25,7 @@ current_notes = None
 original_filepath = ""
 last_opened_dir = None
 histogram = OnsetHistogram()
+algo = ""
 
 #Fájl betöltése és zajszűrés
 def file_load():
@@ -76,15 +77,20 @@ def show_note_rec():
 
         notes = stft.note_rec(5, histogram)
 
+        if select.get() == 1:
+            algo = "viterbi"
+        elif select.get() == 2:
+            algo = "pso"
+
         converter = DataToTxtConverter(notes)
-        converter.save_note_to_txt() # ideiglenes fájlba mentés a C++ programnak
+        converter.save_note_to_txt(algo) # ideiglenes fájlba mentés a C++ programnak
 
         # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
-        cpp_exe = "D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\viterbi_fingering_optimization\\main.exe"
+        cpp_exe = f"D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\{algo}_fingering_optimization\\main.exe"
         if os.path.exists(cpp_exe):
             print("Ujjrend optimalizálás indítása...")
             result = subprocess.run([cpp_exe],
-                                    cwd=r"D:\Sulis dolgok\gitar_projekt\backend\cpp\viterbi_fingering_optimization",
+                                    cwd=fr"D:\Sulis dolgok\gitar_projekt\backend\cpp\{algo}_fingering_optimization",
                                     capture_output=True,
                                     text=True)
             print("C++ kimenet:")
@@ -173,5 +179,14 @@ bpm_label.place(x=0, y=30)
 bpm_entry = ttk.Entry(m, width=5)
 bpm_entry.insert(0, "120")
 bpm_entry.place(x=30, y=30)
+
+opt_label = ttk.Label(m, text="Optimalizáló eljárás:")
+opt_label.place(x=0, y=60)
+select = tk.IntVar()
+select.set(1)
+r1 = ttk.Radiobutton(m, text="Viterbi algoritmus", variable=select, value=1)
+r1.place(x=0, y=80)
+r2 = ttk.Radiobutton(m, text="PSO algoritmus", variable=select, value=2)
+r2.place(x=0, y=100)
 
 m.mainloop()
