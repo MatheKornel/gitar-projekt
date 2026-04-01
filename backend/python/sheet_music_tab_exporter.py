@@ -1,5 +1,7 @@
 from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
 import os
+import re
+import subprocess
 
 lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 
@@ -10,7 +12,7 @@ if os.path.exists(lilypond_path):
 else:
     print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
-class SheetMusicExporter:
+class SheetMusicTabExporter:
     def __init__(self, audio_tempo=120):
         self.sec_per_beat = 60 / audio_tempo # másodperc per negyedhang
         self.audio_tempo = audio_tempo # tempó a kotta számára
@@ -61,19 +63,56 @@ class SheetMusicExporter:
         
         final_part = part.makeMeasures()
 
-        # mentés PDF-be
+        # tabulatúra generálás és mentés PDF-be
         target_dir = "sheet_music"
         os.makedirs(target_dir, exist_ok=True)
 
         try:
-            pdf_path_full = os.path.join(target_dir, f"{file_basename}")
-            final_part.show('lily.pdf', fp=pdf_path_full)
-            pdf_path = pdf_path_full
+            ly_path_full = os.path.join(target_dir, f"{file_basename}.ly")
+            final_part.write('lily', fp=ly_path_full)
 
-            print(f"Kotta mentve: {target_dir}")
-            return pdf_path
-        except Exception as e:
-            print(f"Hiba a kotta generálásánál: {e}")
+            with open(ly_path_full, 'r', encoding='utf-8') as f:
+                ly_code = f.read()
+
+            ly_code = re.sub(r'\\header\s*\{', f'\\\\header {{\n  title = "{file_basename}"', ly_code, count=1)
+            ly_code = re.sub(r'\\clef\s+"?[a-zA-Z0-9_]+"?', '', ly_code)
+            ly_code = ly_code.replace("\\new Voice {", "{")
+            ly_code = re.sub(r'\\include "lilypond-book-preamble\.ly"', '', ly_code)
+            ly_code = re.sub(r'\\score\s*\{', 'melody = {', ly_code, count=1)
+            new_score_block = """
+\\score {
+  <<
+    \\new Staff { \\melody }
+    \\new TabStaff { \\new TabVoice { \\transpose c c, { \\melody } } }
+  >>
+  \\layout {
+    indent = 0\\mm
+  }
+}
+"""
+            if "\\paper" in ly_code:
+                ly_code = ly_code.replace("\\paper", new_score_block + "\n\\paper", 1)
+            else:
+                ly_code += new_score_block
+
+            with open(ly_path_full, 'w', encoding='utf-8') as f:
+                f.write(ly_code)
+
+            pdf_path_full = os.path.join(target_dir, f"{file_basename}.pdf")
+            lilypond_exe = environment.Environment()['lilypondPath']
+            subprocess.run([lilypond_exe, "--pdf", "-o", os.path.join(target_dir, file_basename), ly_path_full], check=True)
+            
+            if os.path.exists(pdf_path_full):
+                print(f"Kotta és tabulatúra sikeresen generálva: {pdf_path_full}")
+                os.startfile(pdf_path_full)
+
+            if os.path.exists(ly_path_full):
+                os.remove(ly_path_full)
+            return pdf_path_full
+        
+        except subprocess.CalledProcessError as e:
+            print(f"Hiba történt a Lilypond futtatásakor: {e}")
             return None
-        finally:
-            os.remove(pdf_path_full)
+        except Exception as e:
+            print(f"Hiba a kotta és tabulatúra generálásánál: {e}")
+            return None

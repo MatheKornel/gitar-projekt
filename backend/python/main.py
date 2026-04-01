@@ -12,7 +12,7 @@ from audio_files import Audio
 from spectrograms import Spectrogram
 from note_recognition import ShortTimeFT
 from midi import MidiExporter
-from sheet_music_exporter import SheetMusicExporter
+from sheet_music_tab_exporter import SheetMusicTabExporter
 from onset_histogram import OnsetHistogram
 from data_to_txt_converter import DataToTxtConverter
 
@@ -148,7 +148,7 @@ def generate_sheet_music():
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0]
 
-    exporter = SheetMusicExporter(audio_tempo=int(bpm_entry.get()))
+    exporter = SheetMusicTabExporter(audio_tempo=int(bpm_entry.get()))
     pdf_path = exporter.create_score(current_notes, file_basename=file_name)
 
     if pdf_path:
