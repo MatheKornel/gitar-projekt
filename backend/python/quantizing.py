@@ -11,7 +11,7 @@ class Quantizing:
         quant_offset = round(beat_offset / self.grid_resolution) * self.grid_resolution
 
         if quant_offset <= quant_onset:
-            quant_offset = quant_onset + self.self.grid_resolution
+            quant_offset = quant_onset + self.grid_resolution
 
         if i < len(self.notes) - 1:
             next_note = self.notes[i + 1]
