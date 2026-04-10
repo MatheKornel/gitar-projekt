@@ -30,7 +30,7 @@ class SheetMusicTabExporter:
         quantizer = Quantizing(notes)
         current_beat = 0.0
         for i, note_event in enumerate(notes):
-            quant_onset, quant_offset = quantizer.quantize(note_event, i, self.sec_per_beat, current_beat)
+            quant_onset, quant_offset = quantizer.quantize(note_event, i, self.sec_per_beat)
                 
             rest_duration = quant_onset - current_beat
             if rest_duration > 0:

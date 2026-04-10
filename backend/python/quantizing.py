@@ -3,7 +3,7 @@ class Quantizing:
         self.notes = notes
         self.grid_resolution = grid_resolution
 
-    def quantize(self, note_event, i, sec_per_beat, current_beat):
+    def quantize(self, note_event, i, sec_per_beat):
         beat_onset = note_event.onset / sec_per_beat # időpontok átszámítása negyedhangokra
         beat_offset = note_event.offset / sec_per_beat
 
