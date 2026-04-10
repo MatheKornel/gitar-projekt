@@ -2,6 +2,7 @@ from music21 import stream, note, duration, meter, environment, clef, tempo, ins
 import os
 import re
 import subprocess
+from quantizing import Quantizing
 
 lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 
@@ -25,29 +26,11 @@ class SheetMusicTabExporter:
         part.append(meter.TimeSignature('4/4'))
         part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef() # violinkulcs
+
+        quantizer = Quantizing(notes)
         current_beat = 0.0
-        grid_resolution = 0.25 # 16-od értékekre kvantálás
-
         for i, note_event in enumerate(notes):
-            beat_onset = note_event.onset / self.sec_per_beat # időpontok átszámítása negyedhangokra
-            beat_offset = note_event.offset / self.sec_per_beat
-
-            quant_onset = round(beat_onset / grid_resolution) * grid_resolution # kvantálás a legközelebbi grid pontokra
-            quant_offset = round(beat_offset / grid_resolution) * grid_resolution
-
-            if quant_offset <= quant_onset:
-                quant_offset = quant_onset + grid_resolution
-
-            if i < len(notes) - 1:
-                next_note = notes[i + 1]
-                next_beat_onset = next_note.onset / self.sec_per_beat
-                next_quant_onset = round(next_beat_onset / grid_resolution) * grid_resolution
-                gap = next_quant_onset - quant_offset
-                if gap < 0.5 and next_quant_onset > quant_onset:
-                    quant_offset = next_quant_onset # nagyon rövid szünetek elkerülése
-
-            if quant_offset <= quant_onset:
-                quant_offset = quant_onset + grid_resolution # ha 0-ra kvantálna, legalább egy 16-od érték legyen
+            quant_onset, quant_offset = quantizer.quantize(note_event, i, self.sec_per_beat, current_beat)
                 
             rest_duration = quant_onset - current_beat
             if rest_duration > 0:
