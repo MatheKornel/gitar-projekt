@@ -7,7 +7,7 @@ class NotePosition
 public:
     NotePosition(const int newStringIdx, const int newFretIdx);
     NotePosition() = default;
-    double Distance(const NotePosition &otherPos); // távolság 2 pozíció között
+    double Distance(const NotePosition &otherPos) const; // távolság 2 pozíció között
     int GetStringIdx() const;
     int GetFretIdx() const;
     std::string ToString() const;

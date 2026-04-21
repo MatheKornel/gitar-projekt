@@ -10,17 +10,54 @@ struct Path
 
 Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std::move(newNotes)) {}
 
+double Optimization::CalculateCenter(const int currentIdx)
+{
+    const int foresight = 15;
+    int count = 0;
+    double sumMidi = 0.0;
+
+    for (size_t i = currentIdx; i < currentIdx + foresight && i < notes.size(); i++)
+    {
+        sumMidi += notes[i].GetMidiNote();
+        count++;
+    }
+    return sumMidi / count;
+}
+
+double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos) const
+{
+    double extraCost = 0.0;
+    if (currentCenter > 64.0 && nextPos.GetFretIdx() < 5)
+    {
+        extraCost += 10.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
+    }
+
+    if (prevPos.GetFretIdx() >= 5 && nextPos.GetFretIdx() == 0)
+    {
+        extraCost += 30.0; // ha az 5. bund felett volt az előző hang, akkor ne váltsunk üres húrra
+    }
+
+    const int fretDiff = abs(nextPos.GetFretIdx() - prevPos.GetFretIdx());
+
+    if (prevPos.GetFretIdx() != 0 && nextPos.GetFretIdx() != 0 && fretDiff <= 3)
+    {
+        extraCost -= 5.0; // ha a kéz egy helyben marad, azt jutalmazzuk
+    }
+
+    return extraCost;
+}
+
 std::vector<NotePosition> Optimization::RunOptimization()
 {
     std::vector<NotePosition> finalPositions;
     finalPositions.reserve(notes.size());
 
-    const int WINDOW_SIZE = 5;
+    const int windowSize = 5;
 
     for (size_t i = 0; i < notes.size(); i++)
     {
         std::vector<InputNotes> window;
-        for (size_t j = i; j < i + WINDOW_SIZE && j < notes.size(); j++)
+        for (size_t j = i; j < i + windowSize && j < notes.size(); j++)
         {
             window.push_back(notes[j]);
         }
@@ -48,19 +85,24 @@ std::vector<NotePosition> Optimization::RunOptimization()
             currentPaths.push_back(newPath);
         }
 
+        double currentCenter = CalculateCenter(i);
+
         for (size_t j = 1; j < window.size(); j++)
         {
             auto nextPositions = FretBoard::GetPositions(window[j].GetMidiNote());
             std::vector<Path> nextPaths;
 
-            for (auto &path : currentPaths)
+            for (const auto &path : currentPaths)
             {
+                const auto &prevPos = path.positions.back();
+
                 for (const auto &nextPos : nextPositions)
                 {
-                    double stepCost = path.positions.back().Distance(nextPos);
+                    const double stepCost = prevPos.Distance(nextPos);
+                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos);
                     Path expandedPath = path;
                     expandedPath.positions.push_back(nextPos);
-                    expandedPath.totalCost += stepCost;
+                    expandedPath.totalCost += (stepCost + extraCost);
                     nextPaths.push_back(expandedPath);
                 }
             }

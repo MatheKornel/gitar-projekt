@@ -4,7 +4,7 @@
 
 NotePosition::NotePosition(const int newStringIdx, const int newFretIdx) : stringIdx(newStringIdx), fretIdx(newFretIdx) {}
 
-double NotePosition::Distance(const NotePosition &otherPos)
+double NotePosition::Distance(const NotePosition &otherPos) const
 {
     const bool isOpenString = (this->fretIdx == 0 || otherPos.fretIdx == 0);
     const int stringDiff = abs(this->stringIdx - otherPos.stringIdx);
@@ -16,7 +16,7 @@ double NotePosition::Distance(const NotePosition &otherPos)
     }
 
     const double stringWeight = 2.5;                    // húrváltás büntetés
-    const double fretWeight = isOpenString ? 1.5 : 5.0; // bundváltás büntetés
+    const double fretWeight = isOpenString ? 3.0 : 5.0; // bundváltás büntetés
 
     double cost = (stringWeight * stringDiff) + (fretWeight * fretDiff);
 
