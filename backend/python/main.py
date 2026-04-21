@@ -81,6 +81,8 @@ def show_note_rec():
             algo = "viterbi"
         elif select.get() == 2:
             algo = "pso"
+        elif select.get() == 3:
+            algo = "main"
 
         converter = DataToTxtConverter(notes)
         converter.save_note_to_txt(algo) # ideiglenes fájlba mentés a C++ programnak
@@ -88,6 +90,7 @@ def show_note_rec():
         # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
         cpp_exe = f"D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\{algo}_fingering_optimization\\main.exe"
         if os.path.exists(cpp_exe):
+            print(f"Ujjrend optimalizáló eljárás: {algo}")
             print("Ujjrend optimalizálás indítása...")
             result = subprocess.run([cpp_exe],
                                     cwd=fr"D:\Sulis dolgok\gitar_projekt\backend\cpp\{algo}_fingering_optimization",
@@ -188,5 +191,7 @@ r1 = ttk.Radiobutton(m, text="Viterbi algoritmus", variable=select, value=1)
 r1.place(x=0, y=80)
 r2 = ttk.Radiobutton(m, text="PSO algoritmus", variable=select, value=2)
 r2.place(x=0, y=100)
+r3 = ttk.Radiobutton(m, text="Saját algoritmus", variable=select, value=3)
+r3.place(x=0, y=120)
 
 m.mainloop()
