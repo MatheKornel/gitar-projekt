@@ -22,6 +22,7 @@ class ProjectPaths:
         mapping = {
             "viterbi": self.cpp_dir / "viterbi_fingering_optimization",
             "pso": self.cpp_dir / "pso_fingering_optimization",
+            "main": self.cpp_dir / "main_fingering_optimization",
         }
         return mapping.get(algo, self.cpp_dir / f"{algo}_fingering_optimization")
 

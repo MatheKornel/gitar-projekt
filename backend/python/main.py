@@ -62,6 +62,8 @@ class GuitarProjectApp:
         r1.place(x=0, y=80)
         r2 = ttk.Radiobutton(self.root, text="PSO algoritmus", variable=self.select, value=2)
         r2.place(x=0, y=100)
+        r3 = ttk.Radiobutton(self.root, text="Saját algoritmus", variable=self.select, value=3)
+        r3.place(x=0, y=120)
 
     def file_load(self):
         if self.last_opened_dir:
@@ -111,6 +113,8 @@ class GuitarProjectApp:
             self.algo = "viterbi"
         elif self.select.get() == 2:
             self.algo = "pso"
+        elif self.select.get() == 3:
+            self.algo = "main"
 
         converter = DataToTxtConverter(notes, paths=self.paths)
         converter.save_note_to_txt(self.algo)
