@@ -1,98 +1,124 @@
-#Library importok
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog as fd
-import soundfile as sf
 import os
 import subprocess
+import tkinter as tk
+from tkinter import filedialog as fd
+from tkinter import ttk
 
-#Fájl importok
-from filter import BandpassFilter
+import soundfile as sf
+
 from audio_files import Audio
-from spectrograms import Spectrogram
-from note_recognition import ShortTimeFT
-from midi import MidiExporter
-from sheet_music_tab_exporter import SheetMusicTabExporter
-from onset_histogram import OnsetHistogram
+from config import ProjectPaths
 from data_to_txt_converter import DataToTxtConverter
+from filter import BandpassFilter
+from midi import MidiExporter
+from note_recognition import ShortTimeFT
+from onset_histogram import OnsetHistogram
+from sheet_music_tab_exporter import SheetMusicTabExporter
+from spectrograms import Spectrogram
 
-m = tk.Tk()
-m.geometry("700x300")
-m.title("Gitár projekt")
 
-current_audio = None
-current_notes = None
-original_filepath = ""
-last_opened_dir = None
-histogram = OnsetHistogram()
-algo = ""
+class GuitarProjectApp:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.geometry("700x300")
+        self.root.title("Gitár projekt")
 
-#Fájl betöltése és zajszűrés
-def file_load():
-    global current_audio, original_filepath, current_notes, last_opened_dir
+        self.current_audio = None
+        self.current_notes = None
+        self.original_filepath = ""
+        self.last_opened_dir = None
+        self.histogram = OnsetHistogram()
+        self.paths = ProjectPaths()
+        self.algo = ""
+        self.select = tk.IntVar(value=1)
 
-    if last_opened_dir:
-        start_dir = last_opened_dir
-    else:
-        start_dir = os.path.join(os.path.expanduser("~"), "Music")
-        if not os.path.exists(start_dir):
-            start_dir = os.path.expanduser("~")
+        self._build_ui()
 
-    path = fd.askopenfilename(
-        title="Fájl kiválasztása",
-        initialdir=start_dir,
-        filetypes=[("Hangfájl", "*.wav")]
-    )
-    
-    if path:
-        last_opened_dir = os.path.dirname(path)
-        original_filepath = path
-        print(f"Betöltött fájl: {os.path.basename(original_filepath)}")
-        original, fs = sf.read(path)
-        print(f"Mintavételi frekvencia: {fs} Hz")
-        
-        original = original.mean(axis=1) if len(original.shape) > 1 else original
-    
-        bpf = BandpassFilter(original)
-        filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
-        print("Szűrés elvégezve.")
+    def _build_ui(self):
+        open_button = ttk.Button(self.root, text="Fájl megnyitása", command=self.file_load)
+        open_button.place(x=0, y=0)
 
-        audio = Audio(original=original, filtered=filtered, fs=fs)
-        current_audio = audio
-        current_notes = None # új fájl betöltésekor töröljük a korábbi adatokat
+        spectrogram_button = ttk.Button(self.root, text="Szűrés utáni összehasonlítás", command=self.show_spectrogram)
+        spectrogram_button.place(x=95, y=0)
 
-#Spektrogram megjelenítése a betöltött hanganyagból - szűrés előtti és utáni állapot
-def show_spectrogram():
-    global current_audio
-    if current_audio:
-        spec = Spectrogram(current_audio.original, current_audio.filtered, current_audio.fs)
-    spec.spectrograms()
+        note_rec_button = ttk.Button(self.root, text="Hangfelismerés", command=self.show_note_rec)
+        note_rec_button.place(x=255, y=0)
 
-#STFT elvégzése
-def show_note_rec():
-    global current_audio, current_notes
-    if current_audio:
-        stft = ShortTimeFT(current_audio.filtered)
+        midi_export_button = ttk.Button(self.root, text="MIDI exportálása", command=self.save_midi)
+        midi_export_button.place(x=350, y=0)
+
+        sheet_music_button = ttk.Button(self.root, text="Kotta generálása", command=self.generate_sheet_music)
+        sheet_music_button.place(x=450, y=0)
+
+        bpm_label = ttk.Label(self.root, text="BPM:")
+        bpm_label.place(x=0, y=30)
+        self.bpm_entry = ttk.Entry(self.root, width=5)
+        self.bpm_entry.insert(0, "120")
+        self.bpm_entry.place(x=30, y=30)
+
+        opt_label = ttk.Label(self.root, text="Optimalizáló eljárás:")
+        opt_label.place(x=0, y=60)
+        r1 = ttk.Radiobutton(self.root, text="Viterbi algoritmus", variable=self.select, value=1)
+        r1.place(x=0, y=80)
+        r2 = ttk.Radiobutton(self.root, text="PSO algoritmus", variable=self.select, value=2)
+        r2.place(x=0, y=100)
+
+    def file_load(self):
+        if self.last_opened_dir:
+            start_dir = self.last_opened_dir
+        else:
+            start_dir = os.path.join(os.path.expanduser("~"), "Music")
+            if not os.path.exists(start_dir):
+                start_dir = os.path.expanduser("~")
+
+        path = fd.askopenfilename(
+            title="Fájl kiválasztása",
+            initialdir=start_dir,
+            filetypes=[("Hangfájl", "*.wav")],
+        )
+
+        if path:
+            self.last_opened_dir = os.path.dirname(path)
+            self.original_filepath = path
+            print(f"Betöltött fájl: {os.path.basename(self.original_filepath)}")
+            original, fs = sf.read(path)
+            print(f"Mintavételi frekvencia: {fs} Hz")
+
+            original = original.mean(axis=1) if len(original.shape) > 1 else original
+
+            bpf = BandpassFilter(original)
+            filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
+            print("Szűrés elvégezve.")
+
+            self.current_audio = Audio(original=original, filtered=filtered, fs=fs)
+            self.current_notes = None
+
+    def show_spectrogram(self):
+        if self.current_audio:
+            spec = Spectrogram(self.current_audio.original, self.current_audio.filtered, self.current_audio.fs)
+            spec.spectrograms()
+
+    def show_note_rec(self):
+        if not self.current_audio:
+            return
+
+        stft = ShortTimeFT(self.current_audio.filtered)
         print("Elemzés folyamatban...")
 
-        notes = stft.note_rec(5, histogram)
+        notes = stft.note_rec(5, self.histogram)
 
-        if select.get() == 1:
-            algo = "viterbi"
-        elif select.get() == 2:
-            algo = "pso"
+        if self.select.get() == 1:
+            self.algo = "viterbi"
+        elif self.select.get() == 2:
+            self.algo = "pso"
 
-        converter = DataToTxtConverter(notes)
-        converter.save_note_to_txt(algo) # ideiglenes fájlba mentés a C++ programnak
+        converter = DataToTxtConverter(notes, paths=self.paths)
+        converter.save_note_to_txt(self.algo)
 
-        # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
-        cpp_exe = f"D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\{algo}_fingering_optimization\\main.exe"
-        if os.path.exists(cpp_exe):
+        cpp_exe = self.paths.cpp_executable(self.algo)
+        if cpp_exe.exists():
             print("Ujjrend optimalizálás indítása...")
-            result = subprocess.run([cpp_exe],
-                                    cwd=fr"D:\Sulis dolgok\gitar_projekt\backend\cpp\{algo}_fingering_optimization",
-                                    capture_output=True,
-                                    text=True)
+            result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
             print("C++ kimenet:")
             print(result.stdout)
             if result.returncode != 0:
@@ -101,92 +127,58 @@ def show_note_rec():
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
 
-        test_file_name = os.path.splitext(os.path.basename(original_filepath))[0] + "_test.txt"
-        converter.save_to_test_txt(output_txt_path=test_file_name) # teszt fájlba mentés Excel-nek
+        test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
+        converter.save_to_test_txt(output_txt_path=test_file_name)
 
-        bpm = histogram.get_bpm() # BPM becslése
-
-        bpm_entry.delete(0, tk.END)
-        bpm_entry.insert(0, str(bpm))
+        bpm = self.histogram.get_bpm()
+        self.bpm_entry.delete(0, tk.END)
+        self.bpm_entry.insert(0, str(bpm))
 
         print(f"BPM becslés: {bpm} BPM")
-        current_notes = notes
+        self.current_notes = notes
         if notes:
             print("Elemzés kész.")
         else:
             print("Nincsenek felismert hangok.")
 
-# MIDI exportálás
-def save_midi():
-    global current_notes, original_filepath
-    if not current_notes:
-        print("Nincsenek felismert hangok a MIDI exportáláshoz.")
-        return
-    
-    if not original_filepath:
-        print("Nincs eredeti fájlnév a mentéshez.")
-        return
-    
-    exporter = MidiExporter(tempo=int(bpm_entry.get()))
-    base_name = os.path.basename(original_filepath)
-    file_name = os.path.splitext(base_name)[0] + ".mid"
-    output_midi_path = os.path.join("MIDI_files", file_name)
+    def save_midi(self):
+        if not self.current_notes:
+            print("Nincsenek felismert hangok a MIDI exportáláshoz.")
+            return
 
-    exporter.create_midi(current_notes, output_midi_path)
+        if not self.original_filepath:
+            print("Nincs eredeti fájlnév a mentéshez.")
+            return
 
-# Kotta generálás és megjelenítés
-def generate_sheet_music():
-    global current_notes, original_filepath
-    if not current_notes:
-        print("Nincsenek felismert hangok a kottához.")
-        return
-    
-    if not original_filepath:
-        print("Nincs eredeti fájlnév a mentéshez.")
-        return
-    
-    base_name = os.path.basename(original_filepath)
-    file_name = os.path.splitext(base_name)[0]
+        exporter = MidiExporter(tempo=int(self.bpm_entry.get()), paths=self.paths)
+        base_name = os.path.basename(self.original_filepath)
+        file_name = os.path.splitext(base_name)[0] + ".mid"
+        exporter.create_midi(self.current_notes, file_name)
 
-    exporter = SheetMusicTabExporter(audio_tempo=int(bpm_entry.get()))
-    pdf_path = exporter.create_score(current_notes, file_basename=file_name)
+    def generate_sheet_music(self):
+        if not self.current_notes:
+            print("Nincsenek felismert hangok a kottához.")
+            return
 
-    if pdf_path:
-        print(f"PDF generálva: {pdf_path}")
-    else:
-        print("Kotta generálása sikertelen.")
+        if not self.original_filepath:
+            print("Nincs eredeti fájlnév a mentéshez.")
+            return
+
+        base_name = os.path.basename(self.original_filepath)
+        file_name = os.path.splitext(base_name)[0]
+
+        exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()))
+        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name)
+
+        if pdf_path:
+            print(f"PDF generálva: {pdf_path}")
+        else:
+            print("Kotta generálása sikertelen.")
+
+    def run(self):
+        self.root.mainloop()
 
 
-
-#Alkalmazás dolgai
-open_button = ttk.Button(m, text="Fájl megnyitása", command=file_load)
-open_button.place(x=0, y=0)
-
-spectrogram_button = ttk.Button(m, text="Szűrés utáni összehasonlítás", command=show_spectrogram)
-spectrogram_button.place(x=95, y=0)
-
-note_rec_button = ttk.Button(m, text="Hangfelismerés", command=show_note_rec)
-note_rec_button.place(x=255, y=0)
-
-midi_export_button = ttk.Button(m, text="MIDI exportálása", command=save_midi)
-midi_export_button.place(x=350, y=0)
-
-sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
-sheet_music_button.place(x=450, y=0)
-
-bpm_label = ttk.Label(m, text="BPM:")
-bpm_label.place(x=0, y=30)
-bpm_entry = ttk.Entry(m, width=5)
-bpm_entry.insert(0, "120")
-bpm_entry.place(x=30, y=30)
-
-opt_label = ttk.Label(m, text="Optimalizáló eljárás:")
-opt_label.place(x=0, y=60)
-select = tk.IntVar()
-select.set(1)
-r1 = ttk.Radiobutton(m, text="Viterbi algoritmus", variable=select, value=1)
-r1.place(x=0, y=80)
-r2 = ttk.Radiobutton(m, text="PSO algoritmus", variable=select, value=2)
-r2.place(x=0, y=100)
-
-m.mainloop()
+if __name__ == "__main__":
+    app = GuitarProjectApp()
+    app.run()
