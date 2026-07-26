@@ -90,7 +90,6 @@ class ShortTimeFT:
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
         onsets = onset.get_onsets(min_gap=0.05)
-        envelope = onset.make_envelope() # teljes jel envelope-ja
 
         # hisztogram most csak a bpm becsléshez
         histogram.calculate_iois(onsets)

@@ -38,10 +38,25 @@ double Optimization::ExtraCost(const double currentCenter, const NotePosition &n
     }
 
     const int fretDiff = abs(nextPos.GetFretIdx() - prevPos.GetFretIdx());
-
     if (prevPos.GetFretIdx() != 0 && nextPos.GetFretIdx() != 0 && fretDiff <= 3)
     {
         extraCost -= 5.0; // ha a kéz egy helyben marad, azt jutalmazzuk
+    }
+
+    if ((nextPos.GetStringIdx() == 0 || nextPos.GetStringIdx() == 1) && nextPos.GetFretIdx() > 12)
+    {
+        extraCost += 500.0; // az E és A húron ne játszunk riffeket a 12. bund felett
+    }
+
+    const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
+    if (stringDiff > 1)
+    {
+        extraCost += 500.0 * stringDiff; // húrváltást büntetjük, mert riffeknél nehezebb váltani
+    }
+
+    if ((prevPos.GetStringIdx() == 0 && prevPos.GetFretIdx() == 0) || (nextPos.GetStringIdx() == 0 && nextPos.GetFretIdx() == 0))
+    {
+        extraCost -= 5.0; // ha üres E húr és bármi között van váltás, azt jutalmazzuk, az nem baj
     }
 
     return extraCost;
