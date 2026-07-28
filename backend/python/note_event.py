@@ -8,6 +8,8 @@ class NoteEvent:
         self.freq = freq        # hang frekvenciája (Hz)
         self.duration = offset - onset  # hang hossza (másodpercben)
         self.velocity = velocity  # hangerő (0-127)
+        self.opt_string_num = None  # opcionális: húr száma (ha van)
+        self.opt_fret_num = None    # opcionális: bund száma (ha van)
 
         try:
             self.midi_note = int(np.round(69 + 12 * np.log2(freq / 440.0)))  # frekvencia átváltása MIDI hangra
