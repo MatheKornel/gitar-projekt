@@ -1,8 +1,9 @@
 import os
+from pathlib import Path
 
 import mido
 
-from config import ProjectPaths
+from config_paths import ProjectPaths
 from quantizing import Quantizing
 
 
@@ -42,7 +43,7 @@ class MidiExporter:
                 track.append(mido.Message("note_off", note=event["note"], velocity=64, time=int(delta_ticks)))
             last_event_time_ticks = event["time_ticks"]
 
-        output_path = self.paths.output_path(output, kind="midi") if os.path.dirname(output) == "" else output
+        output_path = self.paths.output_path(output, kind="midi") if os.path.dirname(output) == "" else Path(output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             mid.save(output_path)

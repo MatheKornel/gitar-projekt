@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from config import ProjectPaths
+from config_paths import ProjectPaths
 from data_to_txt_converter import DataToTxtConverter
 from quantizing import Quantizing
 from note_event import NoteEvent

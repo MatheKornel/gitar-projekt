@@ -8,7 +8,8 @@ from tkinter import ttk
 import soundfile as sf
 
 from audio_files import Audio
-from config import ProjectPaths
+from config_paths import ProjectPaths
+from config_parameters import ProjectConfig
 from data_to_txt_converter import DataToTxtConverter
 from filter import BandpassFilter
 from midi import MidiExporter
@@ -30,6 +31,7 @@ class GuitarProjectApp:
         self.last_opened_dir = None
         self.histogram = OnsetHistogram()
         self.paths = ProjectPaths()
+        self.config = ProjectConfig()
         self.algo = ""
         self.select = tk.IntVar(value=1)
 
@@ -90,7 +92,7 @@ class GuitarProjectApp:
             original = original.mean(axis=1) if len(original.shape) > 1 else original
 
             bpf = BandpassFilter(original)
-            filtered = bpf.bandpass_filter(original, fs, lowcut=70, highcut=2800)
+            filtered = bpf.bandpass_filter(original, fs, lowcut=self.config.filter_lowcut, highcut=self.config.filter_highcut)
             print("Szűrés elvégezve.")
 
             self.current_audio = Audio(original=original, filtered=filtered, fs=fs)
@@ -185,7 +187,7 @@ class GuitarProjectApp:
         base_name = os.path.basename(self.original_filepath)
         file_name = os.path.splitext(base_name)[0]
 
-        exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()))
+        exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()), paths=self.paths, config=self.config)
         pdf_path = exporter.create_score(self.current_notes, file_basename=file_name)
 
         if pdf_path:

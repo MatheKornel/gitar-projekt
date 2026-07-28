@@ -4,16 +4,9 @@ import subprocess
 
 from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
 
+from config_parameters import ProjectConfig
+from config_paths import ProjectPaths
 from quantizing import Quantizing
-
-lilypond_path = r"D:\lilypond-2.24.4\bin\lilypond.exe"
-
-if os.path.exists(lilypond_path):
-    env = environment.Environment()
-    env['lilypondPath'] = lilypond_path
-    print(f"LilyPond útvonal beállítva: {lilypond_path}")
-else:
-    print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
 
 NOTES_RE = re.compile(
@@ -76,16 +69,24 @@ def insert_string_numbers(melody_body, notes):
 
 
 class SheetMusicTabExporter:
-    def __init__(self, audio_tempo=120, paths=None):
+    def __init__(self, audio_tempo=120, paths=None, config=None):
         self.sec_per_beat = 60 / audio_tempo
         self.audio_tempo = audio_tempo
-        self.paths = paths
+        self.paths = paths or ProjectPaths()
+        self.config = config or ProjectConfig()
+
+        self.env = environment.Environment()
+        if os.path.exists(self.config.lilypond_path):
+            self.env['lilypondPath'] = self.config.lilypond_path
+            print(f"LilyPond útvonal beállítva: {self.config.lilypond_path}")
+        else:
+            print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
     def create_score(self, notes, file_basename="output"):
         part = stream.Stream()
         part.insert(0, instrument.Guitar())
 
-        part.append(meter.TimeSignature('4/4'))
+        part.append(meter.TimeSignature(self.config.default_time_signature))
         part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef()
 
@@ -108,7 +109,7 @@ class SheetMusicTabExporter:
 
         final_part = part.makeMeasures()
 
-        target_dir = "sheet_music"
+        target_dir = self.paths.sheet_output_dir
         os.makedirs(target_dir, exist_ok=True)
 
         try:
@@ -151,7 +152,7 @@ class SheetMusicTabExporter:
                 f.write(ly_code)
 
             pdf_path_full = os.path.join(target_dir, f"{file_basename}.pdf")
-            lilypond_exe = environment.Environment()['lilypondPath']
+            lilypond_exe = self.env['lilypondPath']
             subprocess.run([lilypond_exe, "--pdf", "-o", os.path.join(target_dir, file_basename), ly_path_full], check=True)
 
             if os.path.exists(pdf_path_full):
