@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import tkinter as tk
 from tkinter import filedialog as fd
@@ -125,6 +126,19 @@ class GuitarProjectApp:
             result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
             print("C++ kimenet:")
             print(result.stdout)
+
+            if result.returncode == 0:
+                matches = re.findall(r'Hur:\s*([EADGBe])\s*Bund:\s*(\d+)', result.stdout)
+                string_map = {'e': 1, 'B': 2, 'G': 3, 'D': 4, 'A': 5, 'E': 6}
+                if matches:
+                    if len(matches) != len(notes):
+                        print(f"Figyelem: A C++ {len(matches)} sort adott vissza, de {len(notes)} hang van! A meglévők lesznek párosítva.")
+                    for i, (hur_str, bund_str) in enumerate(matches):
+                        if i < len(notes):
+                            s_val = string_map.get(hur_str)
+                            if s_val is not None:
+                                notes[i].opt_string_num = s_val
+                                notes[i].opt_fret_num = int(bund_str)
             if result.returncode != 0:
                 print("C++ hiba:")
                 print(result.stderr)

@@ -16,6 +16,65 @@ else:
     print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
 
+NOTES_RE = re.compile(
+    r"(?P<rest>\br\s+\d+\.*\b)" # szünetek felismerése
+    r"|(?P<note>\b[a-g](?:is|es)*[',]*\s+\d+\.*)(?P<tie>~?)" # hangok és kötések felismerése
+)
+
+# megkeresi a "melody = {" első és utolsó zárójelét, és visszaadja a kezdő és záró indexet --> itt kell módosítani, hogy a megfelelő helyre szúrjuk be a tab számokat
+def lilypond_brace_search(text, start_marker):
+    start = text.index(start_marker)
+    brace_open = text.index('{', start)
+    depth = 0
+    i = brace_open
+    while i < len(text):
+        if text[i] == '{':
+            depth += 1
+        elif text[i] == '}':
+            depth -= 1
+            if depth == 0:
+                return brace_open, i
+        i += 1
+    raise ValueError(f"Nem található lezáró '}}' a(z) '{start_marker}' blokkhoz.")
+
+# a kivágott részben a hangokhoz hozzáadja a tab számokat, ha vannak
+def insert_string_numbers(melody_body, notes):
+    result = []
+    pos = 0
+    note_idx = 0
+    skip_tie_continuation = False
+
+    for m in NOTES_RE.finditer(melody_body):
+        result.append(melody_body[pos:m.start()])
+        pos = m.end()
+
+        if m.group('rest'):
+            result.append(m.group(0))
+            skip_tie_continuation = False
+            continue
+
+        tie = m.group('tie') or ''
+        token_text = m.group('note') + tie
+
+        if skip_tie_continuation:
+            result.append(token_text)
+            skip_tie_continuation = bool(tie)
+            continue
+
+        if note_idx < len(notes):
+            note_event = notes[note_idx]
+            string_num = getattr(note_event, 'opt_string_num', None)
+            if string_num is not None:
+                token_text = f"{m.group('note')}\\{string_num}{tie}"
+            note_idx += 1
+
+        skip_tie_continuation = bool(tie)
+        result.append(token_text)
+
+    result.append(melody_body[pos:])
+    return ''.join(result)
+
+
 class SheetMusicTabExporter:
     def __init__(self, audio_tempo=120, paths=None):
         self.sec_per_beat = 60 / audio_tempo
@@ -64,11 +123,19 @@ class SheetMusicTabExporter:
             ly_code = ly_code.replace("\\new Voice {", "{")
             ly_code = re.sub(r'\\include "lilypond-book-preamble\.ly"', '', ly_code)
             ly_code = re.sub(r'\\score\s*\{', 'melody = {', ly_code, count=1)
+
+            brace_open, brace_close = lilypond_brace_search(ly_code, 'melody = {')
+            melody_body = ly_code[brace_open + 1:brace_close]
+            tab_body = insert_string_numbers(melody_body, notes)
+
+            tabmelody_block = "\ntabmelody = {" + tab_body + "}\n"
+            ly_code = ly_code[:brace_close + 1] + tabmelody_block + ly_code[brace_close + 1:]
+
             new_score_block = """
 \\score {
   <<
     \\new Staff { \\melody }
-    \\new TabStaff { \\new TabVoice { \\transpose c c, { \\melody } } }
+    \\new TabStaff { \\new TabVoice { \\transpose c c, { \\tabmelody } } }
   >>
   \\layout {
     indent = 0\\mm
