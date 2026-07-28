@@ -1,4 +1,4 @@
-from config import ProjectPaths
+from config_paths import ProjectPaths
 
 
 class DataToTxtConverter:
