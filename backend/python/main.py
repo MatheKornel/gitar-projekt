@@ -34,8 +34,10 @@ class GuitarProjectApp:
         self.config = ProjectConfig()
         self.algo = ""
         self.select = tk.IntVar(value=1)
+        self.is_note_rec_done = False
 
         self._build_ui()
+        self.refresh_ui()
 
     def _build_ui(self):
         open_button = ttk.Button(self.root, text="Fájl megnyitása", command=self.file_load)
@@ -46,6 +48,9 @@ class GuitarProjectApp:
 
         note_rec_button = ttk.Button(self.root, text="Hangfelismerés", command=self.show_note_rec)
         note_rec_button.place(x=255, y=0)
+
+        opt_button = ttk.Button(self.root, text="Ujjrend optimalizálás", command=self.finger_optimization)
+        opt_button.place(x=255, y=30)
 
         midi_export_button = ttk.Button(self.root, text="MIDI exportálása", command=self.save_midi)
         midi_export_button.place(x=350, y=0)
@@ -67,6 +72,23 @@ class GuitarProjectApp:
         r2.place(x=0, y=100)
         r3 = ttk.Radiobutton(self.root, text="Saját algoritmus", variable=self.select, value=3)
         r3.place(x=0, y=120)
+
+    def refresh_ui(self):
+        if self.current_audio:
+            loaded_file_text = f"Betöltött fájl: {os.path.basename(self.original_filepath)}"
+        else:
+            loaded_file_text = "Betöltött fájl: nincs"
+
+        loaded_file_label = ttk.Label(self.root, text=loaded_file_text)
+        loaded_file_label.place(x=0, y=160)
+
+        if self.is_note_rec_done:
+            is_note_rec_done_text = "Hangfelismerés: kész"
+        else:
+            is_note_rec_done_text = "Hangfelismerés: nincs"
+
+        is_note_rec_done_label = ttk.Label(self.root, text=is_note_rec_done_text)
+        is_note_rec_done_label.place(x=0, y=180)
 
     def file_load(self):
         if self.last_opened_dir:
@@ -97,6 +119,8 @@ class GuitarProjectApp:
 
             self.current_audio = Audio(original=original, filtered=filtered, fs=fs)
             self.current_notes = None
+            self.is_note_rec_done = False
+            self.refresh_ui()
 
     def show_spectrogram(self):
         if self.current_audio:
@@ -112,6 +136,30 @@ class GuitarProjectApp:
 
         notes = stft.note_rec(5, self.histogram)
 
+        test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
+        converter = DataToTxtConverter(notes, paths=self.paths)
+        converter.save_to_test_txt(output_txt_path=test_file_name)
+
+        bpm = self.histogram.get_bpm()
+        self.bpm_entry.delete(0, tk.END)
+        self.bpm_entry.insert(0, str(bpm))
+
+        print(f"BPM becslés: {bpm} BPM")
+        self.current_notes = notes
+        if notes:
+            print("Elemzés kész.")
+            self.is_note_rec_done = True
+            self.refresh_ui()
+        else:
+            print("Nincsenek felismert hangok.")
+            self.is_note_rec_done = False
+            self.refresh_ui()
+
+    def finger_optimization(self):
+        if not self.current_notes:
+            print("Nincsenek felismert hangok az optimalizáláshoz.")
+            return
+
         if self.select.get() == 1:
             self.algo = "viterbi"
         elif self.select.get() == 2:
@@ -119,7 +167,7 @@ class GuitarProjectApp:
         elif self.select.get() == 3:
             self.algo = "main"
 
-        converter = DataToTxtConverter(notes, paths=self.paths)
+        converter = DataToTxtConverter(self.current_notes, paths=self.paths)
         converter.save_note_to_txt(self.algo)
 
         cpp_exe = self.paths.cpp_executable(self.algo)
@@ -133,33 +181,19 @@ class GuitarProjectApp:
                 matches = re.findall(r'Hur:\s*([EADGBe])\s*Bund:\s*(\d+)', result.stdout)
                 string_map = {'e': 1, 'B': 2, 'G': 3, 'D': 4, 'A': 5, 'E': 6}
                 if matches:
-                    if len(matches) != len(notes):
-                        print(f"Figyelem: A C++ {len(matches)} sort adott vissza, de {len(notes)} hang van! A meglévők lesznek párosítva.")
+                    if len(matches) != len(self.current_notes):
+                        print(f"Figyelem: A C++ {len(matches)} sort adott vissza, de {len(self.current_notes)} hang van! A meglévők lesznek párosítva.")
                     for i, (hur_str, bund_str) in enumerate(matches):
-                        if i < len(notes):
+                        if i < len(self.current_notes):
                             s_val = string_map.get(hur_str)
                             if s_val is not None:
-                                notes[i].opt_string_num = s_val
-                                notes[i].opt_fret_num = int(bund_str)
+                                self.current_notes[i].opt_string_num = s_val
+                                self.current_notes[i].opt_fret_num = int(bund_str)
             if result.returncode != 0:
                 print("C++ hiba:")
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
-
-        test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
-        converter.save_to_test_txt(output_txt_path=test_file_name)
-
-        bpm = self.histogram.get_bpm()
-        self.bpm_entry.delete(0, tk.END)
-        self.bpm_entry.insert(0, str(bpm))
-
-        print(f"BPM becslés: {bpm} BPM")
-        self.current_notes = notes
-        if notes:
-            print("Elemzés kész.")
-        else:
-            print("Nincsenek felismert hangok.")
 
     def save_midi(self):
         if not self.current_notes:
