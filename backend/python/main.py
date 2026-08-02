@@ -72,6 +72,8 @@ class GuitarProjectApp:
         r2.place(x=0, y=100)
         r3 = ttk.Radiobutton(self.root, text="Saját algoritmus", variable=self.select, value=3)
         r3.place(x=0, y=120)
+        r4 = ttk.Radiobutton(self.root, text="Saját + Viterbi algoritmus", variable=self.select, value=4)
+        r4.place(x=0, y=140)
 
     def refresh_ui(self):
         if self.current_audio:
@@ -80,7 +82,7 @@ class GuitarProjectApp:
             loaded_file_text = "Betöltött fájl: nincs"
 
         loaded_file_label = ttk.Label(self.root, text=loaded_file_text)
-        loaded_file_label.place(x=0, y=160)
+        loaded_file_label.place(x=0, y=180)
 
         if self.is_note_rec_done:
             is_note_rec_done_text = "Hangfelismerés: kész"
@@ -88,7 +90,7 @@ class GuitarProjectApp:
             is_note_rec_done_text = "Hangfelismerés: nincs"
 
         is_note_rec_done_label = ttk.Label(self.root, text=is_note_rec_done_text)
-        is_note_rec_done_label.place(x=0, y=180)
+        is_note_rec_done_label.place(x=0, y=200)
 
     def file_load(self):
         if self.last_opened_dir:
@@ -166,6 +168,8 @@ class GuitarProjectApp:
             self.algo = "pso"
         elif self.select.get() == 3:
             self.algo = "main"
+        elif self.select.get() == 4:
+            self.algo = "main_plus_viterbi"
 
         converter = DataToTxtConverter(self.current_notes, paths=self.paths)
         converter.save_note_to_txt(self.algo)

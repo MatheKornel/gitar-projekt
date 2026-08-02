@@ -34,3 +34,16 @@ add_executable(ViterbiOpt
     viterbi_fingering_optimization/viterbi.cpp
     )
 target_link_libraries(ViterbiOpt PRIVATE CommonLib)
+
+add_executable(MainPlusViterbiOpt
+    main_plus_viterbi_fingering_optimization/main.cpp
+    main_plus_viterbi_fingering_optimization/note_position.cpp
+    main_plus_viterbi_fingering_optimization/optimization.cpp
+    )
+target_link_libraries(MainPlusViterbiOpt PRIVATE CommonLib)
+set_target_properties(MainPlusViterbiOpt PROPERTIES 
+    OUTPUT_NAME "main"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/main_plus_viterbi_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/main_plus_viterbi_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/main_plus_viterbi_fingering_optimization"
+)
