@@ -4,31 +4,17 @@
 #include "particle.h"
 #include "pso.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    /*
-    // Gitár nyak generálás és abban keresés tesztelése
-    auto positon = FretBoard::GetPositions(60);
-    for (const auto &pos : positon)
+    if (argc < 2)
     {
-        std::cout << "Hur: " << pos.GetStringIdx() << "\tBund: " << pos.GetFretIdx() << std::endl;
+        std::cerr << "Hiba: Nem adtad meg a bemeneti fajl nevet paramaterkent!" << std::endl;
+        return 1;
     }
-    */
 
-    // Fájl betöltés tesztelése
+    std::string filePath = argv[1];
+
     const auto input = InputNotes::LoadNotes("notes.txt");
-    /*
-    for (const auto &note : input)
-    {
-        std::cout << note.GetNoteName() << "\t" << note.GetMidiNote() << "\t" << note.GetOnset() << "\t" << note.GetDuration() << std::endl;
-    }
-    */
-    /*
-    // Particle osztály tesztelése
-    Particle p = Particle(input.size());
-    p.Initialize(input);
-    ;
-    */
 
     PSO pso(std::move(input), input.size(), 50, 10000, 0.0001);
     const auto result = pso.PsoAlgo(5000, 100);

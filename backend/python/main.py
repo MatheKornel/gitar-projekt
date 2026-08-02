@@ -173,7 +173,8 @@ class GuitarProjectApp:
         cpp_exe = self.paths.cpp_executable(self.algo)
         if cpp_exe.exists():
             print("Ujjrend optimalizálás indítása...")
-            result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+            txt_path = os.path.join(str(cpp_exe.parent), "notes.txt")
+            result = subprocess.run([str(cpp_exe), txt_path], cwd=str(cpp_exe.parent), capture_output=True, text=True)
             print("C++ kimenet:")
             print(result.stdout)
 

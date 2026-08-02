@@ -4,15 +4,17 @@
 #include "input_notes.h"
 #include "viterbi.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    const auto input = InputNotes::LoadNotes("notes.txt");
-    /*
-    for (const auto &note : input)
+    if (argc < 2)
     {
-        std::cout << note.GetNoteName() << "\t" << note.GetMidiNote() << std::endl;
+        std::cerr << "Hiba: Nem adtad meg a bemeneti fajl nevet paramaterkent!" << std::endl;
+        return 1;
     }
-    */
+
+    std::string filePath = argv[1];
+
+    const auto input = InputNotes::LoadNotes(filePath);
 
     const auto result = Viterbi(input).Optimization();
     for (size_t i = 0; i < result.size(); i++)
