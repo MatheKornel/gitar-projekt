@@ -3,7 +3,7 @@
 
 NotePosition::NotePosition(const int newStringIdx, const int newFretIdx) : stringIdx(newStringIdx), fretIdx(newFretIdx) {}
 
-double NotePosition::Distance(const NotePosition &otherPos)
+double NotePosition::Distance(const NotePosition &otherPos) const
 {
     const bool isOpenString = (this->fretIdx == 0 || otherPos.fretIdx == 0);
     const int stringDiff = abs(this->stringIdx - otherPos.stringIdx);
