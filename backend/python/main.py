@@ -75,6 +75,13 @@ class GuitarProjectApp:
         r4 = ttk.Radiobutton(self.root, text="Saját + Viterbi algoritmus", variable=self.select, value=4)
         r4.place(x=0, y=140)
 
+        tuning_label = ttk.Label(self.root, text="Hangolás:")
+        tuning_label.place(x=100, y=30)
+        tunings = ["E", "D# / Eb", "D", "C# / Db", "C", "B", "A# / Bb", "A", "G# / Ab", "G", "F# / Gb", "F"]
+        tunings_combobox = ttk.Combobox(self.root, values=tunings, state="readonly", width=7)
+        tunings_combobox.current(0)
+        tunings_combobox.place(x=160, y=30)
+
     def refresh_ui(self):
         if self.current_audio:
             loaded_file_text = f"Betöltött fájl: {os.path.basename(self.original_filepath)}"
