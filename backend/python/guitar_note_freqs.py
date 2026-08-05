@@ -11,28 +11,17 @@ class GuitarNoteFreqs:
                     880.00, 932.33, 987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51], maxlen=49)
 
         def select_tuning(self, tuning):
-            match tuning:
-                case "E":
-                    return self.guitar_notes
-                case "D# / Eb":
-                    return self.guitar_notes.appendleft(77.78)
-                case "D":
-                    return self.guitar_notes.appendleft(73.42)
-                case "C# / Db":
-                    return self.guitar_notes.appendleft(69.30)
-                case "C":
-                    return self.guitar_notes.appendleft(65.41)
-                case "B":
-                    return self.guitar_notes.appendleft(61.74)
-                case "A# / Bb":
-                    return self.guitar_notes.appendleft(58.27)
-                case "A":
-                    return self.guitar_notes.appendleft(55.00)
-                case "G# / Ab":
-                    return self.guitar_notes.appendleft(51.91)
-                case "G":
-                    return self.guitar_notes.appendleft(49.00)
-                case "F# / Gb":
-                    return self.guitar_notes.appendleft(46.25)
-                case "F":
-                    return self.guitar_notes.appendleft(43.65)
+            lower_notes = [77.78, 73.42, 69.30, 65.41, 61.74, 58.27, 55.00, 51.91, 49.00, 46.25, 43.65]
+
+            offsets = {
+            "E": 0, "D# / Eb": 1, "D": 2, "C# / Db": 3,
+            "C": 4, "B": 5, "A# / Bb": 6, "A": 7,
+            "G# / Ab": 8, "G": 9, "F# / Gb": 10, "F": 11
+            }
+
+            steps = offsets.get(tuning, 0)
+            d = deque(self.guitar_notes, maxlen=49)
+            if steps > 0:
+                d.extendleft(lower_notes[:steps])
+
+            return d
