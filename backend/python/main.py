@@ -99,8 +99,6 @@ class GuitarProjectApp:
         is_note_rec_done_label = ttk.Label(self.root, text=is_note_rec_done_text)
         is_note_rec_done_label.place(x=0, y=200)
 
-        self.tunings_combobox.current(0) # alapértelmezett hangolás: E
-
     def file_load(self):
         if self.last_opened_dir:
             start_dir = self.last_opened_dir
@@ -132,6 +130,7 @@ class GuitarProjectApp:
             self.current_notes = None
             self.is_note_rec_done = False
             self.refresh_ui()
+            self.tunings_combobox.current(0) # alapértelmezett hangolás: E
 
     def show_spectrogram(self):
         if self.current_audio:

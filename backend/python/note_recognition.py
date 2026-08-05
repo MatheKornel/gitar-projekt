@@ -82,6 +82,7 @@ class ShortTimeFT:
         # gitár hangok frekvenciái
         guitar_note_freqs = GuitarNoteFreqs()
         guitar_notes = guitar_note_freqs.select_tuning(tuning)
+        #print(f"Gitár hangok ({len(guitar_notes)} db): {[round(f, 2) for f in guitar_notes]}")
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)
