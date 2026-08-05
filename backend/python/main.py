@@ -78,9 +78,9 @@ class GuitarProjectApp:
         tuning_label = ttk.Label(self.root, text="Hangolás:")
         tuning_label.place(x=100, y=30)
         tunings = ["E", "D# / Eb", "D", "C# / Db", "C", "B", "A# / Bb", "A", "G# / Ab", "G", "F# / Gb", "F"]
-        tunings_combobox = ttk.Combobox(self.root, values=tunings, state="readonly", width=7)
-        tunings_combobox.current(0)
-        tunings_combobox.place(x=160, y=30)
+        self.tunings_combobox = ttk.Combobox(self.root, values=tunings, state="readonly", width=7)
+        self.tunings_combobox.current(0)
+        self.tunings_combobox.place(x=160, y=30)
 
     def refresh_ui(self):
         if self.current_audio:
@@ -98,6 +98,8 @@ class GuitarProjectApp:
 
         is_note_rec_done_label = ttk.Label(self.root, text=is_note_rec_done_text)
         is_note_rec_done_label.place(x=0, y=200)
+
+        self.tunings_combobox.current(0) # alapértelmezett hangolás: E
 
     def file_load(self):
         if self.last_opened_dir:
