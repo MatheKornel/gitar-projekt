@@ -145,7 +145,7 @@ class GuitarProjectApp:
         stft = ShortTimeFT(self.current_audio.filtered)
         print("Elemzés folyamatban...")
 
-        notes = stft.note_rec(5, self.histogram)
+        notes = stft.note_rec(5, self.histogram, self.tunings_combobox.get())
 
         test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
         converter = DataToTxtConverter(notes, paths=self.paths)

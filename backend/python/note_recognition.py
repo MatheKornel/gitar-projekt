@@ -40,7 +40,7 @@ class ShortTimeFT:
         for f0_candidate in guitar_notes:
             
             # a túl mélyeket és túl magasakat kihagyom
-            if f0_candidate < 75:
+            if f0_candidate < guitar_notes[0] - 7:
                 continue
 
             salience = 0.0
