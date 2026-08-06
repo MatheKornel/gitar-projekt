@@ -6,8 +6,6 @@ from dataclasses import dataclass
 @dataclass
 class ProjectConfig:
     sample_rate: int = 44100
-    filter_lowcut: int = 70
-    filter_highcut: int = 2800
     stft_nfft: int = 4096
     stft_hop_length: int = 512
     gate_min_gap: float = 0.05

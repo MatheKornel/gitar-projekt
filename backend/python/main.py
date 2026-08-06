@@ -17,6 +17,7 @@ from note_recognition import ShortTimeFT
 from onset_histogram import OnsetHistogram
 from sheet_music_tab_exporter import SheetMusicTabExporter
 from spectrograms import Spectrogram
+from guitar_note_freqs import GuitarNoteFreqs
 
 
 class GuitarProjectApp:
@@ -25,6 +26,8 @@ class GuitarProjectApp:
         self.root.geometry("700x300")
         self.root.title("Gitár projekt")
 
+        self.original_audio = None
+        self.fs = None
         self.current_audio = None
         self.current_notes = None
         self.original_filepath = ""
@@ -83,7 +86,7 @@ class GuitarProjectApp:
         self.tunings_combobox.place(x=160, y=30)
 
     def refresh_ui(self):
-        if self.current_audio:
+        if self.original_audio is not None:
             loaded_file_text = f"Betöltött fájl: {os.path.basename(self.original_filepath)}"
         else:
             loaded_file_text = "Betöltött fájl: nincs"
@@ -121,25 +124,30 @@ class GuitarProjectApp:
             print(f"Mintavételi frekvencia: {fs} Hz")
 
             original = original.mean(axis=1) if len(original.shape) > 1 else original
+            self.fs = fs
 
-            bpf = BandpassFilter(original)
-            filtered = bpf.bandpass_filter(original, fs, lowcut=self.config.filter_lowcut, highcut=self.config.filter_highcut)
-            print("Szűrés elvégezve.")
-
-            self.current_audio = Audio(original=original, filtered=filtered, fs=fs)
+            self.original_audio = original
             self.current_notes = None
             self.is_note_rec_done = False
             self.refresh_ui()
             self.tunings_combobox.current(0) # alapértelmezett hangolás: E
 
     def show_spectrogram(self):
-        if self.current_audio:
+        if self.current_audio is not None:
             spec = Spectrogram(self.current_audio.original, self.current_audio.filtered, self.current_audio.fs)
             spec.spectrograms()
 
     def show_note_rec(self):
-        if not self.current_audio:
+        if self.original_audio is None:
             return
+
+        bpf = BandpassFilter(self.original_audio)
+        bpf_lowcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[0] * 0.85
+        bpf_highcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[-1] * 2.12
+        filtered = bpf.bandpass_filter(self.original_audio, self.fs, lowcut=bpf_lowcut, highcut=bpf_highcut)
+        print("Szűrés elvégezve.")
+        
+        self.current_audio = Audio(original=self.original_audio, filtered=filtered, fs=self.fs)
 
         stft = ShortTimeFT(self.current_audio.filtered)
         print("Elemzés folyamatban...")
