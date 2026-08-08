@@ -1,6 +1,12 @@
 from collections import deque
 
 class GuitarNoteFreqs:
+    TUNING_STEPS = {
+                    "E": 0, "D# / Eb": 1, "D": 2, "C# / Db": 3,
+                    "C": 4, "B": 5, "A# / Bb": 6, "A": 7,
+                    "G# / Ab": 8, "G": 9, "F# / Gb": 10, "F": 11
+                    }
+    
     def __init__(self):
         self.guitar_notes = deque([
                     82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 123.47, 130.81,
@@ -12,14 +18,8 @@ class GuitarNoteFreqs:
 
     def select_tuning(self, tuning):
                 lower_notes = [77.78, 73.42, 69.30, 65.41, 61.74, 58.27, 55.00, 51.91, 49.00, 46.25, 43.65]
-    
-                offsets = {
-                "E": 0, "D# / Eb": 1, "D": 2, "C# / Db": 3,
-                "C": 4, "B": 5, "A# / Bb": 6, "A": 7,
-                "G# / Ab": 8, "G": 9, "F# / Gb": 10, "F": 11
-                }
-    
-                steps = offsets.get(tuning, 0)
+
+                steps = self.TUNING_STEPS.get(tuning, 0)
                 d = deque(self.guitar_notes, maxlen=49)
                 if steps > 0:
                     d.extendleft(lower_notes[:steps])

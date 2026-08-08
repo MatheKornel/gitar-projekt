@@ -243,7 +243,7 @@ class GuitarProjectApp:
         file_name = os.path.splitext(base_name)[0]
 
         exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()), paths=self.paths, config=self.config)
-        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name)
+        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name, tuning=self.tunings_combobox.get())
 
         if pdf_path:
             print(f"PDF generálva: {pdf_path}")

@@ -4,18 +4,45 @@ import subprocess
 
 from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
 
+from guitar_note_freqs import GuitarNoteFreqs
 from config_parameters import ProjectConfig
 from config_paths import ProjectPaths
 from quantizing import Quantizing
 
 
-NOTES_RE = re.compile(
+_NOTES_RE = re.compile(
     r"(?P<rest>\br\s+\d+\.*\b)" # szünetek felismerése
     r"|(?P<note>\b[a-g](?:is|es)*[',]*\s+\d+\.*)(?P<tie>~?)" # hangok és kötések felismerése
 )
 
+_STANDARD_TUNING_MIDI = [40, 45, 50, 55, 59, 64]
+
+_PITCH_CLASS_NAMES = ['c', 'cis', 'd', 'dis', 'e', 'f', 'fis', 'g', 'gis', 'a', 'ais', 'b']
+
+# a MIDI számot átalakítja Lilypond hangnév formátumra (pl. 64 -> e')
+def _lily_pitch_name(midi):
+    pitch_class = midi % 12
+    name = _PITCH_CLASS_NAMES[pitch_class]
+    octave = midi // 12 - 1
+    marks = octave - 3
+    if marks > 0:
+        name += "'" * marks
+    elif marks < 0:
+        name += "," * (-marks)
+    return name
+
+# a gitár hangolásához szükséges MIDI számokat adja vissza a hangolás címkéjéből
+def _tuning_midi_from_label(tuning_label):
+    steps = GuitarNoteFreqs.TUNING_STEPS.get(tuning_label, 0)
+    return [midi - steps for midi in _STANDARD_TUNING_MIDI]
+
+# custom-tuning = \stringTuning <e' a' d'' g'' b'' e''>  --> lilypond kód generálása a gitár hangolásához
+def _build_string_tuning_ly(tuning_midi):
+    pitch_names = [_lily_pitch_name(midi) for midi in tuning_midi]
+    return "custom-tuning = \\stringTuning <" + " ".join(pitch_names) + ">\n"
+
 # megkeresi a "melody = {" első és utolsó zárójelét, és visszaadja a kezdő és záró indexet --> itt kell módosítani, hogy a megfelelő helyre szúrjuk be a tab számokat
-def lilypond_brace_search(text, start_marker):
+def _lilypond_brace_search(text, start_marker):
     start = text.index(start_marker)
     brace_open = text.index('{', start)
     depth = 0
@@ -31,13 +58,13 @@ def lilypond_brace_search(text, start_marker):
     raise ValueError(f"Nem található lezáró '}}' a(z) '{start_marker}' blokkhoz.")
 
 # a kivágott részben a hangokhoz hozzáadja a tab számokat, ha vannak
-def insert_string_numbers(melody_body, notes):
+def _insert_string_numbers(melody_body, notes):
     result = []
     pos = 0
     note_idx = 0
     skip_tie_continuation = False
 
-    for m in NOTES_RE.finditer(melody_body):
+    for m in _NOTES_RE.finditer(melody_body):
         result.append(melody_body[pos:m.start()])
         pos = m.end()
 
@@ -82,7 +109,8 @@ class SheetMusicTabExporter:
         else:
             print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
 
-    def create_score(self, notes, file_basename="output"):
+    def create_score(self, notes, file_basename="output", tuning="E"):
+        tuning_midi = _tuning_midi_from_label(tuning)
         part = stream.Stream()
         part.insert(0, instrument.Guitar())
 
@@ -119,24 +147,33 @@ class SheetMusicTabExporter:
             with open(ly_path_full, 'r', encoding='utf-8') as f:
                 ly_code = f.read()
 
-            ly_code = re.sub(r'\\header\s*\{', f'\\\\header {{\n  title = "{file_basename}"', ly_code, count=1)
+            ly_code = re.sub(
+                r'\\header\s*\{',
+                f'\\\\header {{\n  title = "{file_basename}"\n  subtitle = "Hangolás: {tuning}"',
+                ly_code, count=1
+            )
             ly_code = re.sub(r'\\clef\s+"?[a-zA-Z0-9_]+"?', '', ly_code)
             ly_code = ly_code.replace("\\new Voice {", "{")
             ly_code = re.sub(r'\\include "lilypond-book-preamble\.ly"', '', ly_code)
             ly_code = re.sub(r'\\score\s*\{', 'melody = {', ly_code, count=1)
 
-            brace_open, brace_close = lilypond_brace_search(ly_code, 'melody = {')
+            brace_open, brace_close = _lilypond_brace_search(ly_code, 'melody = {')
             melody_body = ly_code[brace_open + 1:brace_close]
-            tab_body = insert_string_numbers(melody_body, notes)
+            tab_body = _insert_string_numbers(melody_body, notes)
 
             tabmelody_block = "\ntabmelody = {" + tab_body + "}\n"
             ly_code = ly_code[:brace_close + 1] + tabmelody_block + ly_code[brace_close + 1:]
+
+            tuning_ly = _build_string_tuning_ly(tuning_midi)
+            ly_code = tuning_ly + "\n" + ly_code
 
             new_score_block = """
 \\score {
   <<
     \\new Staff { \\melody }
-    \\new TabStaff { \\new TabVoice { \\transpose c c, { \\tabmelody } } }
+    \\new TabStaff \\with { stringTunings = #custom-tuning } {
+      \\new TabVoice { \\transpose c c, { \\tabmelody } }
+    }
   >>
   \\layout {
     indent = 0\\mm
