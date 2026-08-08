@@ -12,6 +12,7 @@ public:
     double GetDuration() const;
     std::string GetNoteName() const;
     static const std::vector<InputNotes> LoadNotes(const std::string &filename);
+    static std::vector<int> LoadTuning(const std::string &filename);
 
 private:
     int midiNote;

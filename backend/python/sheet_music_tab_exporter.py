@@ -15,8 +15,6 @@ _NOTES_RE = re.compile(
     r"|(?P<note>\b[a-g](?:is|es)*[',]*\s+\d+\.*)(?P<tie>~?)" # hangok és kötések felismerése
 )
 
-_STANDARD_TUNING_MIDI = [40, 45, 50, 55, 59, 64]
-
 _PITCH_CLASS_NAMES = ['c', 'cis', 'd', 'dis', 'e', 'f', 'fis', 'g', 'gis', 'a', 'ais', 'b']
 
 # a MIDI számot átalakítja Lilypond hangnév formátumra (pl. 64 -> e')
@@ -33,8 +31,7 @@ def _lily_pitch_name(midi):
 
 # a gitár hangolásához szükséges MIDI számokat adja vissza a hangolás címkéjéből
 def _tuning_midi_from_label(tuning_label):
-    steps = GuitarNoteFreqs.TUNING_STEPS.get(tuning_label, 0)
-    return [midi - steps for midi in _STANDARD_TUNING_MIDI]
+    return GuitarNoteFreqs.open_string_midis(tuning_label)
 
 # custom-tuning = \stringTuning <e' a' d'' g'' b'' e''>  --> lilypond kód generálása a gitár hangolásához
 def _build_string_tuning_ly(tuning_midi):

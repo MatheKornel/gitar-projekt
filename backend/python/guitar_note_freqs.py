@@ -6,6 +6,13 @@ class GuitarNoteFreqs:
                     "C": 4, "B": 5, "A# / Bb": 6, "A": 7,
                     "G# / Ab": 8, "G": 9, "F# / Gb": 10, "F": 11
                     }
+
+    STANDARD_TUNING_MIDI = [40, 45, 50, 55, 59, 64]
+
+    @classmethod
+    def open_string_midis(cls, tuning):
+        steps = cls.TUNING_STEPS.get(tuning, 0)
+        return [midi - steps for midi in cls.STANDARD_TUNING_MIDI]
     
     def __init__(self):
         self.guitar_notes = deque([

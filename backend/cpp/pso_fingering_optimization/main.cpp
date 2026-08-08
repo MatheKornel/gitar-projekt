@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     const auto input = InputNotes::LoadNotes("notes.txt");
 
     PSO pso(std::move(input), input.size(), 50, 10000, 0.0001);
+    FretBoard::SetTuning(InputNotes::LoadTuning(filePath));
     const auto result = pso.PsoAlgo(5000, 100);
     std::cout << "Fitnesz: " << pso.g_opt_fitness << std::endl;
     std::cout << "Optimalis lefogasok:" << std::endl;

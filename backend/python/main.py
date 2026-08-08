@@ -188,7 +188,8 @@ class GuitarProjectApp:
             self.algo = "main_plus_viterbi"
 
         converter = DataToTxtConverter(self.current_notes, paths=self.paths)
-        converter.save_note_to_txt(self.algo)
+        open_strings = GuitarNoteFreqs.open_string_midis(self.tunings_combobox.get())
+        converter.save_note_to_txt(self.algo, open_strings)
 
         cpp_exe = self.paths.cpp_executable(self.algo)
         if cpp_exe.exists():
@@ -212,6 +213,9 @@ class GuitarProjectApp:
                                 self.current_notes[i].opt_fret_num = int(bund_str)
             if result.returncode != 0:
                 print("C++ hiba:")
+                print(result.stderr)
+            elif result.stderr:
+                print("C++ figyelmeztetés:")
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
