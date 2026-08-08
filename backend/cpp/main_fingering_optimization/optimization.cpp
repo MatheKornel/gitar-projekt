@@ -82,7 +82,7 @@ std::vector<NotePosition> Optimization::RunOptimization()
 
         if (firstNotePositions.empty())
         {
-            std::cerr << "Nem található lefogás a " << window[0].GetMidiNote() << " hanghoz!" << std::endl;
+            std::cerr << "Nem talalhato lefogas a " << window[0].GetMidiNote() << " hanghoz!" << std::endl;
             finalPositions.push_back(NotePosition(0, 0));
             continue;
         }
@@ -139,6 +139,12 @@ std::vector<NotePosition> Optimization::RunOptimization()
         if (!bestWindowPath.empty())
         {
             finalPositions.push_back(bestWindowPath[0]);
+        }
+        else
+        {
+            std::cerr << "Nem talalhato ervenyes utvonal a(z) " << i
+                      << ". hangtol (MIDI " << notes[i].GetMidiNote()
+                      << ") kezdodo ablakhoz - kimaradt az eredmenybol!" << std::endl;
         }
     }
 

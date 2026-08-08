@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 
     const auto input = InputNotes::LoadNotes(filePath);
 
+    FretBoard::SetTuning(InputNotes::LoadTuning(filePath));
     const auto result = Optimization(input).RunOptimization();
     for (size_t i = 0; i < result.size(); i++)
     {

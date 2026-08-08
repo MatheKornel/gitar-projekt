@@ -19,6 +19,12 @@ add_executable(MainOpt
     main_fingering_optimization/optimization.cpp
     )
 target_link_libraries(MainOpt PRIVATE CommonLib)
+set_target_properties(MainOpt PROPERTIES
+    OUTPUT_NAME "main"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/main_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/main_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/main_fingering_optimization"
+)
 
 add_executable(PsoOpt
     pso_fingering_optimization/main.cpp
@@ -27,6 +33,12 @@ add_executable(PsoOpt
     pso_fingering_optimization/pso.cpp
     )
 target_link_libraries(PsoOpt PRIVATE CommonLib)
+set_target_properties(PsoOpt PROPERTIES
+    OUTPUT_NAME "main"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/pso_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/pso_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/pso_fingering_optimization"
+)
 
 add_executable(ViterbiOpt
     viterbi_fingering_optimization/main.cpp
@@ -34,6 +46,12 @@ add_executable(ViterbiOpt
     viterbi_fingering_optimization/viterbi.cpp
     )
 target_link_libraries(ViterbiOpt PRIVATE CommonLib)
+set_target_properties(ViterbiOpt PROPERTIES
+    OUTPUT_NAME "main"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/viterbi_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/viterbi_fingering_optimization"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/viterbi_fingering_optimization"
+)
 
 add_executable(MainPlusViterbiOpt
     main_plus_viterbi_fingering_optimization/main.cpp

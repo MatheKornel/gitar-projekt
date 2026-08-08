@@ -1,10 +1,21 @@
 #include "fretboard.h"
 #include <iostream>
 
+std::vector<int> FretBoard::openStrings = {40, 45, 50, 55, 59, 64};
+
+void FretBoard::SetTuning(const std::vector<int> &newOpenStrings)
+{
+    if (newOpenStrings.size() != 6)
+    {
+        std::cerr << "Ervenytelen hangolas (6 hurnak kell lennie), a jelenlegi hangolas marad ervenyben." << std::endl;
+        return;
+    }
+    openStrings = newOpenStrings;
+}
+
 std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
 {
     std::vector<std::vector<NotePosition>> fretboard(89);
-    const int openStrings[] = {40, 45, 50, 55, 59, 64};
     const int numStrings = 6;
     const int maxFret = 24;
 
@@ -25,7 +36,7 @@ std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
 const std::vector<NotePosition> FretBoard::GetPositions(const int midiNote)
 {
     static const std::vector<std::vector<NotePosition>> fretboard = GenerateFretBoard();
-    if (midiNote < 40 || midiNote >= fretboard.size())
+    if (midiNote < 0 || midiNote >= fretboard.size())
     {
         const std::vector<NotePosition> empty;
         std::cerr << "Nincs ilyen MIDI hang: " << midiNote << std::endl;

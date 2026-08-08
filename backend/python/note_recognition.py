@@ -4,6 +4,7 @@ import os
 
 from onset_detect import OnsetDetect
 from note_event import NoteEvent
+from guitar_note_freqs import GuitarNoteFreqs
 
 class ShortTimeFT:
     def __init__(self, filtered):
@@ -39,7 +40,7 @@ class ShortTimeFT:
         for f0_candidate in guitar_notes:
             
             # a túl mélyeket és túl magasakat kihagyom
-            if f0_candidate < 75:
+            if f0_candidate < guitar_notes[0] - 7:
                 continue
 
             salience = 0.0
@@ -73,19 +74,15 @@ class ShortTimeFT:
         return best_candidate
     
 
-    def note_rec(self, max_harmonics, histogram):
+    def note_rec(self, max_harmonics, histogram, tuning="E"):
         nfft = 4096
         fs = 44100
         hop_length = 512
 
         # gitár hangok frekvenciái
-        guitar_notes = [
-            82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 123.47, 130.81,
-            138.59, 146.83, 155.56, 164.81, 174.61, 185.00, 196.00, 207.65,
-            220.00, 233.08, 246.94, 261.63, 277.18, 293.66, 311.13, 329.63,
-            349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88, 523.25,
-            554.37, 587.33, 622.25, 659.25, 698.46, 739.99, 783.99, 830.61,
-            880.00, 932.33, 987.77, 1046.50, 1108.73, 1174.66, 1244.51, 1318.51]
+        guitar_note_freqs = GuitarNoteFreqs()
+        guitar_notes = guitar_note_freqs.select_tuning(tuning)
+        #print(f"Gitár hangok ({len(guitar_notes)} db): {[round(f, 2) for f in guitar_notes]}")
         
         # ONSET DETEKTÁLÁS
         onset = OnsetDetect(self.filtered, fs=self.fs)

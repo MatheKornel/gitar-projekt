@@ -6,12 +6,13 @@ class DataToTxtConverter:
         self.notes = notes
         self.paths = paths or ProjectPaths()
 
-    def save_note_to_txt(self, algo, file_name="notes.txt"):
+    def save_note_to_txt(self, algo, open_strings, file_name="notes.txt"):
         notes = self.notes
         output_path = self.paths.cpp_project_dir(algo) / file_name
         output_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with output_path.open("w", encoding="utf-8") as f:
+                f.write(" ".join(str(m) for m in open_strings) + "\n")
                 f.write(f"{len(notes)}\n")
                 for note in notes:
                     note_name = note.note_name.replace("♯", "#")

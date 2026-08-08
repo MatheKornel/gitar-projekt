@@ -17,6 +17,7 @@ from note_recognition import ShortTimeFT
 from onset_histogram import OnsetHistogram
 from sheet_music_tab_exporter import SheetMusicTabExporter
 from spectrograms import Spectrogram
+from guitar_note_freqs import GuitarNoteFreqs
 
 
 class GuitarProjectApp:
@@ -25,6 +26,8 @@ class GuitarProjectApp:
         self.root.geometry("700x300")
         self.root.title("Gitár projekt")
 
+        self.original_audio = None
+        self.fs = None
         self.current_audio = None
         self.current_notes = None
         self.original_filepath = ""
@@ -75,8 +78,15 @@ class GuitarProjectApp:
         r4 = ttk.Radiobutton(self.root, text="Saját + Viterbi algoritmus", variable=self.select, value=4)
         r4.place(x=0, y=140)
 
+        tuning_label = ttk.Label(self.root, text="Hangolás:")
+        tuning_label.place(x=100, y=30)
+        tunings = ["E", "D# / Eb", "D", "C# / Db", "C", "B", "A# / Bb", "A", "G# / Ab", "G", "F# / Gb", "F"]
+        self.tunings_combobox = ttk.Combobox(self.root, values=tunings, state="readonly", width=7)
+        self.tunings_combobox.current(0)
+        self.tunings_combobox.place(x=160, y=30)
+
     def refresh_ui(self):
-        if self.current_audio:
+        if self.original_audio is not None:
             loaded_file_text = f"Betöltött fájl: {os.path.basename(self.original_filepath)}"
         else:
             loaded_file_text = "Betöltött fájl: nincs"
@@ -114,29 +124,35 @@ class GuitarProjectApp:
             print(f"Mintavételi frekvencia: {fs} Hz")
 
             original = original.mean(axis=1) if len(original.shape) > 1 else original
+            self.fs = fs
 
-            bpf = BandpassFilter(original)
-            filtered = bpf.bandpass_filter(original, fs, lowcut=self.config.filter_lowcut, highcut=self.config.filter_highcut)
-            print("Szűrés elvégezve.")
-
-            self.current_audio = Audio(original=original, filtered=filtered, fs=fs)
+            self.original_audio = original
             self.current_notes = None
             self.is_note_rec_done = False
             self.refresh_ui()
+            self.tunings_combobox.current(0) # alapértelmezett hangolás: E
 
     def show_spectrogram(self):
-        if self.current_audio:
+        if self.current_audio is not None:
             spec = Spectrogram(self.current_audio.original, self.current_audio.filtered, self.current_audio.fs)
             spec.spectrograms()
 
     def show_note_rec(self):
-        if not self.current_audio:
+        if self.original_audio is None:
             return
+
+        bpf = BandpassFilter(self.original_audio)
+        bpf_lowcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[0] * 0.85
+        bpf_highcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[-1] * 2.12
+        filtered = bpf.bandpass_filter(self.original_audio, self.fs, lowcut=bpf_lowcut, highcut=bpf_highcut)
+        print("Szűrés elvégezve.")
+        
+        self.current_audio = Audio(original=self.original_audio, filtered=filtered, fs=self.fs)
 
         stft = ShortTimeFT(self.current_audio.filtered)
         print("Elemzés folyamatban...")
 
-        notes = stft.note_rec(5, self.histogram)
+        notes = stft.note_rec(5, self.histogram, self.tunings_combobox.get())
 
         test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
         converter = DataToTxtConverter(notes, paths=self.paths)
@@ -172,7 +188,8 @@ class GuitarProjectApp:
             self.algo = "main_plus_viterbi"
 
         converter = DataToTxtConverter(self.current_notes, paths=self.paths)
-        converter.save_note_to_txt(self.algo)
+        open_strings = GuitarNoteFreqs.open_string_midis(self.tunings_combobox.get())
+        converter.save_note_to_txt(self.algo, open_strings)
 
         cpp_exe = self.paths.cpp_executable(self.algo)
         if cpp_exe.exists():
@@ -196,6 +213,9 @@ class GuitarProjectApp:
                                 self.current_notes[i].opt_fret_num = int(bund_str)
             if result.returncode != 0:
                 print("C++ hiba:")
+                print(result.stderr)
+            elif result.stderr:
+                print("C++ figyelmeztetés:")
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
@@ -227,7 +247,7 @@ class GuitarProjectApp:
         file_name = os.path.splitext(base_name)[0]
 
         exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()), paths=self.paths, config=self.config)
-        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name)
+        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name, tuning=self.tunings_combobox.get())
 
         if pdf_path:
             print(f"PDF generálva: {pdf_path}")

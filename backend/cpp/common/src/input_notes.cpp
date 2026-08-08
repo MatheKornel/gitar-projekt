@@ -22,6 +22,12 @@ const std::vector<InputNotes> InputNotes::LoadNotes(const std::string &filename)
         return notes;
     }
 
+    int tuningSkip;
+    for (int i = 0; i < 6; i++)
+    {
+        inputFile >> tuningSkip;
+    }
+
     int numNotes;
     inputFile >> numNotes;
     notes.reserve(numNotes);
@@ -35,4 +41,25 @@ const std::vector<InputNotes> InputNotes::LoadNotes(const std::string &filename)
     }
     std::cout << "Sikeres fajlbetoltes!" << std::endl;
     return notes;
+}
+
+std::vector<int> InputNotes::LoadTuning(const std::string &filename)
+{
+    std::vector<int> tuning(6);
+    std::ifstream inputFile(filename);
+    if (!inputFile.is_open())
+    {
+        std::cerr << "Fajl betoltese sikertelen (hangolas beolvasasa)!" << std::endl;
+        return {};
+    }
+
+    for (int i = 0; i < 6; i++)
+    {
+        if (!(inputFile >> tuning[i]))
+        {
+            std::cerr << "Nem talalhato ervenyes hangolas a fajl elejen!" << std::endl;
+            return {};
+        }
+    }
+    return tuning;
 }
