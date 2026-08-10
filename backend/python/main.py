@@ -77,16 +77,20 @@ def show_note_rec():
 
         notes = stft.note_rec(5, histogram)
 
+        '''
         if select.get() == 1:
             algo = "viterbi"
         elif select.get() == 2:
             algo = "pso"
         elif select.get() == 3:
             algo = "main"
+        '''
 
         converter = DataToTxtConverter(notes)
+        '''
         converter.save_note_to_txt(algo) # ideiglenes fájlba mentés a C++ programnak
 
+        
         # C++ ujjrend optimalizálás (ideiglenesen tesztelés miatt itt)
         cpp_exe = f"D:\\Sulis dolgok\\gitar_projekt\\backend\\cpp\\{algo}_fingering_optimization\\main.exe"
         if os.path.exists(cpp_exe):
@@ -103,16 +107,20 @@ def show_note_rec():
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
+        '''
 
         test_file_name = os.path.splitext(os.path.basename(original_filepath))[0] + "_test.txt"
         converter.save_to_test_txt(output_txt_path=test_file_name) # teszt fájlba mentés Excel-nek
 
+        '''
         bpm = histogram.get_bpm() # BPM becslése
 
         bpm_entry.delete(0, tk.END)
         bpm_entry.insert(0, str(bpm))
 
         print(f"BPM becslés: {bpm} BPM")
+        '''
+
         current_notes = notes
         if notes:
             print("Elemzés kész.")
@@ -130,7 +138,7 @@ def save_midi():
         print("Nincs eredeti fájlnév a mentéshez.")
         return
     
-    exporter = MidiExporter(tempo=int(bpm_entry.get()))
+    exporter = MidiExporter()
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0] + ".mid"
     output_midi_path = os.path.join("MIDI_files", file_name)
@@ -151,7 +159,7 @@ def generate_sheet_music():
     base_name = os.path.basename(original_filepath)
     file_name = os.path.splitext(base_name)[0]
 
-    exporter = SheetMusicTabExporter(audio_tempo=int(bpm_entry.get()))
+    exporter = SheetMusicTabExporter()
     pdf_path = exporter.create_score(current_notes, file_basename=file_name)
 
     if pdf_path:
@@ -177,6 +185,7 @@ midi_export_button.place(x=350, y=0)
 sheet_music_button = ttk.Button(m, text="Kotta generálása", command=generate_sheet_music)
 sheet_music_button.place(x=450, y=0)
 
+'''
 bpm_label = ttk.Label(m, text="BPM:")
 bpm_label.place(x=0, y=30)
 bpm_entry = ttk.Entry(m, width=5)
@@ -193,5 +202,6 @@ r2 = ttk.Radiobutton(m, text="PSO algoritmus", variable=select, value=2)
 r2.place(x=0, y=100)
 r3 = ttk.Radiobutton(m, text="Saját algoritmus", variable=select, value=3)
 r3.place(x=0, y=120)
+'''
 
 m.mainloop()
