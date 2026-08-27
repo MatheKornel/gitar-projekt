@@ -11,8 +11,8 @@ from quantizing import Quantizing
 
 
 _NOTES_RE = re.compile(
-    r"(?P<rest>\br\s+\d+\.*\b)" # szünetek felismerése
-    r"|(?P<note>\b[a-g](?:is|es)*[',]*\s+\d+\.*)(?P<tie>~?)" # hangok és kötések felismerése
+    r"(?<!\\)(?P<rest>\br(?:\s*\d+\.*)?\b)" # szünetek felismerése
+    r"|(?<!\\)(?P<note>\b[a-g](?:is|es)*[',]*(?:\s*\d+\.*)?)(?![a-zA-Z])(?P<tie>\s*~?)" # hangok és kötések felismerése
 )
 
 _PITCH_CLASS_NAMES = ['c', 'cis', 'd', 'dis', 'e', 'f', 'fis', 'g', 'gis', 'a', 'ais', 'b']
@@ -75,7 +75,7 @@ def _insert_string_numbers(melody_body, notes):
 
         if skip_tie_continuation:
             result.append(token_text)
-            skip_tie_continuation = bool(tie)
+            skip_tie_continuation = '~' in tie
             continue
 
         if note_idx < len(notes):
@@ -85,7 +85,7 @@ def _insert_string_numbers(melody_body, notes):
                 token_text = f"{m.group('note')}\\{string_num}{tie}"
             note_idx += 1
 
-        skip_tie_continuation = bool(tie)
+        skip_tie_continuation = '~' in tie
         result.append(token_text)
 
     result.append(melody_body[pos:])
