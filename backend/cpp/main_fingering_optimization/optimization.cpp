@@ -1,6 +1,7 @@
 #include "optimization.h"
 #include "fretboard.h"
 #include <iostream>
+#include <algorithm>
 
 struct Path
 {
@@ -67,7 +68,8 @@ std::vector<NotePosition> Optimization::RunOptimization()
     std::vector<NotePosition> finalPositions;
     finalPositions.reserve(notes.size());
 
-    const int windowSize = 5;
+    const int windowSize = 10;
+    const size_t maxPaths = 25;
 
     for (size_t i = 0; i < notes.size(); i++)
     {
@@ -121,6 +123,14 @@ std::vector<NotePosition> Optimization::RunOptimization()
                     nextPaths.push_back(expandedPath);
                 }
             }
+
+            std::sort(nextPaths.begin(), nextPaths.end(), [](const Path &a, const Path &b)
+                      { return a.totalCost < b.totalCost; });
+            if (nextPaths.size() > maxPaths)
+            {
+                nextPaths.resize(maxPaths);
+            }
+
             currentPaths = nextPaths;
         }
 
