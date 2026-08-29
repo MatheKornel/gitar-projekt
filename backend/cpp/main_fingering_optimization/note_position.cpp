@@ -1,6 +1,7 @@
 #include "note_position.h"
 #include <cmath>
 #include <unordered_map>
+#include <algorithm>
 
 NotePosition::NotePosition(const int newStringIdx, const int newFretIdx) : stringIdx(newStringIdx), fretIdx(newFretIdx) {}
 
@@ -20,9 +21,22 @@ double NotePosition::Distance(const NotePosition &otherPos) const
 
     double cost = (stringWeight * stringDiff) + (fretWeight * fretDiff);
 
-    if (!isOpenString && fretDiff > 4)
+    if (!isOpenString)
     {
-        cost += (fretDiff - 4) * 20.0;
+        int lowerFret = std::min(this->fretIdx, otherPos.fretIdx);
+        int maxAllowedStretch = 4;
+
+        if (lowerFret >= 7)
+            maxAllowedStretch = 5;
+        if (lowerFret >= 12)
+            maxAllowedStretch = 6;
+        if (lowerFret >= 17)
+            maxAllowedStretch = 7;
+
+        if (fretDiff > maxAllowedStretch)
+        {
+            cost += (fretDiff - maxAllowedStretch) * 20.0;
+        }
     }
 
     return cost;
