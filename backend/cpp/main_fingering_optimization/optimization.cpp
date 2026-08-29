@@ -30,7 +30,7 @@ double Optimization::CalculateCenter(const int currentIdx)
     return (sumMidi / count) ? count > 0 : 0.0;
 }
 
-double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos) const
+double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
 {
     double extraCost = 0.0;
     if (currentCenter > 64.0 && nextPos.GetFretIdx() < 5)
@@ -63,6 +63,38 @@ double Optimization::ExtraCost(const double currentCenter, const NotePosition &n
     if ((prevPos.GetStringIdx() == 0 && prevPos.GetFretIdx() == 0) || (nextPos.GetStringIdx() == 0 && nextPos.GetFretIdx() == 0))
     {
         extraCost -= 5.0; // ha üres E húr és bármi között van váltás, azt jutalmazzuk, az nem baj
+    }
+
+    if (prevPrevPos.GetFretIdx() != -1) // ha V alakú, oda vissza ugrálások vannak, büntetjük
+    {
+        int fret1 = prevPrevPos.GetFretIdx();
+        int fret2 = prevPos.GetFretIdx();
+        int fret3 = nextPos.GetFretIdx();
+
+        if (fret1 != 0 && fret2 != 0 && fret3 != 0)
+        {
+            bool upThenDown = (fret2 > fret1) && (fret3 < fret2);
+            bool downThenUp = (fret2 < fret1) && (fret3 > fret2);
+
+            if (upThenDown || downThenUp)
+            {
+                int jump1 = abs(fret2 - fret1);
+                int jump2 = abs(fret3 - fret2);
+                int lowestFret = std::min(fret1, std::min(fret2, fret3));
+
+                int jumpTolerance = 3;
+
+                if (lowestFret >= 12)
+                    jumpTolerance = 4;
+                if (lowestFret >= 17)
+                    jumpTolerance = 5;
+
+                if (jump1 >= jumpTolerance && jump2 >= jumpTolerance)
+                {
+                    extraCost += 15.0;
+                }
+            }
+        }
     }
 
     return extraCost;
@@ -118,10 +150,13 @@ std::vector<NotePosition> Optimization::RunOptimization()
             {
                 const auto &prevPos = path.positions.back();
 
+                NotePosition dummyPos(-1, -1);
+                const NotePosition &prevPrevPos = (path.positions.size() >= 2) ? path.positions[path.positions.size() - 2] : dummyPos;
+
                 for (const auto &nextPos : nextPositions)
                 {
                     const double stepCost = prevPos.Distance(nextPos);
-                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos);
+                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
                     Path expandedPath = path;
                     expandedPath.positions.push_back(nextPos);
                     expandedPath.totalCost += (stepCost + extraCost);
