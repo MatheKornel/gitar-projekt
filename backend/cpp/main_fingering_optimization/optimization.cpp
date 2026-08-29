@@ -13,16 +13,21 @@ Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std:
 
 double Optimization::CalculateCenter(const int currentIdx)
 {
-    const int foresight = 15;
+    const double timeWindow = 2.0;
+    const double currentOnset = notes[currentIdx].GetOnset();
     int count = 0;
     double sumMidi = 0.0;
 
-    for (size_t i = currentIdx; i < currentIdx + foresight && i < notes.size(); i++)
+    for (size_t i = currentIdx; i < notes.size(); i++)
     {
+        if (notes[i].GetOnset() - currentOnset > timeWindow)
+        {
+            break;
+        }
         sumMidi += notes[i].GetMidiNote();
         count++;
     }
-    return sumMidi / count;
+    return (sumMidi / count) ? count > 0 : 0.0;
 }
 
 double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos) const
