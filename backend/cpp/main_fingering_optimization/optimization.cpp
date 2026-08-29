@@ -13,10 +13,9 @@ Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std:
 
 double Optimization::CalculateCenter(const int currentIdx)
 {
-    const double timeWindow = 2.0;
+    const double timeWindow = 2.0; // 2 másodperc előre
     const double currentOnset = notes[currentIdx].GetOnset();
-    int count = 0;
-    double sumMidi = 0.0;
+    std::vector<int> windowMidis;
 
     for (size_t i = currentIdx; i < notes.size(); i++)
     {
@@ -24,10 +23,33 @@ double Optimization::CalculateCenter(const int currentIdx)
         {
             break;
         }
-        sumMidi += notes[i].GetMidiNote();
-        count++;
+
+        if (i > currentIdx)
+        {
+            double prevOffset = notes[i - 1].GetOnset() + notes[i - 1].GetDuration();
+            if (notes[i].GetOnset() - prevOffset > 0.4)
+            {
+                break;
+            }
+        }
+
+        windowMidis.push_back(notes[i].GetMidiNote());
     }
-    return (sumMidi / count) ? count > 0 : 0.0;
+
+    if (windowMidis.empty())
+        return 0.0;
+
+    std::sort(windowMidis.begin(), windowMidis.end());
+    size_t mid = windowMidis.size() / 2;
+
+    if (windowMidis.size() % 2 == 0)
+    {
+        return (windowMidis[mid - 1] + windowMidis[mid]) / 2.0;
+    }
+    else
+    {
+        return windowMidis[mid];
+    }
 }
 
 double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
