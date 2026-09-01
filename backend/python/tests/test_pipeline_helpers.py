@@ -12,7 +12,7 @@ from note_event import NoteEvent
 
 def test_project_paths_defaults():
     paths = ProjectPaths()
-    assert paths.repo_root.name == "gitar_projekt"
+    assert (paths.repo_root / "backend").is_dir()
     assert paths.backend_dir.name == "backend"
     assert paths.python_dir.name == "python"
 

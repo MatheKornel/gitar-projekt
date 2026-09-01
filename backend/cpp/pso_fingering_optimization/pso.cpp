@@ -40,7 +40,7 @@ std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printI
     double omega = 0.9;
     while (!StopCondition())
     {
-        omega = 0.4 ? omega < 0.4 : omega * 0.995;
+        omega = (omega < 0.4) ? 0.4 : omega * 0.995;
         CalculateVelocity(omega);
         for (auto &particle : P)
         {

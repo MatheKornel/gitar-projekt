@@ -104,7 +104,11 @@ class SheetMusicTabExporter:
             self.env['lilypondPath'] = self.config.lilypond_path
             print(f"LilyPond útvonal beállítva: {self.config.lilypond_path}")
         else:
-            print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
+            print(
+                f"Hiba: A LilyPond nem található itt: {self.config.lilypond_path}\n"
+                "Állítsd be a LILYPOND_PATH környezeti változót a lilypond.exe teljes "
+                "elérési útjára, vagy tedd a lilypond.exe-t a PATH-ra."
+            )
 
     def create_score(self, notes, file_basename="output", tuning="E"):
         tuning_midi = _tuning_midi_from_label(tuning)
