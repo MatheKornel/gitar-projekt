@@ -24,7 +24,7 @@ std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
         for (int fretIdx = 0; fretIdx <= maxFret; fretIdx++)
         {
             int midiNote = openStrings[stringIdx] + fretIdx;
-            if (midiNote >= 0 && midiNote < fretboard.size())
+            if (midiNote >= 0 && static_cast<size_t>(midiNote) < fretboard.size())
             {
                 fretboard[midiNote].emplace_back(stringIdx, fretIdx);
             }
@@ -36,7 +36,7 @@ std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
 const std::vector<NotePosition> FretBoard::GetPositions(const int midiNote)
 {
     static const std::vector<std::vector<NotePosition>> fretboard = GenerateFretBoard();
-    if (midiNote < 0 || midiNote >= fretboard.size())
+    if (midiNote < 0 || static_cast<size_t>(midiNote) >= fretboard.size())
     {
         const std::vector<NotePosition> empty;
         std::cerr << "Nincs ilyen MIDI hang: " << midiNote << std::endl;

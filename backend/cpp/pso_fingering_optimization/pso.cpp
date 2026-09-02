@@ -5,7 +5,8 @@
 #include <iostream>
 #include <omp.h>
 
-PSO::PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const int swarmSize, const int newLimit, const double newImprThreshold) : notes(std::move(newNotes)), dimension(newDimension), g_opt_fitness(DBL_MAX), limit(newLimit), imprThreshold(newImprThreshold)
+PSO::PSO(const std::vector<InputNotes> &newNotes, const size_t newDimension, const size_t swarmSize, const int newLimit, const double newImprThreshold)
+    : g_opt_fitness(DBL_MAX), notes(newNotes), dimension(newDimension), limit(newLimit), imprThreshold(newImprThreshold)
 {
     g_opt.resize(dimension);
     InitializePopulation(swarmSize);
@@ -47,7 +48,7 @@ std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printI
             for (size_t j = 0; j < dimension; j++)
             {
                 double newPosition = particle.p[j] + particle.p_velo[j];
-                const int max = FretBoard::GetPositions(notes[j].GetMidiNote()).size();
+                const int max = static_cast<int>(FretBoard::GetPositions(notes[j].GetMidiNote()).size());
                 if (newPosition >= max)
                 {
                     newPosition = max - 1;
@@ -76,12 +77,12 @@ std::vector<NotePosition> PSO::PsoAlgo(const int stopCondition, const int printI
     std::vector<NotePosition> optimalPositions;
     for (size_t j = 0; j < notes.size(); j++)
     {
-        optimalPositions.emplace_back(FretBoard::GetPositions(notes[j].GetMidiNote())[g_opt[j]]);
+        optimalPositions.emplace_back(FretBoard::GetPositions(notes[j].GetMidiNote())[static_cast<size_t>(g_opt[j])]);
     }
     return optimalPositions;
 }
 
-void PSO::InitializePopulation(const int swarmSize)
+void PSO::InitializePopulation(const size_t swarmSize)
 {
     for (size_t i = 0; i < swarmSize; i++)
     {
@@ -128,7 +129,7 @@ void PSO::Evaluation()
 double PSO::Fitness(const Particle &particle) const
 {
     double total = 0;
-    int firstNoteIdx = particle.p[0];
+    const size_t firstNoteIdx = static_cast<size_t>(particle.p[0]);
     const NotePosition startPos = FretBoard::GetPositions(notes[0].GetMidiNote())[firstNoteIdx];
 
     if (startPos.GetFretIdx() > 4 && startPos.GetFretIdx() != 0)
@@ -138,8 +139,8 @@ double PSO::Fitness(const Particle &particle) const
 
     for (size_t i = 0; i < notes.size() - 1; i++)
     {
-        const int currentNoteIdx = particle.p[i];
-        const int nextNoteIdx = particle.p[i + 1];
+        const size_t currentNoteIdx = static_cast<size_t>(particle.p[i]);
+        const size_t nextNoteIdx = static_cast<size_t>(particle.p[i + 1]);
         const auto &pos1 = FretBoard::GetPositions(notes[i].GetMidiNote());
         const auto &pos2 = FretBoard::GetPositions(notes[i + 1].GetMidiNote());
 

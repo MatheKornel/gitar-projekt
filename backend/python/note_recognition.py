@@ -138,7 +138,8 @@ class ShortTimeFT:
                 continue
 
             stable_f0 = np.median(f0_candidates) # legstabilabb f0 az ablakból
-            note_idx = np.argmin(np.abs(guitar_notes - stable_f0))
+            guitar_notes_arr = np.asarray(guitar_notes, dtype=float)
+            note_idx = int(np.argmin(np.abs(guitar_notes_arr - stable_f0)))
             recognized_note = guitar_notes[note_idx]
 
             # rezonancia szűrés

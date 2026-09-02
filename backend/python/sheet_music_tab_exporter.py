@@ -2,7 +2,8 @@ import os
 import re
 import subprocess
 
-from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
+from music21 import stream, note, duration, environment, clef, tempo, instrument
+from music21.meter.base import TimeSignature
 
 from guitar_note_freqs import GuitarNoteFreqs
 from config_parameters import ProjectConfig
@@ -115,7 +116,7 @@ class SheetMusicTabExporter:
         part = stream.Stream()
         part.insert(0, instrument.Guitar())
 
-        part.append(meter.TimeSignature(self.config.default_time_signature))
+        part.append(TimeSignature(self.config.default_time_signature))
         part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef()
 
@@ -137,6 +138,10 @@ class SheetMusicTabExporter:
             current_beat = quant_offset
 
         final_part = part.makeMeasures()
+
+        if final_part is None:
+            print("Hiba: nem sikerult utemekre bontani a hangokat.")
+            return None
 
         target_dir = self.paths.sheet_output_dir
         os.makedirs(target_dir, exist_ok=True)

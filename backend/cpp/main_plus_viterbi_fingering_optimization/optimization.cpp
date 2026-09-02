@@ -5,11 +5,9 @@
 
 Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std::move(newNotes)) {}
 
-// Ugyanaz, mint az eredeti Optimization::CalculateCenter: a következő 15 hang
-// átlagos MIDI-magassága, hogy tudjuk, a dallam épp "magasan" vagy "lent" jár-e.
-double Optimization::CalculateCenter(const int currentIdx) const
+double Optimization::CalculateCenter(const size_t currentIdx) const
 {
-    const int foresight = 15;
+    const size_t foresight = 15;
     int count = 0;
     double sumMidi = 0.0;
 

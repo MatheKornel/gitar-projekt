@@ -38,8 +38,8 @@ std::vector<NotePosition> Viterbi::Optimization()
 
     for (size_t i = 1; i < notes.size(); i++)
     {
-        int currentPositionsCount = allPositions[i].size();
-        int prevPositionsCount = allPositions[i - 1].size();
+        const size_t currentPositionsCount = allPositions[i].size();
+        const size_t prevPositionsCount = allPositions[i - 1].size();
 
         minCost[i].resize(currentPositionsCount);
         parent[i].resize(currentPositionsCount);
@@ -57,7 +57,7 @@ std::vector<NotePosition> Viterbi::Optimization()
                 if (currentTotalCost < bestTotalCost)
                 {
                     bestTotalCost = currentTotalCost;
-                    bestPrevIdx = prev;
+                    bestPrevIdx = static_cast<int>(prev);
                 }
             }
             minCost[i][curr] = bestTotalCost;
@@ -66,7 +66,7 @@ std::vector<NotePosition> Viterbi::Optimization()
     }
 
     std::vector<NotePosition> optimalPositions(notes.size());
-    const int lastPositionsCount = allPositions[notes.size() - 1].size();
+    const size_t lastPositionsCount = allPositions[notes.size() - 1].size();
     double min = DBL_MAX;
     int bestLastIdx = 0;
 
@@ -75,7 +75,7 @@ std::vector<NotePosition> Viterbi::Optimization()
         if (minCost[notes.size() - 1][i] < min)
         {
             min = minCost[notes.size() - 1][i];
-            bestLastIdx = i;
+            bestLastIdx = static_cast<int>(i);
         }
     }
 

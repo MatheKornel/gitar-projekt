@@ -8,7 +8,7 @@
 class PSO
 {
 public:
-    PSO(const std::vector<InputNotes> &newNotes, const int newDimension, const int swarmSize, const int newLimit, const double newImprThreshold);
+    PSO(const std::vector<InputNotes> &newNotes, const size_t newDimension, const size_t swarmSize, const int newLimit, const double newImprThreshold);
     std::vector<NotePosition> PsoAlgo(const int stopCondition, const int printInterval);
 
     std::vector<int> g_opt;
@@ -18,7 +18,7 @@ private:
     std::vector<Particle> P;
     std::vector<InputNotes> notes;
 
-    int dimension;
+    size_t dimension;
     double phi_p = 2.0;
     double phi_g = 1.0;
 
@@ -27,7 +27,7 @@ private:
     int limit;
     double imprThreshold;
 
-    void InitializePopulation(const int swarmSize);
+    void InitializePopulation(const size_t swarmSize);
     void Evaluation();
     double Fitness(const Particle &particle) const;
     void CalculateVelocity(const double omega);

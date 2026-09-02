@@ -11,7 +11,7 @@ struct Path
 
 Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std::move(newNotes)) {}
 
-double Optimization::CalculateCenter(const int currentIdx)
+double Optimization::CalculateCenter(const size_t currentIdx)
 {
     const double timeWindow = 2.0; // 2 másodperc előre
     const double currentOnset = notes[currentIdx].GetOnset();
