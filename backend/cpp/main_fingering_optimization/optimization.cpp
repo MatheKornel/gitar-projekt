@@ -148,20 +148,31 @@ std::vector<NotePosition> Optimization::RunOptimization()
             continue;
         }
 
+        double currentCenter = CalculateCenter(i);
+
         for (const auto &pos : firstNotePositions)
         {
             double initialCost = 0.0;
             if (!finalPositions.empty())
             {
-                initialCost = finalPositions.back().Distance(pos);
+                NotePosition prevPos = finalPositions.back();
+                NotePosition prevPrevPos(-1, -1);
+                
+                if (finalPositions.size() >= 2)
+                {
+                    prevPrevPos = finalPositions[finalPositions.size() - 2];
+                }
+                
+                double stepCost = prevPos.Distance(pos);
+                double extraCost = ExtraCost(currentCenter, pos, prevPos, prevPrevPos);
+                
+                initialCost = stepCost + extraCost;
             }
             Path newPath;
             newPath.positions.push_back(pos);
             newPath.totalCost = initialCost;
             currentPaths.push_back(newPath);
         }
-
-        double currentCenter = CalculateCenter(i);
 
         for (size_t j = 1; j < window.size(); j++)
         {
@@ -172,13 +183,21 @@ std::vector<NotePosition> Optimization::RunOptimization()
             {
                 const auto &prevPos = path.positions.back();
 
-                NotePosition dummyPos(-1, -1);
-                const NotePosition &prevPrevPos = (path.positions.size() >= 2) ? path.positions[path.positions.size() - 2] : dummyPos;
+                NotePosition prevPrevPos(-1, -1);
+                if (path.positions.size() >= 2)
+                {
+                    prevPrevPos = path.positions[path.positions.size() - 2];
+                }
+                else if (!finalPositions.empty())
+                {
+                    prevPrevPos = finalPositions.back();
+                }
 
                 for (const auto &nextPos : nextPositions)
                 {
                     const double stepCost = prevPos.Distance(nextPos);
                     const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
+                    
                     Path expandedPath = path;
                     expandedPath.positions.push_back(nextPos);
                     expandedPath.totalCost += (stepCost + extraCost);
