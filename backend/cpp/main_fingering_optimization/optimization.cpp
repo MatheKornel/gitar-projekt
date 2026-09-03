@@ -55,7 +55,9 @@ double Optimization::CalculateCenter(const size_t currentIdx)
 double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
 {
     double extraCost = 0.0;
-    if (currentCenter > 64.0 && nextPos.GetFretIdx() < 5)
+    std::vector<int> tuning = FretBoard::GetTuning();
+    double centerThreshold = tuning.empty() ? 64.0 : (tuning[0] + 24.0);
+    if (currentCenter > centerThreshold && nextPos.GetFretIdx() < 5)
     {
         extraCost += 10.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
     }

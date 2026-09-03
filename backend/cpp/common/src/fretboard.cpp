@@ -44,3 +44,5 @@ const std::vector<NotePosition> FretBoard::GetPositions(const int midiNote)
     }
     return fretboard[midiNote];
 }
+
+std::vector<int> FretBoard::GetTuning() { return openStrings; }

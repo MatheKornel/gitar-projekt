@@ -9,6 +9,7 @@ class FretBoard
 public:
     static const std::vector<NotePosition> GetPositions(const int midiNote); // visszaadja egy MIDI hanghoz tartozó lehetséges lefogásokat
     static void SetTuning(const std::vector<int> &newOpenStrings);           // a 6 üres húr MIDI hangmagasságának beállítása, a GetPositions első hívása előtt kell meghívni
+    static std::vector<int> GetTuning();
 
 private:
     static std::vector<std::vector<NotePosition>> GenerateFretBoard(); // legenerálja a hangokhoz tartozó lefogási pontokat
