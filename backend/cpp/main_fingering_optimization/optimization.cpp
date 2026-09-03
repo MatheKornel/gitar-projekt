@@ -2,7 +2,7 @@
 #include "fretboard.h"
 #include <iostream>
 #include <algorithm>
-
+#include <cmath>
 struct Path
 {
     std::vector<NotePosition> positions;
@@ -165,7 +165,10 @@ std::vector<NotePosition> Optimization::RunOptimization()
                     prevPrevPos = finalPositions[finalPositions.size() - 2];
                 }
                 
-                double stepCost = prevPos.Distance(pos);
+                double ioi = notes[i].GetOnset() - notes[i - 1].GetOnset();
+                double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
+
+                double stepCost = prevPos.Distance(pos) * urgency;
                 double extraCost = ExtraCost(currentCenter, pos, prevPos, prevPrevPos);
                 
                 initialCost = stepCost + extraCost;
@@ -180,6 +183,9 @@ std::vector<NotePosition> Optimization::RunOptimization()
         {
             auto nextPositions = FretBoard::GetPositions(window[j].GetMidiNote());
             std::vector<Path> nextPaths;
+
+            double ioi = window[j].GetOnset() - window[j - 1].GetOnset();
+            double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
 
             for (const auto &path : currentPaths)
             {
@@ -197,7 +203,7 @@ std::vector<NotePosition> Optimization::RunOptimization()
 
                 for (const auto &nextPos : nextPositions)
                 {
-                    const double stepCost = prevPos.Distance(nextPos);
+                    const double stepCost = prevPos.Distance(nextPos) * urgency;
                     const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
                     
                     Path expandedPath = path;
