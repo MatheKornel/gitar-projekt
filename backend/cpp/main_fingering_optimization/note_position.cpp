@@ -23,19 +23,23 @@ double NotePosition::Distance(const NotePosition &otherPos) const
 
     if (!isOpenString)
     {
-        int lowerFret = std::min(this->fretIdx, otherPos.fretIdx);
-        int maxAllowedStretch = 4;
-
-        if (lowerFret >= 7)
-            maxAllowedStretch = 5;
-        if (lowerFret >= 12)
-            maxAllowedStretch = 6;
-        if (lowerFret >= 17)
-            maxAllowedStretch = 7;
-
-        if (fretDiff > maxAllowedStretch)
+        // menzúra mm-ben (a 648 mm a tipikus gitár menzúra)
+        const double L = 648.0; 
+        
+        // bundok fizikai távolsága a nyeregtől (mm)
+        double currentFretMm = L * (1.0 - std::pow(2.0, -this->fretIdx / 12.0));
+        double otherFretMm = L * (1.0 - std::pow(2.0, -otherPos.fretIdx / 12.0));
+        
+        // két bund közötti távolság mm-ben
+        double spanMm = std::abs(currentFretMm - otherFretMm);
+        
+        // kb 100 mm a kényelmes határ
+        const double maxHandSpanMm = 100.0; 
+        
+        // ha a fizikai távolság meghaladja a kéz fesztávját, mm-ként büntetjük
+        if (spanMm > maxHandSpanMm)
         {
-            cost += (fretDiff - maxAllowedStretch) * 20.0;
+            cost += (spanMm - maxHandSpanMm) * 0.5;
         }
     }
 
