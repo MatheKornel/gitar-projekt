@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <map>
 struct Path
 {
     std::vector<NotePosition> positions;
@@ -130,7 +131,6 @@ std::vector<NotePosition> Optimization::RunOptimization()
     finalPositions.reserve(notes.size());
 
     const int windowSize = 10;
-    const size_t maxPaths = 25;
 
     for (size_t i = 0; i < notes.size(); i++)
     {
@@ -213,14 +213,41 @@ std::vector<NotePosition> Optimization::RunOptimization()
                 }
             }
 
-            std::sort(nextPaths.begin(), nextPaths.end(), [](const Path &a, const Path &b)
-                      { return a.totalCost < b.totalCost; });
-            if (nextPaths.size() > maxPaths)
+            std::map<std::pair<int, int>, Path> bestStatePaths;
+
+            for (const auto &p : nextPaths)
             {
-                nextPaths.resize(maxPaths);
+                // vesszük az útvonal utolsó két lefogását, hogy meghatározzuk a kéz fizikai állapotát
+                NotePosition currPos = p.positions.back();
+                NotePosition prevPos(-1, -1);
+                
+                if (p.positions.size() >= 2) 
+                {
+                    prevPos = p.positions[p.positions.size() - 2]; // ha ablakon belül vagyunk
+                } 
+                else if (!finalPositions.empty()) 
+                {
+                    prevPos = finalPositions.back(); // ha az ablak legelső lépése
+                }
+
+                // egyedi azonosítót generálunk a lefogásokból (pl A húr 7. bund -> 107)
+                int prevId = (prevPos.GetFretIdx() != -1) ? (prevPos.GetStringIdx() * 100 + prevPos.GetFretIdx()) : -1;
+                int currId = currPos.GetStringIdx() * 100 + currPos.GetFretIdx();
+                std::pair<int, int> stateKey = {prevId, currId};
+
+                // ha nincs ilyen állapot, elmenti, ha pedig van, akkor csak akkor frissíti, ha az új útvonal költsége kisebb, mint a korábbi
+                if (bestStatePaths.find(stateKey) == bestStatePaths.end() || p.totalCost < bestStatePaths[stateKey].totalCost)
+                {
+                    bestStatePaths[stateKey] = p;
+                }
             }
 
-            currentPaths = nextPaths;
+            // visszatöltjük a legjobb útvonalakat, így a következő iterációban már csak a legjobbakat vizsgáljuk
+            currentPaths.clear();
+            for (const auto &pair : bestStatePaths)
+            {
+                currentPaths.push_back(pair.second);
+            }
         }
 
         double bestCost = std::numeric_limits<double>::max();
