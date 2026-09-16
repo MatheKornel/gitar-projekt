@@ -138,7 +138,7 @@ class GuitarProjectApp:
             spec.spectrograms()
 
     def show_note_rec(self):
-        if self.original_audio is None:
+        if self.original_audio is None or self.fs is None:
             return
 
         bpf = BandpassFilter(self.original_audio)
@@ -149,7 +149,7 @@ class GuitarProjectApp:
         
         self.current_audio = Audio(original=self.original_audio, filtered=filtered, fs=self.fs)
 
-        stft = ShortTimeFT(self.current_audio.filtered)
+        stft = ShortTimeFT(self.current_audio.filtered, fs=self.fs)
         print("Elemzés folyamatban...")
 
         notes = stft.note_rec(5, self.histogram, self.tunings_combobox.get())

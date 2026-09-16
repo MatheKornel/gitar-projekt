@@ -1,0 +1,24 @@
+{
+    "$comment": [
+        "Ez a fajl a VS Code Python-elemzojenek (Pylance) szol.",
+        "Problema volt: a projekt gyokereben van egy 'audio_files' MAPPA (hangfajlok),",
+        "es a backend/python-ban van egy 'audio_files.py' MODUL. Az elemzo a mappat",
+        "talalta meg elobb, ezert azt hitte, hogy az 'Audio' osztaly nem letezik.",
+        "Az alabbi beallitassal a backend/python konyvtar lesz az elemzes gyokere,",
+        "igy az import helyesen a .py fajlra mutat. A futasra nincs hatassal."
+    ],
+    "executionEnvironments": [
+        {
+            "root": "backend/python",
+            "extraPaths": [
+                "backend/python"
+            ]
+        }
+    ],
+    "exclude": [
+        "**/__pycache__",
+        "audio_files",
+        "build",
+        ".venv"
+    ]
+}

@@ -1,7 +1,9 @@
 #include "optimization.h"
 #include "fretboard.h"
 #include <iostream>
-
+#include <algorithm>
+#include <cmath>
+#include <map>
 struct Path
 {
     std::vector<NotePosition> positions;
@@ -10,24 +12,53 @@ struct Path
 
 Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std::move(newNotes)) {}
 
-double Optimization::CalculateCenter(const int currentIdx)
+double Optimization::CalculateCenter(const size_t currentIdx)
 {
-    const int foresight = 15;
-    int count = 0;
-    double sumMidi = 0.0;
+    const double timeWindow = 2.0; // 2 másodperc előre
+    const double currentOnset = notes[currentIdx].GetOnset();
+    std::vector<int> windowMidis;
 
-    for (size_t i = currentIdx; i < currentIdx + foresight && i < notes.size(); i++)
+    for (size_t i = currentIdx; i < notes.size(); i++)
     {
-        sumMidi += notes[i].GetMidiNote();
-        count++;
+        if (notes[i].GetOnset() - currentOnset > timeWindow)
+        {
+            break;
+        }
+
+        if (i > currentIdx)
+        {
+            double prevOffset = notes[i - 1].GetOnset() + notes[i - 1].GetDuration();
+            if (notes[i].GetOnset() - prevOffset > 0.4)
+            {
+                break;
+            }
+        }
+
+        windowMidis.push_back(notes[i].GetMidiNote());
     }
-    return sumMidi / count;
+
+    if (windowMidis.empty())
+        return 0.0;
+
+    std::sort(windowMidis.begin(), windowMidis.end());
+    size_t mid = windowMidis.size() / 2;
+
+    if (windowMidis.size() % 2 == 0)
+    {
+        return (windowMidis[mid - 1] + windowMidis[mid]) / 2.0;
+    }
+    else
+    {
+        return windowMidis[mid];
+    }
 }
 
-double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos) const
+double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
 {
     double extraCost = 0.0;
-    if (currentCenter > 64.0 && nextPos.GetFretIdx() < 5)
+    std::vector<int> tuning = FretBoard::GetTuning();
+    double centerThreshold = tuning.empty() ? 64.0 : (tuning[0] + 24.0);
+    if (currentCenter > centerThreshold && nextPos.GetFretIdx() < 5)
     {
         extraCost += 10.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
     }
@@ -45,18 +76,50 @@ double Optimization::ExtraCost(const double currentCenter, const NotePosition &n
 
     if ((nextPos.GetStringIdx() == 0 || nextPos.GetStringIdx() == 1) && nextPos.GetFretIdx() > 12)
     {
-        extraCost += 500.0; // az E és A húron ne játszunk riffeket a 12. bund felett
+        extraCost += 25.0; // az E és A húron ne játszunk riffeket a 12. bund felett
     }
 
     const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
     if (stringDiff > 1)
     {
-        extraCost += 500.0 * stringDiff; // húrváltást büntetjük, mert riffeknél nehezebb váltani
+        extraCost += 25.0 * (stringDiff - 1); // húrváltást büntetjük, mert riffeknél nehezebb váltani
     }
 
     if ((prevPos.GetStringIdx() == 0 && prevPos.GetFretIdx() == 0) || (nextPos.GetStringIdx() == 0 && nextPos.GetFretIdx() == 0))
     {
         extraCost -= 5.0; // ha üres E húr és bármi között van váltás, azt jutalmazzuk, az nem baj
+    }
+
+    if (prevPrevPos.GetFretIdx() != -1) // ha V alakú, oda vissza ugrálások vannak, büntetjük
+    {
+        int fret1 = prevPrevPos.GetFretIdx();
+        int fret2 = prevPos.GetFretIdx();
+        int fret3 = nextPos.GetFretIdx();
+
+        if (fret1 != 0 && fret2 != 0 && fret3 != 0)
+        {
+            bool upThenDown = (fret2 > fret1) && (fret3 < fret2);
+            bool downThenUp = (fret2 < fret1) && (fret3 > fret2);
+
+            if (upThenDown || downThenUp)
+            {
+                int jump1 = abs(fret2 - fret1);
+                int jump2 = abs(fret3 - fret2);
+                int lowestFret = std::min(fret1, std::min(fret2, fret3));
+
+                int jumpTolerance = 3;
+
+                if (lowestFret >= 12)
+                    jumpTolerance = 4;
+                if (lowestFret >= 17)
+                    jumpTolerance = 5;
+
+                if (jump1 >= jumpTolerance && jump2 >= jumpTolerance)
+                {
+                    extraCost += 15.0;
+                }
+            }
+        }
     }
 
     return extraCost;
@@ -67,7 +130,7 @@ std::vector<NotePosition> Optimization::RunOptimization()
     std::vector<NotePosition> finalPositions;
     finalPositions.reserve(notes.size());
 
-    const int windowSize = 5;
+    const int windowSize = 10;
 
     for (size_t i = 0; i < notes.size(); i++)
     {
@@ -87,12 +150,28 @@ std::vector<NotePosition> Optimization::RunOptimization()
             continue;
         }
 
+        double currentCenter = CalculateCenter(i);
+
         for (const auto &pos : firstNotePositions)
         {
             double initialCost = 0.0;
             if (!finalPositions.empty())
             {
-                initialCost = finalPositions.back().Distance(pos);
+                NotePosition prevPos = finalPositions.back();
+                NotePosition prevPrevPos(-1, -1);
+                
+                if (finalPositions.size() >= 2)
+                {
+                    prevPrevPos = finalPositions[finalPositions.size() - 2];
+                }
+                
+                double ioi = notes[i].GetOnset() - notes[i - 1].GetOnset();
+                double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
+
+                double stepCost = prevPos.Distance(pos) * urgency;
+                double extraCost = ExtraCost(currentCenter, pos, prevPos, prevPrevPos);
+                
+                initialCost = stepCost + extraCost;
             }
             Path newPath;
             newPath.positions.push_back(pos);
@@ -100,28 +179,75 @@ std::vector<NotePosition> Optimization::RunOptimization()
             currentPaths.push_back(newPath);
         }
 
-        double currentCenter = CalculateCenter(i);
-
         for (size_t j = 1; j < window.size(); j++)
         {
             auto nextPositions = FretBoard::GetPositions(window[j].GetMidiNote());
             std::vector<Path> nextPaths;
 
+            double ioi = window[j].GetOnset() - window[j - 1].GetOnset();
+            double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
+
             for (const auto &path : currentPaths)
             {
                 const auto &prevPos = path.positions.back();
 
+                NotePosition prevPrevPos(-1, -1);
+                if (path.positions.size() >= 2)
+                {
+                    prevPrevPos = path.positions[path.positions.size() - 2];
+                }
+                else if (!finalPositions.empty())
+                {
+                    prevPrevPos = finalPositions.back();
+                }
+
                 for (const auto &nextPos : nextPositions)
                 {
-                    const double stepCost = prevPos.Distance(nextPos);
-                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos);
+                    const double stepCost = prevPos.Distance(nextPos) * urgency;
+                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
+                    
                     Path expandedPath = path;
                     expandedPath.positions.push_back(nextPos);
                     expandedPath.totalCost += (stepCost + extraCost);
                     nextPaths.push_back(expandedPath);
                 }
             }
-            currentPaths = nextPaths;
+
+            std::map<std::pair<int, int>, Path> bestStatePaths;
+
+            for (const auto &p : nextPaths)
+            {
+                // vesszük az útvonal utolsó két lefogását, hogy meghatározzuk a kéz fizikai állapotát
+                NotePosition currPos = p.positions.back();
+                NotePosition prevPos(-1, -1);
+                
+                if (p.positions.size() >= 2) 
+                {
+                    prevPos = p.positions[p.positions.size() - 2]; // ha ablakon belül vagyunk
+                } 
+                else if (!finalPositions.empty()) 
+                {
+                    prevPos = finalPositions.back(); // ha az ablak legelső lépése
+                }
+
+                // egyedi azonosítót generálunk a lefogásokból (pl A húr 7. bund -> 107)
+                int prevId = (prevPos.GetFretIdx() != -1) ? (prevPos.GetStringIdx() * 100 + prevPos.GetFretIdx()) : -1;
+                int currId = currPos.GetStringIdx() * 100 + currPos.GetFretIdx();
+                std::pair<int, int> stateKey = {prevId, currId};
+
+                // ha nincs ilyen állapot, elmenti, ha pedig van, akkor csak akkor frissíti, ha az új útvonal költsége kisebb, mint a korábbi
+                if (bestStatePaths.find(stateKey) == bestStatePaths.end() || p.totalCost < bestStatePaths[stateKey].totalCost)
+                {
+                    bestStatePaths[stateKey] = p;
+                }
+            }
+
+            // visszatöltjük a legjobb útvonalakat, így a következő iterációban már csak a legjobbakat vizsgáljuk
+            currentPaths.clear();
+            for (const auto &pair : bestStatePaths)
+            {
+                currentPaths.push_back(pair.second);
+            }
         }
 
         double bestCost = std::numeric_limits<double>::max();

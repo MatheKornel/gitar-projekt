@@ -38,6 +38,32 @@ Thumbs.db
 *.pro.user
 *.qrc.py
 
+# JAVITVA: C++ build kimenetek. A CMake altal generalt build/ mappa es a
+# leforditott binarisok nem valok verziokovetes ala (gepenkent kulonboznek,
+# nagyok, es minden forditasnal valtoznak).
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.lib
+*.a
+*.sln
+*.slnx
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# JAVITVA: a Python altal a C++-nak generalt ideiglenes bemeneti fajl.
+# Minden futasnal ujraiodik, nincs ertelme kommitolni.
+backend/cpp/*/notes.txt
+
+# JAVITVA: LilyPond koztes fajl (a kotta generalasakor keletkezik).
+*.ly
+
 # Audio / MIDI files (if temporary)
 #*.wav
 *.mp3

@@ -1,15 +1,14 @@
 import librosa as lb
 import numpy as np
-import os
 
 from onset_detect import OnsetDetect
 from note_event import NoteEvent
 from guitar_note_freqs import GuitarNoteFreqs
 
 class ShortTimeFT:
-    def __init__(self, filtered):
+    def __init__(self, filtered, fs=44100):
         self.filtered = filtered # szűrt audio jel
-        self.fs = 44100 # mintavételi frekvencia
+        self.fs = fs # mintavételi frekvencia (a betöltött hangfájlból származik)
 
     # egy adott frekvenciára kiszámolja a salience-t egy adott frame-ben
     def get_f0_salience(self, f0, i, magnitude, freqs, fs, max_harmonics):
@@ -76,7 +75,7 @@ class ShortTimeFT:
 
     def note_rec(self, max_harmonics, histogram, tuning="E"):
         nfft = 4096
-        fs = 44100
+        fs = self.fs
         hop_length = 512
 
         # gitár hangok frekvenciái
@@ -139,7 +138,8 @@ class ShortTimeFT:
                 continue
 
             stable_f0 = np.median(f0_candidates) # legstabilabb f0 az ablakból
-            note_idx = np.argmin(np.abs(guitar_notes - stable_f0))
+            guitar_notes_arr = np.asarray(guitar_notes, dtype=float)
+            note_idx = int(np.argmin(np.abs(guitar_notes_arr - stable_f0)))
             recognized_note = guitar_notes[note_idx]
 
             # rezonancia szűrés
@@ -167,7 +167,7 @@ class ShortTimeFT:
                     peak_frame = j # ez most a szeleten belüli frame index
 
             if peak_salience < 0.01:
-                notes_with_offsets.append((onset, f0, onset + 0.1)) # ha a hang túl rövid adok neki egy fix hosszt
+                notes_with_offsets.append(NoteEvent(onset, onset + 0.1, f0)) # ha a hang túl rövid, adok neki egy fix hosszt
                 continue
 
             salience_treshold = peak_salience * 0.1 # a küszöb legyen a csúcs valahány százaléka

@@ -2,7 +2,8 @@ import os
 import re
 import subprocess
 
-from music21 import stream, note, duration, meter, environment, clef, tempo, instrument
+from music21 import stream, note, duration, environment, clef, tempo, instrument
+from music21.meter.base import TimeSignature
 
 from guitar_note_freqs import GuitarNoteFreqs
 from config_parameters import ProjectConfig
@@ -11,8 +12,8 @@ from quantizing import Quantizing
 
 
 _NOTES_RE = re.compile(
-    r"(?P<rest>\br\s+\d+\.*\b)" # szünetek felismerése
-    r"|(?P<note>\b[a-g](?:is|es)*[',]*\s+\d+\.*)(?P<tie>~?)" # hangok és kötések felismerése
+    r"(?<!\\)(?P<rest>\br(?:\s*\d+\.*)?\b)" # szünetek felismerése
+    r"|(?<!\\)(?P<note>\b[a-g](?:is|es)*[',]*(?:\s*\d+\.*)?)(?![a-zA-Z])(?P<tie>\s*~?)" # hangok és kötések felismerése
 )
 
 _PITCH_CLASS_NAMES = ['c', 'cis', 'd', 'dis', 'e', 'f', 'fis', 'g', 'gis', 'a', 'ais', 'b']
@@ -75,7 +76,7 @@ def _insert_string_numbers(melody_body, notes):
 
         if skip_tie_continuation:
             result.append(token_text)
-            skip_tie_continuation = bool(tie)
+            skip_tie_continuation = '~' in tie
             continue
 
         if note_idx < len(notes):
@@ -85,7 +86,7 @@ def _insert_string_numbers(melody_body, notes):
                 token_text = f"{m.group('note')}\\{string_num}{tie}"
             note_idx += 1
 
-        skip_tie_continuation = bool(tie)
+        skip_tie_continuation = '~' in tie
         result.append(token_text)
 
     result.append(melody_body[pos:])
@@ -104,14 +105,18 @@ class SheetMusicTabExporter:
             self.env['lilypondPath'] = self.config.lilypond_path
             print(f"LilyPond útvonal beállítva: {self.config.lilypond_path}")
         else:
-            print("Hiba: A LilyPond útvonal nincs beállítva vagy nem létezik.")
+            print(
+                f"Hiba: A LilyPond nem található itt: {self.config.lilypond_path}\n"
+                "Állítsd be a LILYPOND_PATH környezeti változót a lilypond.exe teljes "
+                "elérési útjára, vagy tedd a lilypond.exe-t a PATH-ra."
+            )
 
     def create_score(self, notes, file_basename="output", tuning="E"):
         tuning_midi = _tuning_midi_from_label(tuning)
         part = stream.Stream()
         part.insert(0, instrument.Guitar())
 
-        part.append(meter.TimeSignature(self.config.default_time_signature))
+        part.append(TimeSignature(self.config.default_time_signature))
         part.append(tempo.MetronomeMark(number=self.audio_tempo))
         part.clef = clef.TrebleClef()
 
@@ -133,6 +138,10 @@ class SheetMusicTabExporter:
             current_beat = quant_offset
 
         final_part = part.makeMeasures()
+
+        if final_part is None:
+            print("Hiba: nem sikerult utemekre bontani a hangokat.")
+            return None
 
         target_dir = self.paths.sheet_output_dir
         os.makedirs(target_dir, exist_ok=True)

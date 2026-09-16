@@ -22,4 +22,6 @@ int main(int argc, char *argv[])
     {
         std::cout << input[i].GetNoteName() << "\t-\t" << result[i].ToString() << std::endl;
     }
+
+    return 0;
 }

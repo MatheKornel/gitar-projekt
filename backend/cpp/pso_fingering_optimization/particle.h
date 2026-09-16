@@ -6,7 +6,7 @@
 class Particle
 {
 public:
-    Particle(const int newDimension);
+    Particle(const size_t newDimension);
     std::vector<int> p;
     std::vector<double> p_velo;
     std::vector<int> p_opt;
@@ -14,5 +14,5 @@ public:
     void Initialize(const std::vector<InputNotes> &input); // egy részecske tartalma: az egész szám összes hangjához tartozó random lefogás
 
 private:
-    int dimension;
+    size_t dimension;
 };

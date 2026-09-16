@@ -11,6 +11,6 @@ public:
 
 private:
     std::vector<InputNotes> notes;
-    double CalculateCenter(const int currentIdx) const;
+    double CalculateCenter(const size_t currentIdx) const;
     double ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos) const;
 };
