@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 
         std::vector<BenchmarkCase> tests;
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/jotun_clean_fing-opt_test.txt", "jotun_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/almost_honest_clean_fing-opt_test.txt", "almost_honest_clean"));
 
         double totalAccuracy = 0.0;
         int validTests = 0;
