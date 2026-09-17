@@ -193,6 +193,12 @@ class GuitarProjectApp:
 
         cpp_exe = self.paths.cpp_executable(self.algo)
         if cpp_exe.exists():
+            print(f"\n[{self.algo}] Benchmark tesztek indítása...")
+            bench_result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+            print(bench_result.stdout)
+            if bench_result.stderr:
+                print("Benchmark hiba:", bench_result.stderr)
+
             print("Ujjrend optimalizálás indítása...")
             txt_path = os.path.join(str(cpp_exe.parent), "notes.txt")
             result = subprocess.run([str(cpp_exe), txt_path], cwd=str(cpp_exe.parent), capture_output=True, text=True)

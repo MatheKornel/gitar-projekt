@@ -9,6 +9,7 @@ add_library(CommonLib STATIC
     common/src/fretboard.cpp
     common/src/input_notes.cpp
     common/src/random.cpp
+    common/src/benchmark.cpp
 )
 
 target_include_directories(CommonLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
