@@ -36,15 +36,15 @@ BenchmarkCase Benchmark::LoadFromFile(const std::string &filepath, const std::st
     return bc;
 }
 
-double Benchmark::Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions)
+double Benchmark::Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions, std::ofstream &logFile)
 {
-    std::cout << "Futtatas: [" << testCase.testName << "]\n";
+    logFile << "Futtatas: [" << testCase.testName << "]\n";
 
     int total = testCase.expectedPositions.size();
 
     if (actualPositions.size() != total)
     {
-        std::cout << "  [!] HIBA: Kimenet merete nem egyezik! Vart: " << total << ", Kapott: " << actualPositions.size() << "\n\n";
+        logFile << "  [!] HIBA: Kimenet merete nem egyezik! Vart: " << total << ", Kapott: " << actualPositions.size() << "\n\n";
         return 0.0;
     }
 
@@ -65,15 +65,15 @@ double Benchmark::Evaluate(const BenchmarkCase &testCase, const std::vector<std:
         }
         else
         {
-            std::cout << "  - Hiba a(z) " << (i + 1) << ". hangnal (" << testCase.inputNotes[i].GetNoteName() << "): "
-                      << "Vart -> Hur:" << expString << " Bund:" << expFret
-                      << " | Kapott -> Hur:" << actString << " Bund:" << actFret << "\n";
+            logFile << "  - Hiba a(z) " << (i + 1) << ". hangnal (" << testCase.inputNotes[i].GetNoteName() << "): "
+                    << "Vart -> Hur:" << expString << " Bund:" << expFret
+                    << " | Kapott -> Hur:" << actString << " Bund:" << actFret << "\n";
         }
     }
 
     double accuracy = (static_cast<double>(correct) / total) * 100.0;
-    std::cout << "  Eredmeny: " << correct << "/" << total << " helyes ("
-              << std::fixed << std::setprecision(1) << accuracy << "%)\n\n";
+    logFile << "  Eredmeny: " << correct << "/" << total << " helyes ("
+            << std::fixed << std::setprecision(1) << accuracy << "%)\n\n";
 
     return accuracy;
 }

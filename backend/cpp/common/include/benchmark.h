@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <fstream>
 #include "input_notes.h"
 
 // egyetlen teszteset adatai
@@ -20,5 +21,5 @@ public:
     static BenchmarkCase LoadFromFile(const std::string &filepath, const std::string &testName);
 
     // összehasonlítja a várt és a kapott számokat, majd kiírja az eredményt
-    static double Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions);
+    static double Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions, std::ofstream &logFile);
 };

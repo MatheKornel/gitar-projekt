@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <fstream>
 #include "fretboard.h"
 #include "input_notes.h"
 #include "optimization.h"
@@ -11,7 +12,16 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cout << "\n--- Benchmark inditasa ---\n";
+        std::ofstream logFile("../../../benchmarks/benchmark_results.txt");
+        if (!logFile.is_open())
+        {
+            std::cerr << "Hiba: Nem sikerult letrehozni a log fajlt!\n";
+            return 1;
+        }
+
+        logFile << "\n--- Benchmark inditasa ---\n";
+
+        std::cout << "Benchmark futtatasa folyamatban... Az eredmenyek a fajlba irodnak.\n";
 
         std::vector<BenchmarkCase> tests;
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/jotun_clean_fing-opt_test.txt", "jotun_clean"));
@@ -38,16 +48,22 @@ int main(int argc, char *argv[])
                 actualPositions.push_back({pos.GetStringIdx(), pos.GetFretIdx()});
             }
 
-            double accuracy = Benchmark::Evaluate(test, actualPositions);
+            double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
             totalAccuracy += accuracy;
             validTests++;
         }
 
         if (validTests > 0)
         {
+            logFile << "Osszesitett pontossag: "
+                    << (totalAccuracy / validTests) << "%\n\n";
+
             std::cout << "Osszesitett pontossag: "
                       << (totalAccuracy / validTests) << "%\n\n";
         }
+
+        logFile.close();
+        std::cout << "A benchmark lefutott! Keresd a 'benchmark_results.txt' fajlt a benchmarks mappaban.\n";
 
         return 0;
     }
