@@ -1,15 +1,72 @@
 #include <iostream>
+#include <string>
+#include <vector>
+#include <utility>
+#include <fstream>
 #include "fretboard.h"
 #include "input_notes.h"
 #include "particle.h"
 #include "pso.h"
+#include "benchmark.h"
 
 int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Hiba: Nem adtad meg a bemeneti fajl nevet paramaterkent!" << std::endl;
-        return 1;
+        std::ofstream logFile("../../../benchmark_results/pso_benchmark_results.txt");
+        if (!logFile.is_open())
+        {
+            std::cerr << "Hiba: Nem sikerult letrehozni a log fajlt!\n";
+            return 1;
+        }
+
+        logFile << "\n--- Benchmark inditasa ---\n";
+        std::cout << "PSO Benchmark futtatasa folyamatban... Az eredmenyek a fajlba irodnak.\n";
+
+        std::vector<BenchmarkCase> tests;
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/jotun_clean_fing-opt_test.txt", "jotun_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/almost_honest_clean_fing-opt_test.txt", "almost_honest_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/ashes_in_your_mouth_clean_fing-opt_test.txt", "ashes_in_your_mouth_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick1_FN_fing-opt_test.txt", "AR_Lick1_FN"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick3_FN_fing-opt_test.txt", "AR_Lick3_FN"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/breaking_the_law_clean_fing-opt_test.txt", "breaking_the_law_clean"));
+
+        double totalAccuracy = 0.0;
+        int validTests = 0;
+
+        for (const auto &test : tests)
+        {
+            if (test.inputNotes.empty())
+                continue;
+
+            // PSO inicializálása a benchmark teszt adataival
+            PSO pso(test.inputNotes, test.inputNotes.size(), 50, 10000, 0.0001);
+            auto optResult = pso.PsoAlgo(5000, 100);
+
+            std::vector<std::pair<int, int>> actualPositions;
+            for (const auto &pos : optResult)
+            {
+                actualPositions.push_back({pos.GetStringIdx(), pos.GetFretIdx()});
+            }
+
+            double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
+            totalAccuracy += accuracy;
+            validTests++;
+        }
+
+        if (validTests > 0)
+        {
+            logFile << "Osszesitett pontossag: "
+                    << (totalAccuracy / validTests) << "%\n\n";
+
+            std::cout << "Osszesitett pontossag: "
+                      << (totalAccuracy / validTests) << "%\n\n";
+        }
+
+        logFile.close();
+        std::cout << "A benchmark lefutott! Keresd a 'pso_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";
+
+        return 0;
     }
 
     std::string filePath = argv[1];
@@ -29,7 +86,7 @@ int main(int argc, char *argv[])
     std::cout << "Optimalis lefogasok:" << std::endl;
     for (size_t i = 0; i < result.size(); i++)
     {
-        std::cout << input[i].GetNoteName() << "\t" << result[i].ToString() << std::endl;
+        std::cout << input[i].GetNoteName() << "\t-\t" << result[i].ToString() << std::endl;
     }
 
     return 0;

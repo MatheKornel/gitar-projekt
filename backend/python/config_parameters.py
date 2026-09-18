@@ -5,7 +5,7 @@ import shutil
 from dataclasses import dataclass, field
 
 
-_LILYPOND_FALLBACK = r"C:\Users\z005aumf\Documents\Máthé Kornél\lilypond-2.26.0\bin\lilypond.exe"
+_LILYPOND_FALLBACK = r"D:\lilypond-2.24.4\bin\lilypond.exe"
 
 
 def _resolve_lilypond_path() -> str:
