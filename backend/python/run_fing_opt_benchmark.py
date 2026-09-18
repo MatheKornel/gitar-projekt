@@ -31,7 +31,7 @@ def main():
         print(result.stderr.strip())
     
     # megkeressük és beolvassuk a legenerált log fájlt
-    log_path = os.path.join(str(cpp_exe.parent), f"../../../benchmarks/{args.algo}_benchmark_results.txt")
+    log_path = os.path.join(str(cpp_exe.parent), f"../../../benchmark_results/{args.algo}_benchmark_results.txt")
     log_path = os.path.normpath(log_path)
     
     if os.path.exists(log_path):

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::ofstream logFile("../../../benchmarks/main_plus_viterbi_benchmark_results.txt");
+        std::ofstream logFile("../../../benchmark_results/main_plus_viterbi_benchmark_results.txt");
         if (!logFile.is_open())
         {
             std::cerr << "Hiba: Nem sikerult letrehozni a log fajlt!\n";
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         }
 
         logFile.close();
-        std::cout << "A benchmark lefutott! Keresd a 'main_plus_viterbi_benchmark_results.txt' fajlt a benchmarks mappaban.\n";
+        std::cout << "A benchmark lefutott! Keresd a 'main_plus_viterbi_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";
 
         return 0;
     }
