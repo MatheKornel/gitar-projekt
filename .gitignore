@@ -107,3 +107,4 @@ dist/
 # -----
 test_txt_to_excel/
 notes.txt
+lilypond_path.txt

@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import subprocess
 
 from music21 import stream, note, duration, environment, clef, tempo, instrument
@@ -101,14 +102,21 @@ class SheetMusicTabExporter:
         self.config = config or ProjectConfig()
 
         self.env = environment.Environment()
-        if os.path.exists(self.config.lilypond_path):
-            self.env['lilypondPath'] = self.config.lilypond_path
-            print(f"LilyPond útvonal beállítva: {self.config.lilypond_path}")
+        # a resolver vagy teljes elérési utat, vagy PATH-ról futtatható nevet ad
+        resolved = self.config.lilypond_path
+        if not os.path.isfile(resolved):
+            resolved = shutil.which(resolved) or resolved
+
+        if os.path.isfile(resolved):
+            self.env['lilypondPath'] = resolved
+            print(f"LilyPond útvonal beállítva: {resolved}")
         else:
             print(
-                f"Hiba: A LilyPond nem található itt: {self.config.lilypond_path}\n"
-                "Állítsd be a LILYPOND_PATH környezeti változót a lilypond.exe teljes "
-                "elérési útjára, vagy tedd a lilypond.exe-t a PATH-ra."
+                f"Hiba: A LilyPond nem található ({self.config.lilypond_path}).\n"
+                "Megoldás (bármelyik elég):\n"
+                "  - tedd a lilypond futtathatót a PATH-ra,\n"
+                "  - állítsd be a LILYPOND_PATH környezeti változót a teljes elérési útra,\n"
+                "  - vagy hozz létre egy lilypond_path.txt fájlt a projektben az útvonallal."
             )
 
     def create_score(self, notes, file_basename="output", tuning="E"):
