@@ -19,7 +19,14 @@ class MidiExporter:
         track = mido.MidiTrack()
         mid.tracks.append(track)
 
-        track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(self.tempo)))
+        # sáv nevének beállítása ( Guitar Pro ezt jeleníti meg a sáv listában)
+        track.append(mido.MetaMessage("track_name", name="Electric Guitar", time=0))
+
+        # tempó beállítása
+        track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(self.tempo), time=0))
+        
+        # hangszer beállítása: 24 --> klasszikus nylon húros gitár
+        track.append(mido.Message("program_change", program=24, time=0))
 
         quantizer = Quantizing(notes)
         events = []
