@@ -8,9 +8,8 @@ Futtatas: [jotun_clean]
   - Hiba a(z) 15. hangnal (G4): Vart -> Hur:4 Bund:8 | Kapott -> Hur:3 Bund:12
   - Hiba a(z) 16. hangnal (F#4): Vart -> Hur:4 Bund:7 | Kapott -> Hur:3 Bund:11
   - Hiba a(z) 20. hangnal (G4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:4 Bund:8
-  - Hiba a(z) 30. hangnal (D4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:2 Bund:12
-  - Hiba a(z) 31. hangnal (E4): Vart -> Hur:2 Bund:9 | Kapott -> Hur:2 Bund:14
-  Eredmeny: 22/31 helyes (71.0%)
+  - Hiba a(z) 31. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:2 Bund:14
+  Eredmeny: 23/31 helyes (74.2%)
 
 Futtatas: [almost_honest_clean]
   - Hiba a(z) 2. hangnal (B2): Vart -> Hur:1 Bund:2 | Kapott -> Hur:0 Bund:7
@@ -80,5 +79,5 @@ Futtatas: [e0_clean]
 Futtatas: [e24_clean]
   Eredmeny: 1/1 helyes (100.0%)
 
-Osszesitett pontossag: 60.1%
+Osszesitett pontossag: 60.4%
 

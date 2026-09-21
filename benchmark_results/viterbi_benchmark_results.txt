@@ -30,8 +30,8 @@ Futtatas: [jotun_clean]
   - Hiba a(z) 27. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
   - Hiba a(z) 28. hangnal (G4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:5 Bund:3
   - Hiba a(z) 29. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 30. hangnal (D4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:4 Bund:3
-  - Hiba a(z) 31. hangnal (E4): Vart -> Hur:2 Bund:9 | Kapott -> Hur:5 Bund:0
+  - Hiba a(z) 30. hangnal (D4): Vart -> Hur:2 Bund:12 | Kapott -> Hur:4 Bund:3
+  - Hiba a(z) 31. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
   Eredmeny: 0/31 helyes (0.0%)
 
 Futtatas: [almost_honest_clean]
