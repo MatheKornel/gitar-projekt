@@ -1,0 +1,2 @@
+MIDI	Onset	Duration	Name	String	Fret
+64	1.624	2.604	E4	5	0

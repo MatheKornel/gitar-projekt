@@ -30,6 +30,11 @@ int main(int argc, char *argv[])
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick1_FN_fing-opt_test.txt", "AR_Lick1_FN"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick3_FN_fing-opt_test.txt", "AR_Lick3_FN"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/breaking_the_law_clean_fing-opt_test.txt", "breaking_the_law_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_0-3-5-3-0_fing-opt_test.txt", "A_0-3-5-3-0"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_clean_fing-opt_test.txt", "A_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/E_0-3-5-3-0_fing-opt_test.txt", "E_0-3-5-3-0"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e0_clean_fing-opt_test.txt", "e0_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e24_clean_fing-opt_test.txt", "e24_clean"));
 
         double totalAccuracy = 0.0;
         int validTests = 0;

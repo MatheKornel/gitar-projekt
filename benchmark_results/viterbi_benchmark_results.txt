@@ -101,5 +101,22 @@ Futtatas: [AR_Lick3_FN]
 Futtatas: [breaking_the_law_clean]
   Eredmeny: 18/18 helyes (100.0%)
 
-Osszesitett pontossag: 60.3%
+Futtatas: [A_0-3-5-3-0]
+  - Hiba a(z) 3. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
+  Eredmeny: 4/5 helyes (80.0%)
+
+Futtatas: [A_clean]
+  Eredmeny: 1/1 helyes (100.0%)
+
+Futtatas: [E_0-3-5-3-0]
+  - Hiba a(z) 3. hangnal (A2): Vart -> Hur:0 Bund:5 | Kapott -> Hur:1 Bund:0
+  Eredmeny: 4/5 helyes (80.0%)
+
+Futtatas: [e0_clean]
+  Eredmeny: 1/1 helyes (100.0%)
+
+Futtatas: [e24_clean]
+  Eredmeny: 1/1 helyes (100.0%)
+
+Osszesitett pontossag: 74.7%
 

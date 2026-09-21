@@ -1,0 +1,2 @@
+MIDI	Onset	Duration	Name	String	Fret
+45	1.364	5.288	A2	1	0
