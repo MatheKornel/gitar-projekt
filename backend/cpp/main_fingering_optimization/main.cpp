@@ -38,6 +38,8 @@ int main(int argc, char *argv[])
 
         double totalAccuracy = 0.0;
         int validTests = 0;
+        size_t totalCorrectNotes = 0;
+        size_t totalTotalNotes = 0;
 
         for (const auto &test : tests)
         {
@@ -56,15 +58,38 @@ int main(int argc, char *argv[])
             double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
             totalAccuracy += accuracy;
             validTests++;
+            
+            size_t testTotal = test.expectedPositions.size();
+            size_t testCorrect = 0;
+            
+            if (actualPositions.size() == testTotal)
+            {
+                for (size_t i = 0; i < testTotal; i++)
+                {
+                    if (test.expectedPositions[i].first == actualPositions[i].first && test.expectedPositions[i].second == actualPositions[i].second)
+                    {
+                        testCorrect++;
+                    }
+                }
+            }
+            
+            totalCorrectNotes += testCorrect;
+            totalTotalNotes += testTotal;
         }
 
         if (validTests > 0)
         {
-            logFile << "Osszesitett pontossag: "
-                    << (totalAccuracy / validTests) << "%\n\n";
+            double weightedAccuracy = (static_cast<double>(totalCorrectNotes) / totalTotalNotes) * 100.0;
+            double unweightedAccuracy = totalAccuracy / validTests;
 
-            std::cout << "Osszesitett pontossag: "
-                      << (totalAccuracy / validTests) << "%\n\n";
+            logFile << "=======================================\n";
+            logFile << "VEGSO EREDMENYEK (" << validTests << " teszt, " << totalTotalNotes << " hang):\n";
+            logFile << "Teszt-alapu (Sulyozatlan) pontossag: " << unweightedAccuracy << "%\n";
+            logFile << "Hang-alapu (Sulyozott) pontossag:    " << weightedAccuracy << "% (" << totalCorrectNotes << "/" << totalTotalNotes << ")\n";
+            logFile << "=======================================\n\n";
+
+            std::cout << "Teszt-alapu pontossag: " << unweightedAccuracy << "%\n";
+            std::cout << "Hang-alapu pontossag:  " << weightedAccuracy << "%\n\n";
         }
 
         logFile.close();

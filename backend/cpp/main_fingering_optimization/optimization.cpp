@@ -53,25 +53,30 @@ double Optimization::CalculateCenter(const size_t currentIdx)
     }
 }
 
+double Optimization::InitialFretPenalty(const NotePosition& pos) const
+{
+    return pos.GetFretIdx() * 0.01;
+}
+
 double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
 {
     double extraCost = 0.0;
     std::vector<int> tuning = FretBoard::GetTuning();
     double centerThreshold = tuning.empty() ? 64.0 : (tuning[0] + 24.0);
-    if (currentCenter > centerThreshold && nextPos.GetFretIdx() < 5)
+    if (currentCenter > centerThreshold && nextPos.GetFretIdx() < 3)
     {
-        extraCost += 10.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
+        extraCost += 5.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
     }
 
-    if (prevPos.GetFretIdx() >= 5 && nextPos.GetFretIdx() == 0)
+    if (prevPos.GetFretIdx() >= 5 && nextPos.GetFretIdx() == 0 && nextPos.GetStringIdx() > 1)
     {
-        extraCost += 30.0; // ha az 5. bund felett volt az előző hang, akkor ne váltsunk üres húrra
+        extraCost += prevPos.GetFretIdx() * 2.0; // az E és A húrra nem érvényes a büntetés, de a többi húrra igen, ha az előző hang 5. bund felett volt, akkor ne váltsunk üres húrra
     }
 
     const int fretDiff = abs(nextPos.GetFretIdx() - prevPos.GetFretIdx());
-    if (prevPos.GetFretIdx() != 0 && nextPos.GetFretIdx() != 0 && fretDiff <= 3)
+    if (fretDiff <= 3 && !(prevPos.GetFretIdx() == 0 && nextPos.GetFretIdx() != 0 && abs(nextPos.GetFretIdx() - prevPrevPos.GetFretIdx()) > 4)) 
     {
-        extraCost -= 5.0; // ha a kéz egy helyben marad, azt jutalmazzuk
+         extraCost -= 5.0; // ha ugyanazon a húron vagyunk, vagy a bundtávolság kicsi (kéz egy helyben marad jutalom)
     }
 
     if ((nextPos.GetStringIdx() == 0 || nextPos.GetStringIdx() == 1) && nextPos.GetFretIdx() > 12)
@@ -79,15 +84,27 @@ double Optimization::ExtraCost(const double currentCenter, const NotePosition &n
         extraCost += 25.0; // az E és A húron ne játszunk riffeket a 12. bund felett
     }
 
-    const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
-    if (stringDiff > 1)
+    if (nextPos.GetFretIdx() == 0 && nextPos.GetStringIdx() >= 2)
     {
-        extraCost += 25.0 * (stringDiff - 1); // húrváltást büntetjük, mert riffeknél nehezebb váltani
+        extraCost += 15.0; // vékony húrokat ne játsza üresen riffek közben
     }
 
-    if ((prevPos.GetStringIdx() == 0 && prevPos.GetFretIdx() == 0) || (nextPos.GetStringIdx() == 0 && nextPos.GetFretIdx() == 0))
+    const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
+    // húrváltás büntetés
+    if (stringDiff == 1)
     {
-        extraCost -= 5.0; // ha üres E húr és bármi között van váltás, azt jutalmazzuk, az nem baj
+        extraCost += 8.0;
+    }
+    else if (stringDiff > 1)
+    {
+        extraCost += 25.0 * (stringDiff - 1);
+    }
+
+    bool isPrevPedal = (prevPos.GetFretIdx() == 0 && prevPos.GetStringIdx() <= 1);
+    bool isNextPedal = (nextPos.GetFretIdx() == 0 && nextPos.GetStringIdx() <= 1);
+    if (isPrevPedal || isNextPedal)
+    {
+        extraCost -= 5.0; // csak a vastag pedálhúrokat (E és A) jutalmazzuk, ha onnan jövünk vagy oda megyünk
     }
 
     if (prevPrevPos.GetFretIdx() != -1) // ha V alakú, oda vissza ugrálások vannak, büntetjük
@@ -154,7 +171,7 @@ std::vector<NotePosition> Optimization::RunOptimization()
 
         for (const auto &pos : firstNotePositions)
         {
-            double initialCost = 0.0;
+            double initialCost = InitialFretPenalty(pos);
             if (!finalPositions.empty())
             {
                 NotePosition prevPos = finalPositions.back();
@@ -187,6 +204,8 @@ std::vector<NotePosition> Optimization::RunOptimization()
             double ioi = window[j].GetOnset() - window[j - 1].GetOnset();
             double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
 
+            double dynamicCenter = CalculateCenter(i + j);
+
             for (const auto &path : currentPaths)
             {
                 const auto &prevPos = path.positions.back();
@@ -204,7 +223,7 @@ std::vector<NotePosition> Optimization::RunOptimization()
                 for (const auto &nextPos : nextPositions)
                 {
                     const double stepCost = prevPos.Distance(nextPos) * urgency;
-                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
+                    const double extraCost = ExtraCost(dynamicCenter, nextPos, prevPos, prevPrevPos);
                     
                     Path expandedPath = path;
                     expandedPath.positions.push_back(nextPos);

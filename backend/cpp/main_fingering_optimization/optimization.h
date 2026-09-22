@@ -12,5 +12,6 @@ public:
 private:
     std::vector<InputNotes> notes;
     double CalculateCenter(const size_t currentIdx);
+    double InitialFretPenalty(const NotePosition& pos) const;
     double ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const;
 };
