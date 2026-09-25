@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
             double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
             totalAccuracy += accuracy;
             validTests++;
-            
+
             size_t testTotal = test.expectedPositions.size();
             size_t testCorrect = 0;
-            
+
             if (actualPositions.size() == testTotal)
             {
                 for (size_t i = 0; i < testTotal; i++)
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            
+
             totalCorrectNotes += testCorrect;
             totalTotalNotes += testTotal;
         }
