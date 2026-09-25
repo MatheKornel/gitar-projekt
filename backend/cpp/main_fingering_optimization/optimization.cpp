@@ -132,7 +132,7 @@ double Optimization::Urgency(const size_t noteIdx) const
     return std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
 }
 
-double Optimization::PositionCost(const double currentCenter, const NotePosition &pos) const
+double Optimization::PositionCost(const double currentCenter, const NotePosition &pos, const int handFret) const
 {
     double positionCost = 0.0;
     std::vector<int> tuning = FretBoard::GetTuning();
@@ -147,9 +147,12 @@ double Optimization::PositionCost(const double currentCenter, const NotePosition
         positionCost += 25.0; // az E és A húron ne játszunk riffeket a 12. bund felett
     }
 
-    if (pos.GetFretIdx() == 0 && pos.GetStringIdx() >= 2)
+    // vékony húrokat ne játsza üresen riffek közben, kivéve első pozícióban (a kéz az 1-2. bundnál), ott az üres húr természetes
+    // ha a kéz pozíciója még nem ismert (-1), büntetünk, különben az üres húrok miatt a kéz sosem kapna pozíciót
+    const int highHandFret = 3;
+    if (pos.GetFretIdx() == 0 && pos.GetStringIdx() >= 2 && (handFret == -1 || handFret >= highHandFret))
     {
-        positionCost += 15.0; // vékony húrokat ne játsza üresen riffek közben
+        positionCost += 15.0;
     }
 
     return positionCost;
@@ -192,7 +195,7 @@ double Optimization::StepCost(const size_t noteIdx, const double currentCenter, 
 {
     double stepCost = HandCost(prevHandFret, nextPos, nextHandFret) * Urgency(noteIdx);
     stepCost += StringChangeCost(prevPos, nextPos);
-    stepCost += PositionCost(currentCenter, nextPos);
+    stepCost += PositionCost(currentCenter, nextPos, nextHandFret);
     stepCost += ExtraCost(nextPos, prevPos, prevPrevPos);
     return stepCost;
 }

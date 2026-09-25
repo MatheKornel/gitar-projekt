@@ -48,8 +48,7 @@ Futtatas: [ashes_in_your_mouth_clean]
 
 Futtatas: [AR_Lick1_FN]
   - Hiba a(z) 3. hangnal (G3): Vart -> Hur:3 Bund:0 | Kapott -> Hur:2 Bund:5
-  - Hiba a(z) 5. hangnal (D3): Vart -> Hur:2 Bund:0 | Kapott -> Hur:1 Bund:5
-  Eredmeny: 11/13 helyes (84.6%)
+  Eredmeny: 12/13 helyes (92.3%)
 
 Futtatas: [AR_Lick3_FN]
   - Hiba a(z) 10. hangnal (F3): Vart -> Hur:1 Bund:8 | Kapott -> Hur:2 Bund:3
@@ -76,7 +75,7 @@ Futtatas: [e24_clean]
 
 =======================================
 VEGSO EREDMENYEK (11 teszt, 186 hang):
-Teszt-alapu (Sulyozatlan) pontossag: 89.8%
-Hang-alapu (Sulyozott) pontossag:    78.0% (145/186)
+Teszt-alapu (Sulyozatlan) pontossag: 90.5%
+Hang-alapu (Sulyozott) pontossag:    78.5% (146/186)
 =======================================
 

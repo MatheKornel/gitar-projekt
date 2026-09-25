@@ -17,7 +17,7 @@ private:
     std::vector<int> PossibleHandFrets(const NotePosition &pos, const int prevHandFret) const;
     double HandCost(const int prevHandFret, const NotePosition &nextPos, const int nextHandFret) const; // bal kéz mozgása
     double StringChangeCost(const NotePosition &prevPos, const NotePosition &nextPos) const;          // húrváltás (pengetőkéz)
-    double PositionCost(const double currentCenter, const NotePosition &pos) const;                  // a lefogás helye a fogólapon
+    double PositionCost(const double currentCenter, const NotePosition &pos, const int handFret) const; // a lefogás helye a fogólapon
     double ExtraCost(const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const;
     double StepCost(const size_t noteIdx, const double currentCenter, const NotePosition &prevPrevPos, const NotePosition &prevPos, const int prevHandFret, const NotePosition &nextPos, const int nextHandFret) const;
 };
