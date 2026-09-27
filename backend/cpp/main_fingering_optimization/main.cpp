@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/E_0-3-5-3-0_fing-opt_test.txt", "E_0-3-5-3-0"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e0_clean_fing-opt_test.txt", "e0_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e24_clean_fing-opt_test.txt", "e24_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/endgame_clean_fing-opt_test.txt", "endgame_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/trust_clean_fing-opt_test.txt", "trust_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/powerslave_clean_fing-opt_test.txt", "powerslave_clean"));
 
         double totalAccuracy = 0.0;
         int validTests = 0;

@@ -73,9 +73,21 @@ Futtatas: [e0_clean]
 Futtatas: [e24_clean]
   Eredmeny: 1/1 helyes (100.0%)
 
+Futtatas: [endgame_clean]
+  Eredmeny: 46/46 helyes (100.0%)
+
+Futtatas: [trust_clean]
+  - Hiba a(z) 2. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:0 Bund:12
+  - Hiba a(z) 22. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:0 Bund:10
+  Eredmeny: 24/26 helyes (92.3%)
+
+Futtatas: [powerslave_clean]
+  - Hiba a(z) 44. hangnal (A2): Vart -> Hur:1 Bund:0 | Kapott -> Hur:0 Bund:5
+  Eredmeny: 43/44 helyes (97.7%)
+
 =======================================
-VEGSO EREDMENYEK (11 teszt, 186 hang):
-Teszt-alapu (Sulyozatlan) pontossag: 90.5%
-Hang-alapu (Sulyozott) pontossag:    78.5% (146/186)
+VEGSO EREDMENYEK (14 teszt, 302 hang):
+Teszt-alapu (Sulyozatlan) pontossag: 91.8%
+Hang-alapu (Sulyozott) pontossag:    85.8% (259/302)
 =======================================
 
