@@ -87,17 +87,25 @@ double Optimization::HandCost(const int prevHandFret, const NotePosition &nextPo
 
     double cost = 0.0;
 
-    // csak akkor van kézmozgás, ha mindkét kézpozíció ismert (üres húroknál a kéz nem mozdul)
-    if (prevHandFret != -1 && nextHandFret != -1 && prevHandFret != nextHandFret)
+    // ha a darab üres húrokkal kezdődik, a kéz pozíciója még ismeretlen (-1),
+    // ilyenkor úgy vesszük, hogy a kéz az első pozícióban (1. bund) van, így az első lefogott hang sem kerülhet ingyen bárhová
+    int fromHandFret = prevHandFret;
+    if (fromHandFret == -1 && nextHandFret != -1)
     {
-        const int handDiff = abs(nextHandFret - prevHandFret);
+        fromHandFret = 1;
+    }
+
+    // csak akkor van kézmozgás, ha mindkét kézpozíció ismert (üres húroknál a kéz nem mozdul)
+    if (fromHandFret != -1 && nextHandFret != -1 && fromHandFret != nextHandFret)
+    {
+        const int handDiff = abs(nextHandFret - fromHandFret);
         cost += handWeight * handDiff;
 
         // menzúra mm-ben (a 648 mm a tipikus gitár menzúra)
         const double L = 648.0;
 
         // a kéz két pozíciójának fizikai távolsága a nyeregtől (mm)
-        double prevHandMm = L * (1.0 - std::pow(2.0, -prevHandFret / 12.0));
+        double prevHandMm = L * (1.0 - std::pow(2.0, -fromHandFret / 12.0));
         double nextHandMm = L * (1.0 - std::pow(2.0, -nextHandFret / 12.0));
 
         // a kéz elmozdulása mm-ben
@@ -161,7 +169,7 @@ double Optimization::PositionCost(const double currentCenter, const NotePosition
 double Optimization::StringChangeCost(const NotePosition &prevPos, const NotePosition &nextPos) const
 {
     const double stringWeight = 10.5; // szomszédos húrra váltás büntetés
-    const double skipWeight = 27.5;   // minden átugrott húr büntetése (húrugrás, a pengetőkéznek nehezebb)
+    const double skipWeight = 15.0;   // minden átugrott húr büntetése (húrugrás, a pengetőkéznek nehezebb)
 
     const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
     if (stringDiff == 0)
