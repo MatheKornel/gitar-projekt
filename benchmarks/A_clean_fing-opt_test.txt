@@ -1,2 +1,3 @@
-MIDI	Onset	Duration	Name	String	Fret
-45	1.364	5.288	A2	1	0
+# tuning: 40 45 50 55 59 64 				
+MIDI	Onset	Duration	Name	Positions
+45	1.364	5.288	A2	1:0|0:5
