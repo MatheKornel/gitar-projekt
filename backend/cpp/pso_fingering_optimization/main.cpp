@@ -54,7 +54,8 @@ int main(int argc, char *argv[])
                 actualPositions.push_back({pos.GetStringIdx(), pos.GetFretIdx()});
             }
 
-            double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
+            BenchmarkResult result = Benchmark::Evaluate(test, actualPositions, logFile);
+            double accuracy = (static_cast<double>(result.acceptedCorrect) / result.total) * 100.0;
             totalAccuracy += accuracy;
             validTests++;
         }

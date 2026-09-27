@@ -1,3 +1,4 @@
+MIDI	Onset	Duration	Name	String	Fret
 40	0	0.227	E2	0	0
 52	0.227	0.227	E3	1	7
 48	0.455	0.227	C3	0	8

@@ -39,15 +39,19 @@ int main(int argc, char *argv[])
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/trust_clean_fing-opt_test.txt", "trust_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/powerslave_clean_fing-opt_test.txt", "powerslave_clean"));
 
-        double totalAccuracy = 0.0;
         int validTests = 0;
-        size_t totalCorrectNotes = 0;
-        size_t totalTotalNotes = 0;
+        double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)
+        double sumAcceptedAccuracy = 0.0;
+        int totalNotes = 0;                // összes hang (hang-alapú pontossághoz)
+        int totalPreferredCorrect = 0;
+        int totalAcceptedCorrect = 0;
 
         for (const auto &test : tests)
         {
             if (test.inputNotes.empty())
                 continue;
+
+            FretBoard::SetTuning(test.tuning); // minden teszt a saját hangolásával fut
 
             Optimization opt(test.inputNotes);
             auto optResult = opt.RunOptimization();
@@ -58,41 +62,34 @@ int main(int argc, char *argv[])
                 actualPositions.push_back({pos.GetStringIdx(), pos.GetFretIdx()});
             }
 
-            double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
-            totalAccuracy += accuracy;
+            BenchmarkResult result = Benchmark::Evaluate(test, actualPositions, logFile);
             validTests++;
-
-            size_t testTotal = test.expectedPositions.size();
-            size_t testCorrect = 0;
-
-            if (actualPositions.size() == testTotal)
-            {
-                for (size_t i = 0; i < testTotal; i++)
-                {
-                    if (test.expectedPositions[i].first == actualPositions[i].first && test.expectedPositions[i].second == actualPositions[i].second)
-                    {
-                        testCorrect++;
-                    }
-                }
-            }
-
-            totalCorrectNotes += testCorrect;
-            totalTotalNotes += testTotal;
+            sumPreferredAccuracy += (static_cast<double>(result.preferredCorrect) / result.total) * 100.0;
+            sumAcceptedAccuracy += (static_cast<double>(result.acceptedCorrect) / result.total) * 100.0;
+            totalNotes += result.total;
+            totalPreferredCorrect += result.preferredCorrect;
+            totalAcceptedCorrect += result.acceptedCorrect;
         }
 
         if (validTests > 0)
         {
-            double weightedAccuracy = (static_cast<double>(totalCorrectNotes) / totalTotalNotes) * 100.0;
-            double unweightedAccuracy = totalAccuracy / validTests;
+            double preferredTestAccuracy = sumPreferredAccuracy / validTests;
+            double acceptedTestAccuracy = sumAcceptedAccuracy / validTests;
+            double preferredNoteAccuracy = (static_cast<double>(totalPreferredCorrect) / totalNotes) * 100.0;
+            double acceptedNoteAccuracy = (static_cast<double>(totalAcceptedCorrect) / totalNotes) * 100.0;
 
             logFile << "=======================================\n";
-            logFile << "VEGSO EREDMENYEK (" << validTests << " teszt, " << totalTotalNotes << " hang):\n";
-            logFile << "Teszt-alapu (Sulyozatlan) pontossag: " << unweightedAccuracy << "%\n";
-            logFile << "Hang-alapu (Sulyozott) pontossag:    " << weightedAccuracy << "% (" << totalCorrectNotes << "/" << totalTotalNotes << ")\n";
+            logFile << "VEGSO EREDMENYEK (" << validTests << " teszt, " << totalNotes << " hang):\n";
+            logFile << "Kedvenc lefogas:\n";
+            logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << preferredTestAccuracy << "%\n";
+            logFile << "  Hang-alapu (Sulyozott) pontossag:    " << preferredNoteAccuracy << "% (" << totalPreferredCorrect << "/" << totalNotes << ")\n";
+            logFile << "Elfogadhato lefogas:\n";
+            logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << acceptedTestAccuracy << "%\n";
+            logFile << "  Hang-alapu (Sulyozott) pontossag:    " << acceptedNoteAccuracy << "% (" << totalAcceptedCorrect << "/" << totalNotes << ")\n";
             logFile << "=======================================\n\n";
 
-            std::cout << "Teszt-alapu pontossag: " << unweightedAccuracy << "%\n";
-            std::cout << "Hang-alapu pontossag:  " << weightedAccuracy << "%\n\n";
+            std::cout << "Kedvenc lefogas     - teszt-alapu: " << preferredTestAccuracy << "%, hang-alapu: " << preferredNoteAccuracy << "%\n";
+            std::cout << "Elfogadhato lefogas - teszt-alapu: " << acceptedTestAccuracy << "%, hang-alapu: " << acceptedNoteAccuracy << "%\n\n";
         }
 
         logFile.close();
