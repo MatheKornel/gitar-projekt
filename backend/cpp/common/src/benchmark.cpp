@@ -135,6 +135,20 @@ std::string Benchmark::PositionsToString(const std::vector<std::pair<int, int>> 
     return text;
 }
 
+int Benchmark::CountPossiblePositions(const int midiNote, const std::vector<int> &tuning)
+{
+    int count = 0;
+    for (const int openString : tuning)
+    {
+        const int fretIdx = midiNote - openString;
+        if (fretIdx >= 0 && fretIdx <= 24)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
 BenchmarkResult Benchmark::Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions, std::ofstream &logFile)
 {
     logFile << "Futtatas: [" << testCase.testName << "]\n";
@@ -166,14 +180,30 @@ BenchmarkResult Benchmark::Evaluate(const BenchmarkCase &testCase, const std::ve
 
         const std::string actualText = std::to_string(actual.first) + ":" + std::to_string(actual.second);
 
+        // választásos a hang, ha több helyen is lefogható
+        const bool isChoice = CountPossiblePositions(testCase.inputNotes[i].GetMidiNote(), testCase.tuning) > 1;
+        if (isChoice)
+        {
+            result.choiceTotal++;
+        }
+
         if (matchIdx == 0)
         {
             result.preferredCorrect++;
             result.acceptedCorrect++;
+            if (isChoice)
+            {
+                result.choicePreferredCorrect++;
+                result.choiceAcceptedCorrect++;
+            }
         }
         else if (matchIdx > 0)
         {
             result.acceptedCorrect++;
+            if (isChoice)
+            {
+                result.choiceAcceptedCorrect++;
+            }
             logFile << "  ~ Alternativ lefogas a(z) " << (i + 1) << ". hangnal (" << testCase.inputNotes[i].GetNoteName() << "): "
                     << "Kedvenc -> " << accepted[0].first << ":" << accepted[0].second << " | Kapott -> " << actualText << "\n";
         }
@@ -189,7 +219,21 @@ BenchmarkResult Benchmark::Evaluate(const BenchmarkCase &testCase, const std::ve
 
     logFile << std::fixed << std::setprecision(1)
             << "  Eredmeny: kedvenc " << result.preferredCorrect << "/" << result.total << " (" << preferredAccuracy << "%), "
-            << "elfogadhato " << result.acceptedCorrect << "/" << result.total << " (" << acceptedAccuracy << "%)\n\n";
+            << "elfogadhato " << result.acceptedCorrect << "/" << result.total << " (" << acceptedAccuracy << "%)\n";
+
+    if (result.choiceTotal > 0)
+    {
+        const double choicePreferredAccuracy = (static_cast<double>(result.choicePreferredCorrect) / result.choiceTotal) * 100.0;
+        const double choiceAcceptedAccuracy = (static_cast<double>(result.choiceAcceptedCorrect) / result.choiceTotal) * 100.0;
+
+        logFile << "  Valasztasos hangokon (" << result.choiceTotal << "): "
+                << "kedvenc " << result.choicePreferredCorrect << "/" << result.choiceTotal << " (" << choicePreferredAccuracy << "%), "
+                << "elfogadhato " << result.choiceAcceptedCorrect << "/" << result.choiceTotal << " (" << choiceAcceptedAccuracy << "%)\n\n";
+    }
+    else
+    {
+        logFile << "  Valasztasos hangokon: nincs valasztasos hang\n\n";
+    }
 
     return result;
 }

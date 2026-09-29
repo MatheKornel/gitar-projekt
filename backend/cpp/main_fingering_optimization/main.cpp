@@ -50,6 +50,9 @@ int main(int argc, char *argv[])
         int totalNotes = 0; // összes hang (hang-alapú pontossághoz)
         int totalPreferredCorrect = 0;
         int totalAcceptedCorrect = 0;
+        int totalChoiceNotes = 0; // választásos hangok (több helyen is lefoghatók)
+        int totalChoicePreferredCorrect = 0;
+        int totalChoiceAcceptedCorrect = 0;
 
         for (const auto &test : tests)
         {
@@ -74,6 +77,9 @@ int main(int argc, char *argv[])
             totalNotes += result.total;
             totalPreferredCorrect += result.preferredCorrect;
             totalAcceptedCorrect += result.acceptedCorrect;
+            totalChoiceNotes += result.choiceTotal;
+            totalChoicePreferredCorrect += result.choicePreferredCorrect;
+            totalChoiceAcceptedCorrect += result.choiceAcceptedCorrect;
         }
 
         if (validTests > 0)
@@ -91,10 +97,24 @@ int main(int argc, char *argv[])
             logFile << "Elfogadhato lefogas:\n";
             logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << acceptedTestAccuracy << "%\n";
             logFile << "  Hang-alapu (Sulyozott) pontossag:    " << acceptedNoteAccuracy << "% (" << totalAcceptedCorrect << "/" << totalNotes << ")\n";
-            logFile << "=======================================\n\n";
 
             std::cout << "Kedvenc lefogas     - teszt-alapu: " << preferredTestAccuracy << "%, hang-alapu: " << preferredNoteAccuracy << "%\n";
-            std::cout << "Elfogadhato lefogas - teszt-alapu: " << acceptedTestAccuracy << "%, hang-alapu: " << acceptedNoteAccuracy << "%\n\n";
+            std::cout << "Elfogadhato lefogas - teszt-alapu: " << acceptedTestAccuracy << "%, hang-alapu: " << acceptedNoteAccuracy << "%\n";
+
+            // választásos hangokon csak hang-alapú pontosságot számolunk (van teszt, amiben egy választásos hang sincs)
+            if (totalChoiceNotes > 0)
+            {
+                double choicePreferredAccuracy = (static_cast<double>(totalChoicePreferredCorrect) / totalChoiceNotes) * 100.0;
+                double choiceAcceptedAccuracy = (static_cast<double>(totalChoiceAcceptedCorrect) / totalChoiceNotes) * 100.0;
+
+                logFile << "Valasztasos hangokon (" << totalChoiceNotes << " hang, hang-alapu):\n";
+                logFile << "  Kedvenc lefogas:     " << choicePreferredAccuracy << "% (" << totalChoicePreferredCorrect << "/" << totalChoiceNotes << ")\n";
+                logFile << "  Elfogadhato lefogas: " << choiceAcceptedAccuracy << "% (" << totalChoiceAcceptedCorrect << "/" << totalChoiceNotes << ")\n";
+
+                std::cout << "Valasztasos hangokon - kedvenc: " << choicePreferredAccuracy << "%, elfogadhato: " << choiceAcceptedAccuracy << "%\n";
+            }
+            logFile << "=======================================\n\n";
+            std::cout << "\n";
         }
 
         logFile.close();

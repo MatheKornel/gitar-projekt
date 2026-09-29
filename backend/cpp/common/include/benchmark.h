@@ -21,6 +21,11 @@ struct BenchmarkResult
     int total = 0;            // hangok száma
     int preferredCorrect = 0; // ahol a kedvenc (első) lefogást adta az algoritmus
     int acceptedCorrect = 0;  // ahol bármelyik elfogadható lefogást adta az algoritmus
+
+    // ugyanezek csak a választásos hangokra (amelyek a fogólapon több helyen is lefoghatók)
+    int choiceTotal = 0;
+    int choicePreferredCorrect = 0;
+    int choiceAcceptedCorrect = 0;
 };
 
 class Benchmark
@@ -41,4 +46,7 @@ private:
 
     // húr-bund párok kiírása "3:12 | 4:8" formában
     static std::string PositionsToString(const std::vector<std::pair<int, int>> &positions);
+
+    // hány helyen szólaltatható meg a hang az adott hangolásban (0-24. bund)
+    static int CountPossiblePositions(const int midiNote, const std::vector<int> &tuning);
 };
