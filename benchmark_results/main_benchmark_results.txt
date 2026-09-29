@@ -73,13 +73,72 @@ Futtatas: [powerslave_clean]
   ~ Alternativ lefogas a(z) 44. hangnal (A2): Kedvenc -> 1:0 | Kapott -> 0:5
   Eredmeny: kedvenc 43/44 (97.7%), elfogadhato 44/44 (100.0%)
 
+Futtatas: [family_tree_clean_D#]
+  - Hiba a(z) 1. hangnal (D#3): Vart -> 1:7 | Kapott -> 0:12
+  - Hiba a(z) 7. hangnal (D#3): Vart -> 1:7 | 2:2 | Kapott -> 0:12
+  - Hiba a(z) 11. hangnal (D3): Vart -> 1:6 | Kapott -> 0:11
+  - Hiba a(z) 14. hangnal (D#3): Vart -> 1:7 | Kapott -> 0:12
+  - Hiba a(z) 21. hangnal (D#3): Vart -> 1:7 | 2:2 | Kapott -> 0:12
+  Eredmeny: kedvenc 19/24 (79.2%), elfogadhato 19/24 (79.2%)
+
+Futtatas: [deja_vu_intro_clean]
+  - Hiba a(z) 1. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 2. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 5. hangnal (A#4): Vart -> 4:11 | Kapott -> 5:6
+  - Hiba a(z) 7. hangnal (A#4): Vart -> 4:11 | Kapott -> 5:6
+  - Hiba a(z) 9. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 10. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 11. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 12. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 13. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 14. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 18. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  - Hiba a(z) 19. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 20. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
+  Eredmeny: kedvenc 7/20 (35.0%), elfogadhato 7/20 (35.0%)
+
+Futtatas: [deja_vu_main_clean]
+  ~ Alternativ lefogas a(z) 1. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 2. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 3. hangnal (C4): Kedvenc -> 2:10 | Kapott -> 3:5
+  ~ Alternativ lefogas a(z) 4. hangnal (G#3): Kedvenc -> 1:11 | Kapott -> 2:6
+  ~ Alternativ lefogas a(z) 5. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 6. hangnal (A#3): Kedvenc -> 2:8 | Kapott -> 3:3
+  ~ Alternativ lefogas a(z) 7. hangnal (G#3): Kedvenc -> 1:11 | Kapott -> 2:6
+  ~ Alternativ lefogas a(z) 8. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 9. hangnal (G#3): Kedvenc -> 1:11 | Kapott -> 2:6
+  ~ Alternativ lefogas a(z) 10. hangnal (G3): Kedvenc -> 1:10 | Kapott -> 2:5
+  ~ Alternativ lefogas a(z) 11. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 12. hangnal (A#3): Kedvenc -> 2:8 | Kapott -> 3:3
+  ~ Alternativ lefogas a(z) 13. hangnal (G#3): Kedvenc -> 1:11 | Kapott -> 2:6
+  ~ Alternativ lefogas a(z) 14. hangnal (G3): Kedvenc -> 1:10 | Kapott -> 2:5
+  ~ Alternativ lefogas a(z) 15. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  Eredmeny: kedvenc 0/15 (0.0%), elfogadhato 15/15 (100.0%)
+
+Futtatas: [never_walk_alone_clean]
+  ~ Alternativ lefogas a(z) 5. hangnal (A2): Kedvenc -> 0:5 | Kapott -> 1:0
+  - Hiba a(z) 14. hangnal (G3): Vart -> 2:5 | Kapott -> 1:10
+  - Hiba a(z) 15. hangnal (A3): Vart -> 2:7 | Kapott -> 1:12
+  - Hiba a(z) 17. hangnal (D3): Vart -> 1:5 | Kapott -> 0:10
+  - Hiba a(z) 18. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
+  ~ Alternativ lefogas a(z) 25. hangnal (B2): Kedvenc -> 1:2 | Kapott -> 0:7
+  Eredmeny: kedvenc 19/25 (76.0%), elfogadhato 21/25 (84.0%)
+
+Futtatas: [stranger_in_a_strange_land_clean]
+  - Hiba a(z) 5. hangnal (A3): Vart -> 2:7 | 3:2 | Kapott -> 1:12
+  ~ Alternativ lefogas a(z) 7. hangnal (F#3): Kedvenc -> 2:4 | Kapott -> 1:9
+  ~ Alternativ lefogas a(z) 8. hangnal (G3): Kedvenc -> 2:5 | Kapott -> 1:10
+  - Hiba a(z) 13. hangnal (A3): Vart -> 2:7 | 3:2 | Kapott -> 1:12
+  ~ Alternativ lefogas a(z) 16. hangnal (G3): Kedvenc -> 2:5 | Kapott -> 1:10
+  Eredmeny: kedvenc 11/16 (68.8%), elfogadhato 14/16 (87.5%)
+
 =======================================
-VEGSO EREDMENYEK (14 teszt, 302 hang):
+VEGSO EREDMENYEK (19 teszt, 402 hang):
 Kedvenc lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 94.0%
-  Hang-alapu (Sulyozott) pontossag:    89.7% (271/302)
+  Teszt-alapu (Sulyozatlan) pontossag: 82.9%
+  Hang-alapu (Sulyozott) pontossag:    81.3% (327/402)
 Elfogadhato lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 96.1%
-  Hang-alapu (Sulyozott) pontossag:    92.4% (279/302)
+  Teszt-alapu (Sulyozatlan) pontossag: 91.1%
+  Hang-alapu (Sulyozott) pontossag:    88.3% (355/402)
 =======================================
 

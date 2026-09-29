@@ -38,11 +38,16 @@ int main(int argc, char *argv[])
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/endgame_clean_fing-opt_test.txt", "endgame_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/trust_clean_fing-opt_test.txt", "trust_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/powerslave_clean_fing-opt_test.txt", "powerslave_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/family_tree_clean_D#_fing-opt_test.txt", "family_tree_clean_D#"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/deja_vu_intro_clean_fing-opt_test.txt", "deja_vu_intro_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/deja_vu_main_clean_fing-opt_test.txt", "deja_vu_main_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/never_walk_alone_clean_fing-opt_test.txt", "never_walk_alone_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/stranger_in_a_strange_land_clean_fing-opt_test.txt", "stranger_in_a_strange_land_clean"));
 
         int validTests = 0;
         double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)
         double sumAcceptedAccuracy = 0.0;
-        int totalNotes = 0;                // összes hang (hang-alapú pontossághoz)
+        int totalNotes = 0; // összes hang (hang-alapú pontossághoz)
         int totalPreferredCorrect = 0;
         int totalAcceptedCorrect = 0;
 
