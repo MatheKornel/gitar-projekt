@@ -155,6 +155,15 @@ double Optimization::PositionCost(const double currentCenter, const NotePosition
         positionCost += 25.0; // az E és A húron ne játszunk riffeket a 12. bund felett
     }
 
+    // a vastag E húron a 8. bund felett tompa a hang és kényelmetlen a kéznek, ilyenkor inkább az A húrra váltunk
+    // bundonként egyre jobban büntetjük (pl. 10. bund: +24, 12. bund: +48)
+    const int lowStringFretLimit = 8;
+    const double lowStringFretWeight = 12.0;
+    if (pos.GetStringIdx() == 0 && pos.GetFretIdx() > lowStringFretLimit)
+    {
+        positionCost += lowStringFretWeight * (pos.GetFretIdx() - lowStringFretLimit);
+    }
+
     // vékony húrokat ne játsza üresen riffek közben, kivéve első pozícióban (a kéz az 1-2. bundnál), ott az üres húr természetes
     // ha a kéz pozíciója még nem ismert (-1), büntetünk, különben az üres húrok miatt a kéz sosem kapna pozíciót
     const int highHandFret = 3;

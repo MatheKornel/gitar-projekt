@@ -20,20 +20,13 @@ Futtatas: [almost_honest_clean]
 Futtatas: [ashes_in_your_mouth_clean]
   - Hiba a(z) 3. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
   - Hiba a(z) 5. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
-  - Hiba a(z) 18. hangnal (D3): Vart -> 1:5 | Kapott -> 0:10
   - Hiba a(z) 20. hangnal (G3): Vart -> 2:5 | Kapott -> 1:10
   ~ Alternativ lefogas a(z) 22. hangnal (F#3): Kedvenc -> 2:4 | Kapott -> 1:9
-  - Hiba a(z) 23. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
-  - Hiba a(z) 24. hangnal (D#3): Vart -> 1:6 | Kapott -> 0:11
-  - Hiba a(z) 25. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
-  - Hiba a(z) 34. hangnal (D3): Vart -> 1:5 | Kapott -> 0:10
-  - Hiba a(z) 35. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
   - Hiba a(z) 36. hangnal (G3): Vart -> 2:5 | Kapott -> 1:10
   ~ Alternativ lefogas a(z) 38. hangnal (F#3): Kedvenc -> 2:4 | Kapott -> 1:9
-  - Hiba a(z) 50. hangnal (D3): Vart -> 1:5 | Kapott -> 0:10
-  - Hiba a(z) 52. hangnal (G3): Vart -> 2:5 | Kapott -> 1:10
-  ~ Alternativ lefogas a(z) 54. hangnal (F#3): Kedvenc -> 2:4 | Kapott -> 1:9
-  Eredmeny: kedvenc 50/65 (76.9%), elfogadhato 53/65 (81.5%)
+  - Hiba a(z) 53. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 55. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  Eredmeny: kedvenc 57/65 (87.7%), elfogadhato 59/65 (90.8%)
 
 Futtatas: [AR_Lick1_FN]
   ~ Alternativ lefogas a(z) 3. hangnal (G3): Kedvenc -> 3:0 | Kapott -> 2:5
@@ -66,8 +59,7 @@ Futtatas: [endgame_clean]
   Eredmeny: kedvenc 46/46 (100.0%), elfogadhato 46/46 (100.0%)
 
 Futtatas: [trust_clean]
-  ~ Alternativ lefogas a(z) 22. hangnal (D3): Kedvenc -> 1:5 | Kapott -> 0:10
-  Eredmeny: kedvenc 25/26 (96.2%), elfogadhato 26/26 (100.0%)
+  Eredmeny: kedvenc 26/26 (100.0%), elfogadhato 26/26 (100.0%)
 
 Futtatas: [powerslave_clean]
   ~ Alternativ lefogas a(z) 44. hangnal (A2): Kedvenc -> 1:0 | Kapott -> 0:5
@@ -75,11 +67,7 @@ Futtatas: [powerslave_clean]
 
 Futtatas: [family_tree_clean_D#]
   - Hiba a(z) 1. hangnal (D#3): Vart -> 1:7 | Kapott -> 0:12
-  - Hiba a(z) 7. hangnal (D#3): Vart -> 1:7 | 2:2 | Kapott -> 0:12
-  - Hiba a(z) 11. hangnal (D3): Vart -> 1:6 | Kapott -> 0:11
-  - Hiba a(z) 14. hangnal (D#3): Vart -> 1:7 | Kapott -> 0:12
-  - Hiba a(z) 21. hangnal (D#3): Vart -> 1:7 | 2:2 | Kapott -> 0:12
-  Eredmeny: kedvenc 19/24 (79.2%), elfogadhato 19/24 (79.2%)
+  Eredmeny: kedvenc 23/24 (95.8%), elfogadhato 23/24 (95.8%)
 
 Futtatas: [deja_vu_intro_clean]
   - Hiba a(z) 1. hangnal (F4): Vart -> 3:10 | Kapott -> 4:6
@@ -117,12 +105,10 @@ Futtatas: [deja_vu_main_clean]
 
 Futtatas: [never_walk_alone_clean]
   ~ Alternativ lefogas a(z) 5. hangnal (A2): Kedvenc -> 0:5 | Kapott -> 1:0
-  - Hiba a(z) 14. hangnal (G3): Vart -> 2:5 | Kapott -> 1:10
-  - Hiba a(z) 15. hangnal (A3): Vart -> 2:7 | Kapott -> 1:12
-  - Hiba a(z) 17. hangnal (D3): Vart -> 1:5 | Kapott -> 0:10
-  - Hiba a(z) 18. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
-  ~ Alternativ lefogas a(z) 25. hangnal (B2): Kedvenc -> 1:2 | Kapott -> 0:7
-  Eredmeny: kedvenc 19/25 (76.0%), elfogadhato 21/25 (84.0%)
+  ~ Alternativ lefogas a(z) 21. hangnal (C#3): Kedvenc -> 0:9 | Kapott -> 1:4
+  ~ Alternativ lefogas a(z) 23. hangnal (F#3): Kedvenc -> 1:9 | Kapott -> 2:4
+  ~ Alternativ lefogas a(z) 24. hangnal (D3): Kedvenc -> 0:10 | Kapott -> 1:5
+  Eredmeny: kedvenc 21/25 (84.0%), elfogadhato 25/25 (100.0%)
 
 Futtatas: [stranger_in_a_strange_land_clean]
   - Hiba a(z) 5. hangnal (A3): Vart -> 2:7 | 3:2 | Kapott -> 1:12
@@ -135,10 +121,10 @@ Futtatas: [stranger_in_a_strange_land_clean]
 =======================================
 VEGSO EREDMENYEK (19 teszt, 402 hang):
 Kedvenc lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 82.9%
-  Hang-alapu (Sulyozott) pontossag:    81.3% (327/402)
+  Teszt-alapu (Sulyozatlan) pontossag: 84.9%
+  Hang-alapu (Sulyozott) pontossag:    84.8% (341/402)
 Elfogadhato lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 91.1%
-  Hang-alapu (Sulyozott) pontossag:    88.3% (355/402)
+  Teszt-alapu (Sulyozatlan) pontossag: 93.3%
+  Hang-alapu (Sulyozott) pontossag:    91.8% (369/402)
 =======================================
 
