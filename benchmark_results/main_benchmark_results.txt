@@ -137,16 +137,27 @@ Futtatas: [stranger_in_a_strange_land_clean]
   Eredmeny: kedvenc 11/16 (68.8%), elfogadhato 14/16 (87.5%)
   Valasztasos hangokon (9): kedvenc 4/9 (44.4%), elfogadhato 7/9 (77.8%)
 
+Futtatas: [the_loneliness_of_the_long_distance_runner_clean]
+  ~ Alternativ lefogas a(z) 1. hangnal (E4): Kedvenc -> 3:9 | Kapott -> 4:5
+  ~ Alternativ lefogas a(z) 2. hangnal (E4): Kedvenc -> 3:9 | Kapott -> 4:5
+  - Hiba a(z) 12. hangnal (F#4): Vart -> 4:7 | Kapott -> 3:11
+  - Hiba a(z) 13. hangnal (G4): Vart -> 4:8 | Kapott -> 3:12
+  - Hiba a(z) 14. hangnal (F#4): Vart -> 4:7 | Kapott -> 3:11
+  - Hiba a(z) 15. hangnal (G4): Vart -> 4:8 | Kapott -> 3:12
+  - Hiba a(z) 16. hangnal (F#4): Vart -> 4:7 | Kapott -> 3:11
+  Eredmeny: kedvenc 12/19 (63.2%), elfogadhato 14/19 (73.7%)
+  Valasztasos hangokon (19): kedvenc 12/19 (63.2%), elfogadhato 14/19 (73.7%)
+
 =======================================
-VEGSO EREDMENYEK (19 teszt, 402 hang):
+VEGSO EREDMENYEK (20 teszt, 421 hang):
 Kedvenc lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 84.9%
-  Hang-alapu (Sulyozott) pontossag:    84.8% (341/402)
+  Teszt-alapu (Sulyozatlan) pontossag: 83.8%
+  Hang-alapu (Sulyozott) pontossag:    83.8% (353/421)
 Elfogadhato lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 93.3%
-  Hang-alapu (Sulyozott) pontossag:    91.8% (369/402)
-Valasztasos hangokon (285 hang, hang-alapu):
-  Kedvenc lefogas:     78.6% (224/285)
-  Elfogadhato lefogas: 88.4% (252/285)
+  Teszt-alapu (Sulyozatlan) pontossag: 92.3%
+  Hang-alapu (Sulyozott) pontossag:    91.0% (383/421)
+Valasztasos hangokon (304 hang, hang-alapu):
+  Kedvenc lefogas:     77.6% (236/304)
+  Elfogadhato lefogas: 87.5% (266/304)
 =======================================
 

@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/deja_vu_main_clean_fing-opt_test.txt", "deja_vu_main_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/never_walk_alone_clean_fing-opt_test.txt", "never_walk_alone_clean"));
         tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/stranger_in_a_strange_land_clean_fing-opt_test.txt", "stranger_in_a_strange_land_clean"));
+        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/the_loneliness_of_the_long_distance_runner_clean_fing-opt_test.txt", "the_loneliness_of_the_long_distance_runner_clean"));
 
         int validTests = 0;
         double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)
