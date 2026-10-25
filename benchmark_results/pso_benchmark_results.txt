@@ -65,8 +65,9 @@ Futtatas: [ashes_in_your_mouth_clean]
   - Hiba a(z) 34. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
   - Hiba a(z) 35. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
   - Hiba a(z) 36. hangnal (G3): Vart -> 2:5 | Kapott -> 3:0
-  - Hiba a(z) 37. hangnal (E3): Vart -> 1:7 | Kapott -> 0:12
-  ~ Alternativ lefogas a(z) 38. hangnal (F#3): Kedvenc -> 2:4 | Kapott -> 1:9
+  - Hiba a(z) 37. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 39. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 40. hangnal (D#3): Vart -> 1:6 | Kapott -> 2:1
   - Hiba a(z) 41. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
   - Hiba a(z) 45. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
   - Hiba a(z) 47. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
@@ -82,8 +83,8 @@ Futtatas: [ashes_in_your_mouth_clean]
   ~ Alternativ lefogas a(z) 63. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
   ~ Alternativ lefogas a(z) 64. hangnal (A#3): Kedvenc -> 2:8 | Kapott -> 3:3
   - Hiba a(z) 65. hangnal (C4): Vart -> 2:10 | 3:5 | Kapott -> 4:1
-  Eredmeny: kedvenc 25/65 (38.5%), elfogadhato 34/65 (52.3%)
-  Valasztasos hangokon (45): kedvenc 5/45 (11.1%), elfogadhato 14/45 (31.1%)
+  Eredmeny: kedvenc 24/65 (36.9%), elfogadhato 32/65 (49.2%)
+  Valasztasos hangokon (45): kedvenc 4/45 (8.9%), elfogadhato 12/45 (26.7%)
 
 Futtatas: [AR_Lick1_FN]
   ~ Alternativ lefogas a(z) 11. hangnal (D4): Kedvenc -> 3:7 | Kapott -> 4:3
@@ -279,13 +280,13 @@ Futtatas: [the_loneliness_of_the_long_distance_runner_clean]
 =======================================
 VEGSO EREDMENYEK - PSO algoritmus (20 teszt, 421 hang):
 Kedvenc lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 59.5%
-  Hang-alapu (Sulyozott) pontossag:    53.4% (225/421)
+  Teszt-alapu (Sulyozatlan) pontossag: 59.4%
+  Hang-alapu (Sulyozott) pontossag:    53.2% (224/421)
 Elfogadhato lefogas:
-  Teszt-alapu (Sulyozatlan) pontossag: 74.7%
-  Hang-alapu (Sulyozott) pontossag:    68.2% (287/421)
+  Teszt-alapu (Sulyozatlan) pontossag: 74.5%
+  Hang-alapu (Sulyozott) pontossag:    67.7% (285/421)
 Valasztasos hangokon (304 hang, hang-alapu):
-  Kedvenc lefogas:     35.5% (108/304)
-  Elfogadhato lefogas: 55.9% (170/304)
+  Kedvenc lefogas:     35.2% (107/304)
+  Elfogadhato lefogas: 55.3% (168/304)
 =======================================
 

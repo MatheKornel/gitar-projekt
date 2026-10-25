@@ -35,6 +35,9 @@ public:
     void Add(const BenchmarkResult &result);                                // egy teszt eredményének hozzáadása
     void Print(std::ofstream &logFile, const std::string &algoName) const; // végső eredmények kiírása a log fájlba és a konzolra
 
+    // az összesítő fájlban (minden eljárás egy sora egy táblázatban) frissíti az adott eljárás sorát, a többi sor megmarad
+    void SaveToSummaryFile(const std::string &filePath, const std::string &algoName) const;
+
 private:
     int validTests = 0;
     double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)

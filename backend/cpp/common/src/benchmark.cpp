@@ -168,6 +168,87 @@ void BenchmarkSummary::Print(std::ofstream &logFile, const std::string &algoName
     std::cout << "\n";
 }
 
+void BenchmarkSummary::SaveToSummaryFile(const std::string &filePath, const std::string &algoName) const
+{
+    if (validTests == 0)
+        return;
+
+    const int nameWidth = 28;
+
+    // az új sor összeállítása
+    std::ostringstream newRow;
+    newRow << std::fixed << std::setprecision(1);
+    newRow << std::left << std::setw(nameWidth) << algoName << std::right;
+    newRow << "|" << std::setw(8) << validTests;
+    newRow << " |" << std::setw(7) << totalNotes;
+    newRow << " |" << std::setw(8) << (static_cast<double>(totalPreferredCorrect) / totalNotes) * 100.0;
+    newRow << " |" << std::setw(12) << (static_cast<double>(totalAcceptedCorrect) / totalNotes) * 100.0;
+    if (totalChoiceNotes > 0)
+    {
+        newRow << " |" << std::setw(15) << (static_cast<double>(totalChoicePreferredCorrect) / totalChoiceNotes) * 100.0;
+        newRow << " |" << std::setw(14) << (static_cast<double>(totalChoiceAcceptedCorrect) / totalChoiceNotes) * 100.0;
+    }
+    else
+    {
+        newRow << " |" << std::setw(15) << "-";
+        newRow << " |" << std::setw(14) << "-";
+    }
+    newRow << " |" << std::setw(16) << sumPreferredAccuracy / validTests;
+    newRow << " |" << std::setw(18) << sumAcceptedAccuracy / validTests;
+
+    // a meglévő fájlból megtartjuk a többi eljárás sorát (eljárásnév | ... alakú sorok, a fejléc kivételével)
+    std::vector<std::string> rows;
+    bool replaced = false;
+    std::ifstream inFile(filePath);
+    std::string line;
+    while (std::getline(inFile, line))
+    {
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        const size_t separatorIdx = line.find('|');
+        if (separatorIdx == std::string::npos)
+            continue;
+
+        std::string rowName = line.substr(0, separatorIdx);
+        while (!rowName.empty() && rowName.back() == ' ')
+            rowName.pop_back();
+
+        if (rowName == "Eljaras")
+            continue;
+
+        if (rowName == algoName)
+        {
+            rows.push_back(newRow.str());
+            replaced = true;
+        }
+        else
+        {
+            rows.push_back(line);
+        }
+    }
+    inFile.close();
+
+    if (!replaced)
+        rows.push_back(newRow.str());
+
+    std::ofstream outFile(filePath);
+    if (!outFile.is_open())
+    {
+        std::cerr << "Hiba: Nem sikerult megnyitni az osszesito fajlt: " << filePath << "\n";
+        return;
+    }
+
+    outFile << "UJJREND OPTIMALIZALOK - OSSZESITETT BENCHMARK EREDMENYEK (%)\n\n";
+    outFile << std::left << std::setw(nameWidth) << "Eljaras" << std::right
+            << "| Tesztek | Hangok | Kedvenc | Elfogadhato | Valaszt. kedv. | Valaszt. elf. | Kedvenc (teszt) | Elfogadh. (teszt)\n";
+    outFile << std::string(nameWidth + 113, '-') << "\n";
+    for (const auto &row : rows)
+    {
+        outFile << row << "\n";
+    }
+}
+
 std::vector<std::pair<int, int>> Benchmark::ParsePositions(const std::string &text)
 {
     std::vector<std::pair<int, int>> positions;

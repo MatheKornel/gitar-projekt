@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
         }
 
         summary.Print(logFile, "Sajat + Viterbi algoritmus");
+        summary.SaveToSummaryFile("../../../benchmark_results/osszesitett_eredmenyek.txt", "Sajat + Viterbi algoritmus");
 
         logFile.close();
         std::cout << "A benchmark lefutott! Keresd a 'main_plus_viterbi_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";

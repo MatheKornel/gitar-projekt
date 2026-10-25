@@ -1,0 +1,8 @@
+UJJREND OPTIMALIZALOK - OSSZESITETT BENCHMARK EREDMENYEK (%)
+
+Eljaras                     | Tesztek | Hangok | Kedvenc | Elfogadhato | Valaszt. kedv. | Valaszt. elf. | Kedvenc (teszt) | Elfogadh. (teszt)
+---------------------------------------------------------------------------------------------------------------------------------------------
+Sajat algoritmus            |      20 |    421 |    83.8 |        91.0 |           77.6 |          87.5 |            83.8 |              92.3
+Sajat + Viterbi algoritmus  |      20 |    421 |    66.5 |        77.4 |           53.6 |          68.8 |            58.9 |              79.4
+Viterbi algoritmus          |      20 |    421 |    54.2 |        68.9 |           36.5 |          56.9 |            60.2 |              75.4
+PSO algoritmus              |      20 |    421 |    53.2 |        67.7 |           35.2 |          55.3 |            59.4 |              74.5

@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
         }
 
         summary.Print(logFile, "PSO algoritmus");
+        summary.SaveToSummaryFile("../../../benchmark_results/osszesitett_eredmenyek.txt", "PSO algoritmus");
 
         logFile.close();
         std::cout << "A benchmark lefutott! Keresd a 'pso_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";
