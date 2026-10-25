@@ -76,6 +76,98 @@ BenchmarkCase Benchmark::LoadFromFile(const std::string &filepath, const std::st
     return bc;
 }
 
+std::vector<BenchmarkCase> Benchmark::LoadAllCases(const std::string &benchmarkDir)
+{
+    // a tesztek nevei, a fájlnév: <név>_fing-opt_test.txt
+    const std::vector<std::string> testNames = {
+        "jotun_clean",
+        "almost_honest_clean",
+        "ashes_in_your_mouth_clean",
+        "AR_Lick1_FN",
+        "AR_Lick3_FN",
+        "breaking_the_law_clean",
+        "A_0-3-5-3-0",
+        "A_clean",
+        "E_0-3-5-3-0",
+        "e0_clean",
+        "e24_clean",
+        "endgame_clean",
+        "trust_clean",
+        "powerslave_clean",
+        "family_tree_clean_D#",
+        "deja_vu_intro_clean",
+        "deja_vu_main_clean",
+        "never_walk_alone_clean",
+        "stranger_in_a_strange_land_clean",
+        "the_loneliness_of_the_long_distance_runner_clean"};
+
+    std::vector<BenchmarkCase> tests;
+    for (const auto &testName : testNames)
+    {
+        tests.push_back(LoadFromFile(benchmarkDir + "/" + testName + "_fing-opt_test.txt", testName));
+    }
+    return tests;
+}
+
+void BenchmarkSummary::Add(const BenchmarkResult &result)
+{
+    if (result.total == 0)
+        return;
+
+    validTests++;
+    sumPreferredAccuracy += (static_cast<double>(result.preferredCorrect) / result.total) * 100.0;
+    sumAcceptedAccuracy += (static_cast<double>(result.acceptedCorrect) / result.total) * 100.0;
+    totalNotes += result.total;
+    totalPreferredCorrect += result.preferredCorrect;
+    totalAcceptedCorrect += result.acceptedCorrect;
+    totalChoiceNotes += result.choiceTotal;
+    totalChoicePreferredCorrect += result.choicePreferredCorrect;
+    totalChoiceAcceptedCorrect += result.choiceAcceptedCorrect;
+}
+
+void BenchmarkSummary::Print(std::ofstream &logFile, const std::string &algoName) const
+{
+    if (validTests == 0)
+    {
+        std::cout << "Nem futott le egyetlen teszt sem.\n";
+        return;
+    }
+
+    const double preferredTestAccuracy = sumPreferredAccuracy / validTests;
+    const double acceptedTestAccuracy = sumAcceptedAccuracy / validTests;
+    const double preferredNoteAccuracy = (static_cast<double>(totalPreferredCorrect) / totalNotes) * 100.0;
+    const double acceptedNoteAccuracy = (static_cast<double>(totalAcceptedCorrect) / totalNotes) * 100.0;
+
+    logFile << std::fixed << std::setprecision(1);
+    logFile << "=======================================\n";
+    logFile << "VEGSO EREDMENYEK - " << algoName << " (" << validTests << " teszt, " << totalNotes << " hang):\n";
+    logFile << "Kedvenc lefogas:\n";
+    logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << preferredTestAccuracy << "%\n";
+    logFile << "  Hang-alapu (Sulyozott) pontossag:    " << preferredNoteAccuracy << "% (" << totalPreferredCorrect << "/" << totalNotes << ")\n";
+    logFile << "Elfogadhato lefogas:\n";
+    logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << acceptedTestAccuracy << "%\n";
+    logFile << "  Hang-alapu (Sulyozott) pontossag:    " << acceptedNoteAccuracy << "% (" << totalAcceptedCorrect << "/" << totalNotes << ")\n";
+
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << "Kedvenc lefogas     - teszt-alapu: " << preferredTestAccuracy << "%, hang-alapu: " << preferredNoteAccuracy << "%\n";
+    std::cout << "Elfogadhato lefogas - teszt-alapu: " << acceptedTestAccuracy << "%, hang-alapu: " << acceptedNoteAccuracy << "%\n";
+
+    // választásos hangokon csak hang-alapú pontosságot számolunk (van teszt, amiben egy választásos hang sincs)
+    if (totalChoiceNotes > 0)
+    {
+        const double choicePreferredAccuracy = (static_cast<double>(totalChoicePreferredCorrect) / totalChoiceNotes) * 100.0;
+        const double choiceAcceptedAccuracy = (static_cast<double>(totalChoiceAcceptedCorrect) / totalChoiceNotes) * 100.0;
+
+        logFile << "Valasztasos hangokon (" << totalChoiceNotes << " hang, hang-alapu):\n";
+        logFile << "  Kedvenc lefogas:     " << choicePreferredAccuracy << "% (" << totalChoicePreferredCorrect << "/" << totalChoiceNotes << ")\n";
+        logFile << "  Elfogadhato lefogas: " << choiceAcceptedAccuracy << "% (" << totalChoiceAcceptedCorrect << "/" << totalChoiceNotes << ")\n";
+
+        std::cout << "Valasztasos hangokon - kedvenc: " << choicePreferredAccuracy << "%, elfogadhato: " << choiceAcceptedAccuracy << "%\n";
+    }
+    logFile << "=======================================\n\n";
+    std::cout << "\n";
+}
+
 std::vector<std::pair<int, int>> Benchmark::ParsePositions(const std::string &text)
 {
     std::vector<std::pair<int, int>> positions;

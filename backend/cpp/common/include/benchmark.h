@@ -28,11 +28,33 @@ struct BenchmarkResult
     int choiceAcceptedCorrect = 0;
 };
 
+// a tesztek eredményeinek összesítése (teszt-alapú, hang-alapú és választásos pontosság)
+class BenchmarkSummary
+{
+public:
+    void Add(const BenchmarkResult &result);                                // egy teszt eredményének hozzáadása
+    void Print(std::ofstream &logFile, const std::string &algoName) const; // végső eredmények kiírása a log fájlba és a konzolra
+
+private:
+    int validTests = 0;
+    double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)
+    double sumAcceptedAccuracy = 0.0;
+    int totalNotes = 0; // összes hang (hang-alapú pontossághoz)
+    int totalPreferredCorrect = 0;
+    int totalAcceptedCorrect = 0;
+    int totalChoiceNotes = 0; // választásos hangok (több helyen is lefoghatók)
+    int totalChoicePreferredCorrect = 0;
+    int totalChoiceAcceptedCorrect = 0;
+};
+
 class Benchmark
 {
 public:
     // betölti a fájlt és visszaadja a struktúrát
     static BenchmarkCase LoadFromFile(const std::string &filepath, const std::string &testName);
+
+    // betölti az összes benchmark tesztet a megadott mappából (új tesztet itt kell felvenni, minden eljárás ezt használja)
+    static std::vector<BenchmarkCase> LoadAllCases(const std::string &benchmarkDir);
 
     // összehasonlítja a várt és a kapott lefogásokat, majd kiírja az eredményt
     static BenchmarkResult Evaluate(const BenchmarkCase &testCase, const std::vector<std::pair<int, int>> &actualPositions, std::ofstream &logFile);

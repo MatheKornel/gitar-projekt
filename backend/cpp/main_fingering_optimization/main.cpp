@@ -23,37 +23,8 @@ int main(int argc, char *argv[])
 
         std::cout << "Benchmark futtatasa folyamatban... Az eredmenyek a fajlba irodnak.\n";
 
-        std::vector<BenchmarkCase> tests;
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/jotun_clean_fing-opt_test.txt", "jotun_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/almost_honest_clean_fing-opt_test.txt", "almost_honest_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/ashes_in_your_mouth_clean_fing-opt_test.txt", "ashes_in_your_mouth_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick1_FN_fing-opt_test.txt", "AR_Lick1_FN"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick3_FN_fing-opt_test.txt", "AR_Lick3_FN"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/breaking_the_law_clean_fing-opt_test.txt", "breaking_the_law_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_0-3-5-3-0_fing-opt_test.txt", "A_0-3-5-3-0"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_clean_fing-opt_test.txt", "A_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/E_0-3-5-3-0_fing-opt_test.txt", "E_0-3-5-3-0"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e0_clean_fing-opt_test.txt", "e0_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e24_clean_fing-opt_test.txt", "e24_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/endgame_clean_fing-opt_test.txt", "endgame_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/trust_clean_fing-opt_test.txt", "trust_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/powerslave_clean_fing-opt_test.txt", "powerslave_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/family_tree_clean_D#_fing-opt_test.txt", "family_tree_clean_D#"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/deja_vu_intro_clean_fing-opt_test.txt", "deja_vu_intro_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/deja_vu_main_clean_fing-opt_test.txt", "deja_vu_main_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/never_walk_alone_clean_fing-opt_test.txt", "never_walk_alone_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/stranger_in_a_strange_land_clean_fing-opt_test.txt", "stranger_in_a_strange_land_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/the_loneliness_of_the_long_distance_runner_clean_fing-opt_test.txt", "the_loneliness_of_the_long_distance_runner_clean"));
-
-        int validTests = 0;
-        double sumPreferredAccuracy = 0.0; // tesztenkénti pontosságok összege (teszt-alapú átlaghoz)
-        double sumAcceptedAccuracy = 0.0;
-        int totalNotes = 0; // összes hang (hang-alapú pontossághoz)
-        int totalPreferredCorrect = 0;
-        int totalAcceptedCorrect = 0;
-        int totalChoiceNotes = 0; // választásos hangok (több helyen is lefoghatók)
-        int totalChoicePreferredCorrect = 0;
-        int totalChoiceAcceptedCorrect = 0;
+        std::vector<BenchmarkCase> tests = Benchmark::LoadAllCases("../../../benchmarks");
+        BenchmarkSummary summary;
 
         for (const auto &test : tests)
         {
@@ -72,51 +43,10 @@ int main(int argc, char *argv[])
             }
 
             BenchmarkResult result = Benchmark::Evaluate(test, actualPositions, logFile);
-            validTests++;
-            sumPreferredAccuracy += (static_cast<double>(result.preferredCorrect) / result.total) * 100.0;
-            sumAcceptedAccuracy += (static_cast<double>(result.acceptedCorrect) / result.total) * 100.0;
-            totalNotes += result.total;
-            totalPreferredCorrect += result.preferredCorrect;
-            totalAcceptedCorrect += result.acceptedCorrect;
-            totalChoiceNotes += result.choiceTotal;
-            totalChoicePreferredCorrect += result.choicePreferredCorrect;
-            totalChoiceAcceptedCorrect += result.choiceAcceptedCorrect;
+            summary.Add(result);
         }
 
-        if (validTests > 0)
-        {
-            double preferredTestAccuracy = sumPreferredAccuracy / validTests;
-            double acceptedTestAccuracy = sumAcceptedAccuracy / validTests;
-            double preferredNoteAccuracy = (static_cast<double>(totalPreferredCorrect) / totalNotes) * 100.0;
-            double acceptedNoteAccuracy = (static_cast<double>(totalAcceptedCorrect) / totalNotes) * 100.0;
-
-            logFile << "=======================================\n";
-            logFile << "VEGSO EREDMENYEK (" << validTests << " teszt, " << totalNotes << " hang):\n";
-            logFile << "Kedvenc lefogas:\n";
-            logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << preferredTestAccuracy << "%\n";
-            logFile << "  Hang-alapu (Sulyozott) pontossag:    " << preferredNoteAccuracy << "% (" << totalPreferredCorrect << "/" << totalNotes << ")\n";
-            logFile << "Elfogadhato lefogas:\n";
-            logFile << "  Teszt-alapu (Sulyozatlan) pontossag: " << acceptedTestAccuracy << "%\n";
-            logFile << "  Hang-alapu (Sulyozott) pontossag:    " << acceptedNoteAccuracy << "% (" << totalAcceptedCorrect << "/" << totalNotes << ")\n";
-
-            std::cout << "Kedvenc lefogas     - teszt-alapu: " << preferredTestAccuracy << "%, hang-alapu: " << preferredNoteAccuracy << "%\n";
-            std::cout << "Elfogadhato lefogas - teszt-alapu: " << acceptedTestAccuracy << "%, hang-alapu: " << acceptedNoteAccuracy << "%\n";
-
-            // választásos hangokon csak hang-alapú pontosságot számolunk (van teszt, amiben egy választásos hang sincs)
-            if (totalChoiceNotes > 0)
-            {
-                double choicePreferredAccuracy = (static_cast<double>(totalChoicePreferredCorrect) / totalChoiceNotes) * 100.0;
-                double choiceAcceptedAccuracy = (static_cast<double>(totalChoiceAcceptedCorrect) / totalChoiceNotes) * 100.0;
-
-                logFile << "Valasztasos hangokon (" << totalChoiceNotes << " hang, hang-alapu):\n";
-                logFile << "  Kedvenc lefogas:     " << choicePreferredAccuracy << "% (" << totalChoicePreferredCorrect << "/" << totalChoiceNotes << ")\n";
-                logFile << "  Elfogadhato lefogas: " << choiceAcceptedAccuracy << "% (" << totalChoiceAcceptedCorrect << "/" << totalChoiceNotes << ")\n";
-
-                std::cout << "Valasztasos hangokon - kedvenc: " << choicePreferredAccuracy << "%, elfogadhato: " << choiceAcceptedAccuracy << "%\n";
-            }
-            logFile << "=======================================\n\n";
-            std::cout << "\n";
-        }
+        summary.Print(logFile, "Sajat algoritmus");
 
         logFile.close();
         std::cout << "A benchmark lefutott! Keresd a 'main_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";

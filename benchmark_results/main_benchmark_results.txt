@@ -149,7 +149,7 @@ Futtatas: [the_loneliness_of_the_long_distance_runner_clean]
   Valasztasos hangokon (19): kedvenc 12/19 (63.2%), elfogadhato 14/19 (73.7%)
 
 =======================================
-VEGSO EREDMENYEK (20 teszt, 421 hang):
+VEGSO EREDMENYEK - Sajat algoritmus (20 teszt, 421 hang):
 Kedvenc lefogas:
   Teszt-alapu (Sulyozatlan) pontossag: 83.8%
   Hang-alapu (Sulyozott) pontossag:    83.8% (353/421)

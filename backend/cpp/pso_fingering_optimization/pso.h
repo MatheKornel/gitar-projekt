@@ -9,7 +9,7 @@ class PSO
 {
 public:
     PSO(const std::vector<InputNotes> &newNotes, const size_t newDimension, const size_t swarmSize, const int newLimit, const double newImprThreshold);
-    std::vector<NotePosition> PsoAlgo(const int stopCondition, const int printInterval);
+    std::vector<NotePosition> PsoAlgo(const int maxIterations, const int printInterval); // printInterval <= 0 esetén nem ír ki részeredményt
 
     std::vector<int> g_opt;
     double g_opt_fitness;
@@ -17,6 +17,7 @@ public:
 private:
     std::vector<Particle> P;
     std::vector<InputNotes> notes;
+    std::vector<std::vector<NotePosition>> positions; // hangonként a lehetséges lefogások (egyszer számoljuk ki, nem minden fitnesz híváskor)
 
     size_t dimension;
     double phi_p = 2.0;
