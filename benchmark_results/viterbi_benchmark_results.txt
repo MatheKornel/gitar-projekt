@@ -1,122 +1,133 @@
 
 --- Benchmark inditasa ---
 Futtatas: [jotun_clean]
-  - Hiba a(z) 1. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 2. hangnal (B3): Vart -> Hur:2 Bund:9 | Kapott -> Hur:4 Bund:0
-  - Hiba a(z) 3. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 4. hangnal (G4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:5 Bund:3
-  - Hiba a(z) 5. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 6. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 7. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 8. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 9. hangnal (D#4): Vart -> Hur:3 Bund:8 | Kapott -> Hur:4 Bund:4
-  - Hiba a(z) 10. hangnal (B3): Vart -> Hur:2 Bund:9 | Kapott -> Hur:3 Bund:4
-  - Hiba a(z) 11. hangnal (D#4): Vart -> Hur:3 Bund:8 | Kapott -> Hur:4 Bund:4
-  - Hiba a(z) 12. hangnal (A4): Vart -> Hur:4 Bund:10 | Kapott -> Hur:5 Bund:5
-  - Hiba a(z) 13. hangnal (G4): Vart -> Hur:4 Bund:8 | Kapott -> Hur:5 Bund:3
-  - Hiba a(z) 14. hangnal (F#4): Vart -> Hur:4 Bund:7 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 15. hangnal (G4): Vart -> Hur:4 Bund:8 | Kapott -> Hur:5 Bund:3
-  - Hiba a(z) 16. hangnal (F#4): Vart -> Hur:4 Bund:7 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 17. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 18. hangnal (B3): Vart -> Hur:2 Bund:9 | Kapott -> Hur:4 Bund:0
-  - Hiba a(z) 19. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  - Hiba a(z) 20. hangnal (G4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:5 Bund:3
-  - Hiba a(z) 21. hangnal (A4): Vart -> Hur:4 Bund:10 | Kapott -> Hur:5 Bund:5
-  - Hiba a(z) 22. hangnal (B4): Vart -> Hur:4 Bund:12 | Kapott -> Hur:5 Bund:7
-  - Hiba a(z) 23. hangnal (C5): Vart -> Hur:4 Bund:13 | Kapott -> Hur:5 Bund:8
-  - Hiba a(z) 24. hangnal (B4): Vart -> Hur:4 Bund:12 | Kapott -> Hur:5 Bund:7
-  - Hiba a(z) 25. hangnal (A4): Vart -> Hur:4 Bund:10 | Kapott -> Hur:5 Bund:5
-  - Hiba a(z) 26. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 27. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 28. hangnal (G4): Vart -> Hur:3 Bund:12 | Kapott -> Hur:5 Bund:3
-  - Hiba a(z) 29. hangnal (F#4): Vart -> Hur:3 Bund:11 | Kapott -> Hur:5 Bund:2
-  - Hiba a(z) 30. hangnal (D4): Vart -> Hur:2 Bund:12 | Kapott -> Hur:4 Bund:3
-  - Hiba a(z) 31. hangnal (E4): Vart -> Hur:3 Bund:9 | Kapott -> Hur:5 Bund:0
-  Eredmeny: 0/31 helyes (0.0%)
+  - Hiba a(z) 1. hangnal (E4): Vart -> 3:9 | Kapott -> 5:0
+  - Hiba a(z) 2. hangnal (B3): Vart -> 2:9 | Kapott -> 4:0
+  - Hiba a(z) 3. hangnal (E4): Vart -> 3:9 | Kapott -> 5:0
+  - Hiba a(z) 4. hangnal (G4): Vart -> 3:12 | 4:8 | Kapott -> 5:3
+  - Hiba a(z) 5. hangnal (F#4): Vart -> 3:11 | 4:7 | Kapott -> 5:2
+  - Hiba a(z) 6. hangnal (E4): Vart -> 3:9 | 4:5 | Kapott -> 5:0
+  - Hiba a(z) 7. hangnal (F#4): Vart -> 3:11 | 4:7 | Kapott -> 5:2
+  - Hiba a(z) 8. hangnal (E4): Vart -> 3:9 | 4:5 | Kapott -> 5:0
+  - Hiba a(z) 9. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 10. hangnal (B3): Vart -> 2:9 | Kapott -> 3:4
+  - Hiba a(z) 11. hangnal (D#4): Vart -> 3:8 | Kapott -> 4:4
+  - Hiba a(z) 12. hangnal (A4): Vart -> 4:10 | Kapott -> 5:5
+  - Hiba a(z) 13. hangnal (G4): Vart -> 4:8 | Kapott -> 5:3
+  - Hiba a(z) 14. hangnal (F#4): Vart -> 4:7 | Kapott -> 5:2
+  - Hiba a(z) 15. hangnal (G4): Vart -> 4:8 | Kapott -> 5:3
+  - Hiba a(z) 16. hangnal (F#4): Vart -> 4:7 | Kapott -> 5:2
+  - Hiba a(z) 17. hangnal (E4): Vart -> 3:9 | Kapott -> 5:0
+  - Hiba a(z) 18. hangnal (B3): Vart -> 2:9 | Kapott -> 4:0
+  - Hiba a(z) 19. hangnal (E4): Vart -> 3:9 | Kapott -> 5:0
+  - Hiba a(z) 20. hangnal (G4): Vart -> 3:12 | Kapott -> 5:3
+  - Hiba a(z) 21. hangnal (A4): Vart -> 4:10 | Kapott -> 5:5
+  - Hiba a(z) 22. hangnal (B4): Vart -> 4:12 | Kapott -> 5:7
+  - Hiba a(z) 23. hangnal (C5): Vart -> 4:13 | Kapott -> 5:8
+  - Hiba a(z) 24. hangnal (B4): Vart -> 4:12 | Kapott -> 5:7
+  - Hiba a(z) 25. hangnal (A4): Vart -> 4:10 | Kapott -> 5:5
+  - Hiba a(z) 26. hangnal (F#4): Vart -> 3:11 | Kapott -> 5:2
+  - Hiba a(z) 27. hangnal (F#4): Vart -> 3:11 | Kapott -> 5:2
+  - Hiba a(z) 28. hangnal (G4): Vart -> 3:12 | Kapott -> 5:3
+  - Hiba a(z) 29. hangnal (F#4): Vart -> 3:11 | Kapott -> 5:2
+  - Hiba a(z) 30. hangnal (D4): Vart -> 2:12 | Kapott -> 4:3
+  - Hiba a(z) 31. hangnal (E4): Vart -> 3:9 | 2:14 | Kapott -> 5:0
+  Eredmeny: kedvenc 0/31 (0.0%), elfogadhato 0/31 (0.0%)
+  Valasztasos hangokon (31): kedvenc 0/31 (0.0%), elfogadhato 0/31 (0.0%)
 
 Futtatas: [almost_honest_clean]
-  - Hiba a(z) 32. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 33. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  Eredmeny: 31/33 helyes (93.9%)
+  ~ Alternativ lefogas a(z) 32. hangnal (D3): Kedvenc -> 1:5 | Kapott -> 2:0
+  ~ Alternativ lefogas a(z) 33. hangnal (E3): Kedvenc -> 1:7 | Kapott -> 2:2
+  Eredmeny: kedvenc 31/33 (93.9%), elfogadhato 33/33 (100.0%)
+  Valasztasos hangokon (19): kedvenc 17/19 (89.5%), elfogadhato 19/19 (100.0%)
 
 Futtatas: [ashes_in_your_mouth_clean]
-  - Hiba a(z) 2. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 3. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 4. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 5. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 7. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 8. hangnal (D#3): Vart -> Hur:1 Bund:6 | Kapott -> Hur:2 Bund:1
-  - Hiba a(z) 9. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 13. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 15. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 16. hangnal (F#3): Vart -> Hur:1 Bund:9 | Kapott -> Hur:2 Bund:4
-  - Hiba a(z) 18. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 19. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 20. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 21. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 23. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 24. hangnal (D#3): Vart -> Hur:1 Bund:6 | Kapott -> Hur:2 Bund:1
-  - Hiba a(z) 25. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 29. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 31. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 32. hangnal (F#3): Vart -> Hur:1 Bund:9 | Kapott -> Hur:2 Bund:4
-  - Hiba a(z) 34. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 35. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 36. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 37. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 39. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 40. hangnal (D#3): Vart -> Hur:1 Bund:6 | Kapott -> Hur:2 Bund:1
-  - Hiba a(z) 41. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 45. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 47. hangnal (G3): Vart -> Hur:1 Bund:10 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 48. hangnal (F#3): Vart -> Hur:1 Bund:9 | Kapott -> Hur:2 Bund:4
-  - Hiba a(z) 50. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 51. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 52. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 53. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 55. hangnal (E3): Vart -> Hur:1 Bund:7 | Kapott -> Hur:2 Bund:2
-  - Hiba a(z) 59. hangnal (C3): Vart -> Hur:0 Bund:8 | Kapott -> Hur:1 Bund:3
-  - Hiba a(z) 60. hangnal (B2): Vart -> Hur:0 Bund:7 | Kapott -> Hur:1 Bund:2
-  - Hiba a(z) 62. hangnal (A#2): Vart -> Hur:0 Bund:6 | Kapott -> Hur:1 Bund:1
-  - Hiba a(z) 63. hangnal (F3): Vart -> Hur:1 Bund:8 | Kapott -> Hur:2 Bund:3
-  - Hiba a(z) 64. hangnal (A#3): Vart -> Hur:2 Bund:8 | Kapott -> Hur:3 Bund:3
-  - Hiba a(z) 65. hangnal (C4): Vart -> Hur:2 Bund:10 | Kapott -> Hur:3 Bund:5
-  Eredmeny: 24/65 helyes (36.9%)
+  - Hiba a(z) 2. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 3. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 4. hangnal (G3): Vart -> 2:5 | Kapott -> 3:0
+  - Hiba a(z) 5. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 7. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 8. hangnal (D#3): Vart -> 1:6 | Kapott -> 2:1
+  - Hiba a(z) 9. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 13. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  - Hiba a(z) 15. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  ~ Alternativ lefogas a(z) 16. hangnal (F#3): Kedvenc -> 1:9 | Kapott -> 2:4
+  - Hiba a(z) 18. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 19. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 20. hangnal (G3): Vart -> 2:5 | Kapott -> 3:0
+  - Hiba a(z) 21. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 23. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 24. hangnal (D#3): Vart -> 1:6 | Kapott -> 2:1
+  - Hiba a(z) 25. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 29. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  - Hiba a(z) 31. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  ~ Alternativ lefogas a(z) 32. hangnal (F#3): Kedvenc -> 1:9 | Kapott -> 2:4
+  - Hiba a(z) 34. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 35. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 36. hangnal (G3): Vart -> 2:5 | Kapott -> 3:0
+  - Hiba a(z) 37. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 39. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 40. hangnal (D#3): Vart -> 1:6 | Kapott -> 2:1
+  - Hiba a(z) 41. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 45. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  - Hiba a(z) 47. hangnal (G3): Vart -> 1:10 | 2:5 | Kapott -> 3:0
+  ~ Alternativ lefogas a(z) 48. hangnal (F#3): Kedvenc -> 1:9 | Kapott -> 2:4
+  - Hiba a(z) 50. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 51. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 52. hangnal (G3): Vart -> 2:5 | Kapott -> 3:0
+  - Hiba a(z) 53. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  - Hiba a(z) 55. hangnal (E3): Vart -> 1:7 | Kapott -> 2:2
+  ~ Alternativ lefogas a(z) 59. hangnal (C3): Kedvenc -> 0:8 | Kapott -> 1:3
+  ~ Alternativ lefogas a(z) 60. hangnal (B2): Kedvenc -> 0:7 | Kapott -> 1:2
+  ~ Alternativ lefogas a(z) 62. hangnal (A#2): Kedvenc -> 0:6 | Kapott -> 1:1
+  ~ Alternativ lefogas a(z) 63. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  ~ Alternativ lefogas a(z) 64. hangnal (A#3): Kedvenc -> 2:8 | Kapott -> 3:3
+  ~ Alternativ lefogas a(z) 65. hangnal (C4): Kedvenc -> 2:10 | Kapott -> 3:5
+  Eredmeny: kedvenc 24/65 (36.9%), elfogadhato 33/65 (50.8%)
+  Valasztasos hangokon (45): kedvenc 4/45 (8.9%), elfogadhato 13/45 (28.9%)
 
 Futtatas: [AR_Lick1_FN]
-  - Hiba a(z) 11. hangnal (D4): Vart -> Hur:3 Bund:7 | Kapott -> Hur:4 Bund:3
-  - Hiba a(z) 12. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  Eredmeny: 11/13 helyes (84.6%)
+  ~ Alternativ lefogas a(z) 11. hangnal (D4): Kedvenc -> 3:7 | Kapott -> 4:3
+  ~ Alternativ lefogas a(z) 12. hangnal (G3): Kedvenc -> 2:5 | Kapott -> 3:0
+  Eredmeny: kedvenc 11/13 (84.6%), elfogadhato 13/13 (100.0%)
+  Valasztasos hangokon (13): kedvenc 11/13 (84.6%), elfogadhato 13/13 (100.0%)
 
 Futtatas: [AR_Lick3_FN]
-  - Hiba a(z) 3. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 5. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 7. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  - Hiba a(z) 8. hangnal (A3): Vart -> Hur:2 Bund:7 | Kapott -> Hur:3 Bund:2
-  - Hiba a(z) 9. hangnal (G3): Vart -> Hur:2 Bund:5 | Kapott -> Hur:3 Bund:0
-  - Hiba a(z) 10. hangnal (F3): Vart -> Hur:1 Bund:8 | Kapott -> Hur:2 Bund:3
-  - Hiba a(z) 13. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  Eredmeny: 6/13 helyes (46.2%)
+  - Hiba a(z) 3. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 5. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  - Hiba a(z) 7. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  ~ Alternativ lefogas a(z) 8. hangnal (A3): Kedvenc -> 2:7 | Kapott -> 3:2
+  ~ Alternativ lefogas a(z) 9. hangnal (G3): Kedvenc -> 2:5 | Kapott -> 3:0
+  ~ Alternativ lefogas a(z) 10. hangnal (F3): Kedvenc -> 1:8 | Kapott -> 2:3
+  - Hiba a(z) 13. hangnal (D3): Vart -> 1:5 | Kapott -> 2:0
+  Eredmeny: kedvenc 6/13 (46.2%), elfogadhato 9/13 (69.2%)
+  Valasztasos hangokon (13): kedvenc 6/13 (46.2%), elfogadhato 9/13 (69.2%)
 
 Futtatas: [breaking_the_law_clean]
-  Eredmeny: 18/18 helyes (100.0%)
+  Eredmeny: kedvenc 18/18 (100.0%), elfogadhato 18/18 (100.0%)
+  Valasztasos hangokon (13): kedvenc 13/13 (100.0%), elfogadhato 13/13 (100.0%)
 
 Futtatas: [A_0-3-5-3-0]
-  - Hiba a(z) 3. hangnal (D3): Vart -> Hur:1 Bund:5 | Kapott -> Hur:2 Bund:0
-  Eredmeny: 4/5 helyes (80.0%)
+  ~ Alternativ lefogas a(z) 3. hangnal (D3): Kedvenc -> 1:5 | Kapott -> 2:0
+  Eredmeny: kedvenc 4/5 (80.0%), elfogadhato 5/5 (100.0%)
+  Valasztasos hangokon (5): kedvenc 4/5 (80.0%), elfogadhato 5/5 (100.0%)
 
 Futtatas: [A_clean]
-  Eredmeny: 1/1 helyes (100.0%)
+  Eredmeny: kedvenc 1/1 (100.0%), elfogadhato 1/1 (100.0%)
+  Valasztasos hangokon (1): kedvenc 1/1 (100.0%), elfogadhato 1/1 (100.0%)
 
 Futtatas: [E_0-3-5-3-0]
-  - Hiba a(z) 3. hangnal (A2): Vart -> Hur:0 Bund:5 | Kapott -> Hur:1 Bund:0
-  Eredmeny: 4/5 helyes (80.0%)
+  ~ Alternativ lefogas a(z) 3. hangnal (A2): Kedvenc -> 0:5 | Kapott -> 1:0
+  Eredmeny: kedvenc 4/5 (80.0%), elfogadhato 5/5 (100.0%)
+  Valasztasos hangokon (1): kedvenc 0/1 (0.0%), elfogadhato 1/1 (100.0%)
 
 Futtatas: [e0_clean]
-  Eredmeny: 1/1 helyes (100.0%)
+  Eredmeny: kedvenc 1/1 (100.0%), elfogadhato 1/1 (100.0%)
+  Valasztasos hangokon (1): kedvenc 1/1 (100.0%), elfogadhato 1/1 (100.0%)
 
 Futtatas: [e24_clean]
-  Eredmeny: 1/1 helyes (100.0%)
+  Eredmeny: kedvenc 1/1 (100.0%), elfogadhato 1/1 (100.0%)
+  Valasztasos hangokon: nincs valasztasos hang
 
-Osszesitett pontossag: 74.7%
+Osszesitett pontossag: 83.6%
 
