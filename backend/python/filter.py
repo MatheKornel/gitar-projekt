@@ -8,6 +8,7 @@ class BandpassFilter:
         nyq = fs*0.5
         low = lowcut/nyq
         high = highcut/nyq
-        b, a = signal.butter(order, [low, high], btype='band')
-        filtered = signal.filtfilt(b, a, original)
+        # másodrendű szakaszok (SOS): mély hangolásoknál (B és lejjebb) a (b, a) alak numerikusan instabil, inf/NaN lesz a kimenet
+        sos = signal.butter(order, [low, high], btype='band', output='sos')
+        filtered = signal.sosfiltfilt(sos, original)
         return filtered
