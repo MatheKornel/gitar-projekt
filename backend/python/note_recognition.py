@@ -29,9 +29,18 @@ class ShortTimeFT:
         
         return salience
 
+    # egy felharmonikus amplitúdója: a frekvencia körüli ±25 centes sáv legnagyobb értéke a zero-paddelt spektrumban
+    # a sáv centben (relatívan) van megadva, így nem függ attól, hogy a hang hova esik a bin-rácson --> minden hangolásban ugyanúgy mér
+    def get_harmonic_amp(self, spectrum, freq, bin_hz):
+        low_bin = int(np.ceil(freq * 2 ** (-25 / 1200) / bin_hz))
+        high_bin = int(np.floor(freq * 2 ** (25 / 1200) / bin_hz))
+        if high_bin < low_bin: # ha egy bin sem esik a sávba, a legközelebbit vesszük
+            low_bin = high_bin = int(round(freq / bin_hz))
+        return np.max(spectrum[low_bin:high_bin + 1])
+
     # egyetlen frame-re kiszámoljuk az alaphangot, lentről felfele építkezve
     # minden egyes létező hangra kiszámolok egy pontszámot (salience) és a legjobbat választom
-    def get_f0_from_frame(self, i, magnitude, freqs, fs, max_harmonics, guitar_notes):
+    def get_f0_from_frame(self, spectrum, bin_hz, fs, max_harmonics, guitar_notes):
         
         f0_candidate_salience = []
 
@@ -50,12 +59,8 @@ class ShortTimeFT:
                 if freq > fs / 2:
                     break
                 
-                tol_hz = max(freq * 0.03, 4.5)
-                nearby_bins = np.where(np.abs(freqs - freq) <= tol_hz)[0]
-                amp = 0.0
-                if nearby_bins.size > 0:
-                    amp = np.sum(magnitude[nearby_bins, i])
-                
+                amp = self.get_harmonic_amp(spectrum, freq, bin_hz)
+
                 if m == 1:
                     salience += amp * 1.0
                 else:
@@ -95,7 +100,13 @@ class ShortTimeFT:
 
         notes_with_offsets = []
         freqs = lb.fft_frequencies(sr=fs, n_fft=nfft)
-        
+
+        # a hangmagasság becsléshez zero-paddelt spektrum: ~10.8 Hz helyett ~2.7 Hz-es bin távolság,
+        # így a mély hangok (pl. D#2, C#2) minden felharmonikusa mérhető, bármelyik hangolásnál
+        nfft_padded = nfft * 4
+        bin_hz = fs / nfft_padded
+        window = lb.filters.get_window("blackman", nfft, fftbins=True) # ugyanaz az ablak, mint az lb.stft-ben
+
         for i in range(len(onsets)):
             onset = onsets[i]
 
@@ -129,7 +140,9 @@ class ShortTimeFT:
 
             f0_candidates = []
             for j in range(start_frame, end_frame):
-                f0 = self.get_f0_from_frame(j, magnitude, freqs, fs, max_harmonics, guitar_notes) # alaphang meghatározása az adott frame-ben
+                frame = audio_slice[j * hop_length:j * hop_length + nfft] * window # ugyanaz a frame, mint D[:, j]
+                spectrum = np.abs(np.fft.rfft(frame, n=nfft_padded))
+                f0 = self.get_f0_from_frame(spectrum, bin_hz, fs, max_harmonics, guitar_notes) # alaphang meghatározása az adott frame-ben
                 if f0 is not None:
                     f0_candidates.append(f0)
 
