@@ -36,7 +36,7 @@ class GuitarProjectApp:
         self.paths = ProjectPaths()
         self.config = ProjectConfig()
         self.algo = ""
-        self.select = tk.IntVar(value=1)
+        self.select = tk.IntVar(value=3)
         self.is_note_rec_done = False
 
         self._build_ui()

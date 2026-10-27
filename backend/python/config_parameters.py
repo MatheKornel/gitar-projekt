@@ -152,5 +152,5 @@ class ProjectConfig:
     lilypond_path: str = field(default_factory=_resolve_lilypond_path)
     tab_staff_indent_mm: int = 0
     default_time_signature: str = "4/4"
-    default_algo: str = "viterbi"
-    supported_algorithms: tuple[str, ...] = ("viterbi", "pso", "main")
+    default_algo: str = "main"
+    supported_algorithms: tuple[str, ...] = ("viterbi", "pso", "main", "main_plus_viterbi")
