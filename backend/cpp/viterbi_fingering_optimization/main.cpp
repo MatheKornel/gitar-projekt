@@ -23,26 +23,15 @@ int main(int argc, char *argv[])
 
         std::cout << "Benchmark futtatasa folyamatban... Az eredmenyek a fajlba irodnak.\n";
 
-        std::vector<BenchmarkCase> tests;
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/jotun_clean_fing-opt_test.txt", "jotun_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/almost_honest_clean_fing-opt_test.txt", "almost_honest_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/ashes_in_your_mouth_clean_fing-opt_test.txt", "ashes_in_your_mouth_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick1_FN_fing-opt_test.txt", "AR_Lick1_FN"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/AR_Lick3_FN_fing-opt_test.txt", "AR_Lick3_FN"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/breaking_the_law_clean_fing-opt_test.txt", "breaking_the_law_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_0-3-5-3-0_fing-opt_test.txt", "A_0-3-5-3-0"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/A_clean_fing-opt_test.txt", "A_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/E_0-3-5-3-0_fing-opt_test.txt", "E_0-3-5-3-0"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e0_clean_fing-opt_test.txt", "e0_clean"));
-        tests.push_back(Benchmark::LoadFromFile("../../../benchmarks/e24_clean_fing-opt_test.txt", "e24_clean"));
-
-        double totalAccuracy = 0.0;
-        int validTests = 0;
+        std::vector<BenchmarkCase> tests = Benchmark::LoadAllCases("../../../benchmarks");
+        BenchmarkSummary summary;
 
         for (const auto &test : tests)
         {
             if (test.inputNotes.empty())
                 continue;
+
+            FretBoard::SetTuning(test.tuning); // minden teszt a saját hangolásával fut
 
             Viterbi viterbi(test.inputNotes);
             auto optResult = viterbi.Optimization();
@@ -53,19 +42,12 @@ int main(int argc, char *argv[])
                 actualPositions.push_back({pos.GetStringIdx(), pos.GetFretIdx()});
             }
 
-            double accuracy = Benchmark::Evaluate(test, actualPositions, logFile);
-            totalAccuracy += accuracy;
-            validTests++;
+            BenchmarkResult result = Benchmark::Evaluate(test, actualPositions, logFile);
+            summary.Add(result);
         }
 
-        if (validTests > 0)
-        {
-            logFile << "Osszesitett pontossag: "
-                    << (totalAccuracy / validTests) << "%\n\n";
-
-            std::cout << "Osszesitett pontossag: "
-                      << (totalAccuracy / validTests) << "%\n\n";
-        }
+        summary.Print(logFile, "Viterbi algoritmus");
+        summary.SaveToSummaryFile("../../../benchmark_results/osszesitett_eredmenyek.txt", "Viterbi algoritmus");
 
         logFile.close();
         std::cout << "A benchmark lefutott! Keresd a 'viterbi_benchmark_results.txt' fajlt a benchmark_results mappaban.\n";

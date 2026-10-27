@@ -3,276 +3,313 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <map>
-struct Path
+#include <limits>
+
+Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(newNotes)
 {
-    std::vector<NotePosition> positions;
-    double totalCost = 0.0;
-};
+    FindPedalNotes();
+}
 
-Optimization::Optimization(const std::vector<InputNotes> &newNotes) : notes(std::move(newNotes)) {}
-
-double Optimization::CalculateCenter(const size_t currentIdx)
+void Optimization::FindPedalNotes()
 {
-    const double timeWindow = 2.0; // 2 másodperc előre
-    const double currentOnset = notes[currentIdx].GetOnset();
-    std::vector<int> windowMidis;
+    // pedálhang: a környező hangok között sokszor ismétlődik, és ő a legmélyebb vagy legmagasabb hang (pl. üres E alatt futó riff)
+    // a pedálhangot üres húron szokás játszani, akkor is, ha a kéz feljebb van a fogólapon
+    const int pedalRadius = 8;     // ennyi hangot nézünk előre és hátra
+    const double pedalShare = 0.3; // a környező hangok legalább ekkora része ez a hang
+    const int minWindow = 4;       // ennél kevesebb hangból nem döntünk
 
-    for (size_t i = currentIdx; i < notes.size(); i++)
+    isPedal.assign(notes.size(), false);
+    const int n = static_cast<int>(notes.size());
+    for (int i = 0; i < n; i++)
     {
-        if (notes[i].GetOnset() - currentOnset > timeWindow)
+        const int from = std::max(0, i - pedalRadius);
+        const int to = std::min(n - 1, i + pedalRadius);
+        int sameCount = 0;
+        int minMidi = notes[i].GetMidiNote();
+        int maxMidi = notes[i].GetMidiNote();
+        for (int j = from; j <= to; j++)
         {
-            break;
-        }
-
-        if (i > currentIdx)
-        {
-            double prevOffset = notes[i - 1].GetOnset() + notes[i - 1].GetDuration();
-            if (notes[i].GetOnset() - prevOffset > 0.4)
+            const int midi = notes[j].GetMidiNote();
+            if (midi == notes[i].GetMidiNote())
             {
-                break;
+                sameCount++;
             }
+            minMidi = std::min(minMidi, midi);
+            maxMidi = std::max(maxMidi, midi);
         }
 
-        windowMidis.push_back(notes[i].GetMidiNote());
-    }
-
-    if (windowMidis.empty())
-        return 0.0;
-
-    std::sort(windowMidis.begin(), windowMidis.end());
-    size_t mid = windowMidis.size() / 2;
-
-    if (windowMidis.size() % 2 == 0)
-    {
-        return (windowMidis[mid - 1] + windowMidis[mid]) / 2.0;
-    }
-    else
-    {
-        return windowMidis[mid];
+        const int windowCount = to - from + 1;
+        const bool isExtreme = (notes[i].GetMidiNote() == minMidi || notes[i].GetMidiNote() == maxMidi);
+        if (windowCount >= minWindow && isExtreme && sameCount >= pedalShare * windowCount)
+        {
+            isPedal[i] = true;
+        }
     }
 }
 
-double Optimization::ExtraCost(const double currentCenter, const NotePosition &nextPos, const NotePosition &prevPos, const NotePosition &prevPrevPos) const
+std::vector<int> Optimization::PossibleHandFrets(const NotePosition &pos) const
 {
-    double extraCost = 0.0;
-    std::vector<int> tuning = FretBoard::GetTuning();
-    double centerThreshold = tuning.empty() ? 64.0 : (tuning[0] + 24.0);
-    if (currentCenter > centerThreshold && nextPos.GetFretIdx() < 5)
-    {
-        extraCost += 10.0; // ha általában magas hangokat játszünk, akkor feljebb legyen lefogás, a lejjebb lefogásokat büntetjük
-    }
+    std::vector<int> handFrets;
 
-    if (prevPos.GetFretIdx() >= 5 && nextPos.GetFretIdx() == 0)
+    // üres húrnál nem kell lefogni semmit, a kéz bárhol lehet (közben akár át is helyezkedhet)
+    const int maxHandFret = 17;
+    if (pos.GetFretIdx() == 0)
     {
-        extraCost += 30.0; // ha az 5. bund felett volt az előző hang, akkor ne váltsunk üres húrra
-    }
-
-    const int fretDiff = abs(nextPos.GetFretIdx() - prevPos.GetFretIdx());
-    if (prevPos.GetFretIdx() != 0 && nextPos.GetFretIdx() != 0 && fretDiff <= 3)
-    {
-        extraCost -= 5.0; // ha a kéz egy helyben marad, azt jutalmazzuk
-    }
-
-    if ((nextPos.GetStringIdx() == 0 || nextPos.GetStringIdx() == 1) && nextPos.GetFretIdx() > 12)
-    {
-        extraCost += 25.0; // az E és A húron ne játszunk riffeket a 12. bund felett
-    }
-
-    const int stringDiff = abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
-    if (stringDiff > 1)
-    {
-        extraCost += 25.0 * (stringDiff - 1); // húrváltást büntetjük, mert riffeknél nehezebb váltani
-    }
-
-    if ((prevPos.GetStringIdx() == 0 && prevPos.GetFretIdx() == 0) || (nextPos.GetStringIdx() == 0 && nextPos.GetFretIdx() == 0))
-    {
-        extraCost -= 5.0; // ha üres E húr és bármi között van váltás, azt jutalmazzuk, az nem baj
-    }
-
-    if (prevPrevPos.GetFretIdx() != -1) // ha V alakú, oda vissza ugrálások vannak, büntetjük
-    {
-        int fret1 = prevPrevPos.GetFretIdx();
-        int fret2 = prevPos.GetFretIdx();
-        int fret3 = nextPos.GetFretIdx();
-
-        if (fret1 != 0 && fret2 != 0 && fret3 != 0)
+        for (int handFret = 1; handFret <= maxHandFret; handFret++)
         {
-            bool upThenDown = (fret2 > fret1) && (fret3 < fret2);
-            bool downThenUp = (fret2 < fret1) && (fret3 > fret2);
+            handFrets.push_back(handFret);
+        }
+        return handFrets;
+    }
 
-            if (upThenDown || downThenUp)
+    // a kéz 4 bundot fog át (1 ujj / bund), terpesszel a kisujj még egy bunddal feljebb is elér
+    const int stretchSpan = 4;
+    for (int handFret = std::max(1, pos.GetFretIdx() - stretchSpan); handFret <= pos.GetFretIdx(); handFret++)
+    {
+        handFrets.push_back(handFret);
+    }
+    return handFrets;
+}
+
+std::vector<HandState> Optimization::PossibleStates(const size_t noteIdx) const
+{
+    std::vector<HandState> states;
+    for (const auto &pos : FretBoard::GetPositions(notes[noteIdx].GetMidiNote()))
+    {
+        for (const int handFret : PossibleHandFrets(pos))
+        {
+            HandState state;
+            state.pos = pos;
+            state.handFret = handFret;
+            states.push_back(state);
+        }
+    }
+    return states;
+}
+
+double Optimization::NoteCost(const size_t noteIdx, const HandState &state) const
+{
+    const double fretWeight = 0.4;      // lefogott hang alapköltsége, az üres húr ennyivel könnyebb
+    const int highHandFret = 5;         // ettől a kézpozíciótól számít magasnak a kéz
+    const double openHighPenalty = 3.0; // üres húr, miközben a kéz magasan van (nem lehet vibrálni, máshogy szól)
+
+    const int fret = state.pos.GetFretIdx();
+    const int stringIdx = state.pos.GetStringIdx();
+    double cost = 0.0;
+
+    if (fret == 0)
+    {
+        // a pedálhang üres húron természetes, ott nincs büntetés
+        if (!isPedal[noteIdx])
+        {
+            cost += TimbreCost(stringIdx);
+            if (state.handFret >= highHandFret)
             {
-                int jump1 = abs(fret2 - fret1);
-                int jump2 = abs(fret3 - fret2);
-                int lowestFret = std::min(fret1, std::min(fret2, fret3));
-
-                int jumpTolerance = 3;
-
-                if (lowestFret >= 12)
-                    jumpTolerance = 4;
-                if (lowestFret >= 17)
-                    jumpTolerance = 5;
-
-                if (jump1 >= jumpTolerance && jump2 >= jumpTolerance)
-                {
-                    extraCost += 15.0;
-                }
+                cost += openHighPenalty;
             }
         }
     }
+    else
+    {
+        cost += fretWeight;
+        cost += TimbreCost(stringIdx);
+        cost += FingerCost(fret - state.handFret);
+    }
 
-    return extraCost;
+    cost += NeckCost(state.pos);
+    return cost;
+}
+
+double Optimization::FingerCost(const int finger) const
+{
+    const double ringPenalty = 0.3;    // gyűrűsujj
+    const double pinkyPenalty = 1.0;   // a kisujj a leggyengébb
+    const double stretchPenalty = 2.5; // 5 bundos terpesz (a kisujj a mutatóujjtól 4 bundra)
+
+    // finger: 0 = mutató, 1 = középső, 2 = gyűrűs, 3 = kisujj, 4 = kisujj terpesszel
+    if (finger == 2)
+    {
+        return ringPenalty;
+    }
+    if (finger == 3)
+    {
+        return pinkyPenalty;
+    }
+    if (finger == 4)
+    {
+        return pinkyPenalty + stretchPenalty;
+    }
+    return 0.0;
+}
+
+double Optimization::TimbreCost(const int stringIdx) const
+{
+    // ugyanaz a hang a vastagabb húron teltebben szól, ezért (a kényelmes bundhatárig) azt választjuk
+    // a vastag E és az A húr egyformán számít, a D húrtól felfelé húronként drágább
+    const double thinStringWeight = 1.0;
+    return thinStringWeight * std::max(0, stringIdx - 1);
+}
+
+double Optimization::NeckCost(const NotePosition &pos) const
+{
+    // húronként más a kényelmes felső határ: a vastag húrokon magasan tompa a hang és nehezen elérhető
+    const int comfortLimits[6] = {8, 10, 11, 12, 14, 15}; // E, A, D, G, H, e húr
+    const double neckWeight = 2.0;                        // bundonként a határ felett
+
+    const int limit = comfortLimits[pos.GetStringIdx()];
+    if (pos.GetFretIdx() > limit)
+    {
+        return neckWeight * (pos.GetFretIdx() - limit);
+    }
+    return 0.0;
+}
+
+double Optimization::TransitionCost(const size_t noteIdx, const HandState &prevState, const HandState &nextState) const
+{
+    double cost = StringChangeCost(prevState.pos, nextState.pos);
+    cost += HandCost(prevState.handFret, nextState.handFret, AvailableTime(noteIdx, nextState));
+    return cost;
+}
+
+double Optimization::StringChangeCost(const NotePosition &prevPos, const NotePosition &nextPos) const
+{
+    const double stringWeight = 1.0; // szomszédos húrra váltás (ez a költségek mértékegysége)
+    const double skipWeight = 1.75;  // minden átugrott húr (húrugrás, a pengetőkéznek nehezebb)
+
+    const int stringDiff = std::abs(prevPos.GetStringIdx() - nextPos.GetStringIdx());
+    if (stringDiff == 0)
+    {
+        return 0.0;
+    }
+    return stringWeight + skipWeight * (stringDiff - 1);
+}
+
+double Optimization::HandCost(const int prevHandFret, const int nextHandFret, const double availableTime) const
+{
+    if (prevHandFret == nextHandFret)
+    {
+        return 0.0;
+    }
+
+    const double shiftBase = 4.0;   // minden kézmozgás alapköltsége (a pozíció elhagyása)
+    const double handWeight = 1.25; // kézmozgás bundonként
+
+    const int handDiff = std::abs(nextHandFret - prevHandFret);
+    double cost = shiftBase + handWeight * handDiff;
+
+    // menzúra mm-ben (a 648 mm a tipikus gitár menzúra)
+    const double L = 648.0;
+
+    // a kéz két pozíciójának fizikai távolsága a nyeregtől (mm)
+    const double prevHandMm = L * (1.0 - std::pow(2.0, -prevHandFret / 12.0));
+    const double nextHandMm = L * (1.0 - std::pow(2.0, -nextHandFret / 12.0));
+
+    // kb 100 mm felett már nagy ugrásnak számít, mm-ként büntetjük
+    const double shiftMm = std::abs(prevHandMm - nextHandMm);
+    const double maxShiftMm = 100.0;
+    const double mmWeight = 0.03;
+    if (shiftMm > maxShiftMm)
+    {
+        cost += (shiftMm - maxShiftMm) * mmWeight;
+    }
+
+    return cost * Urgency(availableTime);
+}
+
+double Optimization::Urgency(const double availableTime) const
+{
+    // 0.25 s alatt egyszeres a mozgás költsége, kevesebb időnél drágább, több időnél olcsóbb
+    const double referenceTime = 0.25;
+    return std::clamp(referenceTime / std::max(availableTime, 0.03), 0.25, 3.0);
+}
+
+double Optimization::AvailableTime(const size_t noteIdx, const HandState &nextState) const
+{
+    // ha a következő hang üres húron szól, a kéz a hang szólása alatt mozoghat (a következő hangig)
+    if (nextState.pos.GetFretIdx() == 0)
+    {
+        if (noteIdx + 1 < notes.size())
+        {
+            return notes[noteIdx + 1].GetOnset() - notes[noteIdx].GetOnset();
+        }
+        return 1.0; // az utolsó hang után már nem kell sietni
+    }
+    return notes[noteIdx].GetOnset() - notes[noteIdx - 1].GetOnset();
 }
 
 std::vector<NotePosition> Optimization::RunOptimization()
 {
-    std::vector<NotePosition> finalPositions;
-    finalPositions.reserve(notes.size());
+    std::vector<NotePosition> result(notes.size(), NotePosition(0, 0));
 
-    const int windowSize = 10;
-
+    // a gitáron lefoghatatlan hangokat kihagyjuk a keresésből
+    std::vector<size_t> playable;
     for (size_t i = 0; i < notes.size(); i++)
     {
-        std::vector<InputNotes> window;
-        for (size_t j = i; j < i + windowSize && j < notes.size(); j++)
+        if (FretBoard::GetPositions(notes[i].GetMidiNote()).empty())
         {
-            window.push_back(notes[j]);
-        }
-
-        std::vector<Path> currentPaths;
-        auto firstNotePositions = FretBoard::GetPositions(window[0].GetMidiNote());
-
-        if (firstNotePositions.empty())
-        {
-            std::cerr << "Nem talalhato lefogas a " << window[0].GetMidiNote() << " hanghoz!" << std::endl;
-            finalPositions.push_back(NotePosition(0, 0));
-            continue;
-        }
-
-        double currentCenter = CalculateCenter(i);
-
-        for (const auto &pos : firstNotePositions)
-        {
-            double initialCost = 0.0;
-            if (!finalPositions.empty())
-            {
-                NotePosition prevPos = finalPositions.back();
-                NotePosition prevPrevPos(-1, -1);
-                
-                if (finalPositions.size() >= 2)
-                {
-                    prevPrevPos = finalPositions[finalPositions.size() - 2];
-                }
-                
-                double ioi = notes[i].GetOnset() - notes[i - 1].GetOnset();
-                double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
-
-                double stepCost = prevPos.Distance(pos) * urgency;
-                double extraCost = ExtraCost(currentCenter, pos, prevPos, prevPrevPos);
-                
-                initialCost = stepCost + extraCost;
-            }
-            Path newPath;
-            newPath.positions.push_back(pos);
-            newPath.totalCost = initialCost;
-            currentPaths.push_back(newPath);
-        }
-
-        for (size_t j = 1; j < window.size(); j++)
-        {
-            auto nextPositions = FretBoard::GetPositions(window[j].GetMidiNote());
-            std::vector<Path> nextPaths;
-
-            double ioi = window[j].GetOnset() - window[j - 1].GetOnset();
-            double urgency = std::clamp(std::sqrt(0.25 / std::max(ioi, 0.03)), 0.6, 4.0);
-
-            for (const auto &path : currentPaths)
-            {
-                const auto &prevPos = path.positions.back();
-
-                NotePosition prevPrevPos(-1, -1);
-                if (path.positions.size() >= 2)
-                {
-                    prevPrevPos = path.positions[path.positions.size() - 2];
-                }
-                else if (!finalPositions.empty())
-                {
-                    prevPrevPos = finalPositions.back();
-                }
-
-                for (const auto &nextPos : nextPositions)
-                {
-                    const double stepCost = prevPos.Distance(nextPos) * urgency;
-                    const double extraCost = ExtraCost(currentCenter, nextPos, prevPos, prevPrevPos);
-                    
-                    Path expandedPath = path;
-                    expandedPath.positions.push_back(nextPos);
-                    expandedPath.totalCost += (stepCost + extraCost);
-                    nextPaths.push_back(expandedPath);
-                }
-            }
-
-            std::map<std::pair<int, int>, Path> bestStatePaths;
-
-            for (const auto &p : nextPaths)
-            {
-                // vesszük az útvonal utolsó két lefogását, hogy meghatározzuk a kéz fizikai állapotát
-                NotePosition currPos = p.positions.back();
-                NotePosition prevPos(-1, -1);
-                
-                if (p.positions.size() >= 2) 
-                {
-                    prevPos = p.positions[p.positions.size() - 2]; // ha ablakon belül vagyunk
-                } 
-                else if (!finalPositions.empty()) 
-                {
-                    prevPos = finalPositions.back(); // ha az ablak legelső lépése
-                }
-
-                // egyedi azonosítót generálunk a lefogásokból (pl A húr 7. bund -> 107)
-                int prevId = (prevPos.GetFretIdx() != -1) ? (prevPos.GetStringIdx() * 100 + prevPos.GetFretIdx()) : -1;
-                int currId = currPos.GetStringIdx() * 100 + currPos.GetFretIdx();
-                std::pair<int, int> stateKey = {prevId, currId};
-
-                // ha nincs ilyen állapot, elmenti, ha pedig van, akkor csak akkor frissíti, ha az új útvonal költsége kisebb, mint a korábbi
-                if (bestStatePaths.find(stateKey) == bestStatePaths.end() || p.totalCost < bestStatePaths[stateKey].totalCost)
-                {
-                    bestStatePaths[stateKey] = p;
-                }
-            }
-
-            // visszatöltjük a legjobb útvonalakat, így a következő iterációban már csak a legjobbakat vizsgáljuk
-            currentPaths.clear();
-            for (const auto &pair : bestStatePaths)
-            {
-                currentPaths.push_back(pair.second);
-            }
-        }
-
-        double bestCost = std::numeric_limits<double>::max();
-        std::vector<NotePosition> bestWindowPath;
-
-        for (const auto &path : currentPaths)
-        {
-            if (path.totalCost < bestCost)
-            {
-                bestCost = path.totalCost;
-                bestWindowPath = path.positions;
-            }
-        }
-
-        if (!bestWindowPath.empty())
-        {
-            finalPositions.push_back(bestWindowPath[0]);
+            std::cerr << "Nem talalhato lefogas a " << notes[i].GetMidiNote() << " hanghoz!" << std::endl;
         }
         else
         {
-            std::cerr << "Nem talalhato ervenyes utvonal a(z) " << i
-                      << ". hangtol (MIDI " << notes[i].GetMidiNote()
-                      << ") kezdodo ablakhoz - kimaradt az eredmenybol!" << std::endl;
+            playable.push_back(i);
+        }
+    }
+    if (playable.empty())
+    {
+        return result;
+    }
+
+    // dinamikus programozás a teljes darabra: minden hang minden állapotához (lefogás + kézpozíció)
+    // eltároljuk a legolcsóbb odavezető út költségét és azt, hogy melyik előző állapotból jöttünk
+    const size_t count = playable.size();
+    std::vector<std::vector<HandState>> states(count);
+    std::vector<std::vector<double>> bestCosts(count);
+    std::vector<std::vector<int>> prevStateIdx(count);
+
+    states[0] = PossibleStates(playable[0]);
+    for (const auto &state : states[0])
+    {
+        bestCosts[0].push_back(NoteCost(playable[0], state));
+        prevStateIdx[0].push_back(-1);
+    }
+
+    for (size_t t = 1; t < count; t++)
+    {
+        const size_t noteIdx = playable[t];
+        states[t] = PossibleStates(noteIdx);
+        bestCosts[t].assign(states[t].size(), std::numeric_limits<double>::max());
+        prevStateIdx[t].assign(states[t].size(), -1);
+
+        for (size_t k = 0; k < states[t].size(); k++)
+        {
+            const double noteCost = NoteCost(noteIdx, states[t][k]);
+            for (size_t j = 0; j < states[t - 1].size(); j++)
+            {
+                const double pathCost = bestCosts[t - 1][j] + TransitionCost(noteIdx, states[t - 1][j], states[t][k]) + noteCost;
+                if (pathCost < bestCosts[t][k])
+                {
+                    bestCosts[t][k] = pathCost;
+                    prevStateIdx[t][k] = static_cast<int>(j);
+                }
+            }
         }
     }
 
-    return finalPositions;
+    // a legolcsóbb végállapotból visszafelé követjük az utat
+    int bestIdx = 0;
+    for (size_t k = 1; k < states[count - 1].size(); k++)
+    {
+        if (bestCosts[count - 1][k] < bestCosts[count - 1][bestIdx])
+        {
+            bestIdx = static_cast<int>(k);
+        }
+    }
+
+    for (int t = static_cast<int>(count) - 1; t >= 0; t--)
+    {
+        result[playable[t]] = states[t][bestIdx].pos;
+        bestIdx = prevStateIdx[t][bestIdx];
+    }
+
+    return result;
 }

@@ -55,6 +55,9 @@ class GuitarProjectApp:
         opt_button = ttk.Button(self.root, text="Ujjrend optimalizálás", command=self.finger_optimization)
         opt_button.place(x=255, y=30)
 
+        opt_benchmark_button = ttk.Button(self.root, text="Ujjrend benchmark", command=self.finger_optimization_benchmark)
+        opt_benchmark_button.place(x=390, y=30)
+
         midi_export_button = ttk.Button(self.root, text="MIDI exportálása", command=self.save_midi)
         midi_export_button.place(x=350, y=0)
 
@@ -173,11 +176,8 @@ class GuitarProjectApp:
             self.is_note_rec_done = False
             self.refresh_ui()
 
-    def finger_optimization(self):
-        if not self.current_notes:
-            print("Nincsenek felismert hangok az optimalizáláshoz.")
-            return
-
+    def _select_algo(self):
+        # a kiválasztott rádiógomb alapján beállítja az optimalizáló eljárás nevét
         if self.select.get() == 1:
             self.algo = "viterbi"
         elif self.select.get() == 2:
@@ -187,19 +187,20 @@ class GuitarProjectApp:
         elif self.select.get() == 4:
             self.algo = "main_plus_viterbi"
 
+    def finger_optimization(self):
+        if not self.current_notes:
+            print("Nincsenek felismert hangok az optimalizáláshoz.")
+            return
+
+        self._select_algo()
+
         converter = DataToTxtConverter(self.current_notes, paths=self.paths)
         open_strings = GuitarNoteFreqs.open_string_midis(self.tunings_combobox.get())
         converter.save_note_to_txt(self.algo, open_strings)
 
         cpp_exe = self.paths.cpp_executable(self.algo)
         if cpp_exe.exists():
-            print(f"\n[{self.algo}] Benchmark tesztek indítása...")
-            bench_result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
-            print(bench_result.stdout)
-            if bench_result.stderr:
-                print("Benchmark hiba:", bench_result.stderr)
-
-            print("Ujjrend optimalizálás indítása...")
+            print(f"\n[{self.algo}] Ujjrend optimalizálás indítása...")
             txt_path = os.path.join(str(cpp_exe.parent), "notes.txt")
             result = subprocess.run([str(cpp_exe), txt_path], cwd=str(cpp_exe.parent), capture_output=True, text=True)
             print("C++ kimenet:")
@@ -225,6 +226,23 @@ class GuitarProjectApp:
                 print(result.stderr)
         else:
             print(f"Nem találom a {cpp_exe} fájlt!")
+
+    def finger_optimization_benchmark(self):
+        # a kiválasztott eljárás benchmarkja, nem kell hozzá betöltött fájl vagy hangfelismerés
+        self._select_algo()
+
+        cpp_exe = self.paths.cpp_executable(self.algo)
+        if not cpp_exe.exists():
+            print(f"Nem találom a {cpp_exe} fájlt!")
+            return
+
+        print(f"\n[{self.algo}] Benchmark tesztek indítása...")
+        # paraméter nélküli futtatás, ami a C++ kódban a benchmarkot indítja el
+        bench_result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+        print(bench_result.stdout)
+        if bench_result.stderr:
+            print("Benchmark figyelmeztetés / hiba:")
+            print(bench_result.stderr)
 
     def save_midi(self):
         if not self.current_notes:

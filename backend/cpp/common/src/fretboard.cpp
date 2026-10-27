@@ -2,6 +2,7 @@
 #include <iostream>
 
 std::vector<int> FretBoard::openStrings = {40, 45, 50, 55, 59, 64};
+std::vector<std::vector<NotePosition>> FretBoard::fretboard;
 
 void FretBoard::SetTuning(const std::vector<int> &newOpenStrings)
 {
@@ -11,6 +12,7 @@ void FretBoard::SetTuning(const std::vector<int> &newOpenStrings)
         return;
     }
     openStrings = newOpenStrings;
+    fretboard = GenerateFretBoard(); // új hangolásnál a lefogások is megváltoznak
 }
 
 std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
@@ -35,7 +37,11 @@ std::vector<std::vector<NotePosition>> FretBoard::GenerateFretBoard()
 
 const std::vector<NotePosition> FretBoard::GetPositions(const int midiNote)
 {
-    static const std::vector<std::vector<NotePosition>> fretboard = GenerateFretBoard();
+    if (fretboard.empty())
+    {
+        fretboard = GenerateFretBoard();
+    }
+
     if (midiNote < 0 || static_cast<size_t>(midiNote) >= fretboard.size())
     {
         const std::vector<NotePosition> empty;
