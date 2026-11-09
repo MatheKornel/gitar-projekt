@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <fstream>
+#include <chrono>
 #include "fretboard.h"
 #include "input_notes.h"
 #include "particle.h"
@@ -67,8 +68,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // csak magát az optimalizálást mérjük (a program indítása és a fájlbeolvasás nélkül), a részecskék létrehozása is ide tartozik
+    const auto startTime = std::chrono::steady_clock::now();
     PSO pso(input, input.size(), 50, 10000, 0.0001);
     const auto result = pso.PsoAlgo(5000, 100);
+    const auto endTime = std::chrono::steady_clock::now();
+    const double elapsedMs = std::chrono::duration<double, std::milli>(endTime - startTime).count();
+    std::cerr << "Optimalizalas ideje: " << elapsedMs << " ms" << std::endl; // stderr-re, hogy a lefogások feldolgozását ne zavarja
+
     std::cout << "Fitnesz: " << pso.g_opt_fitness << std::endl;
     std::cout << "Optimalis lefogasok:" << std::endl;
     for (size_t i = 0; i < result.size(); i++)

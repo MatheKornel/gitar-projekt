@@ -8,7 +8,7 @@ import tempfile
 import time
 from config_paths import ProjectPaths
 
-ALGOS = ['main', 'viterbi']
+ALGOS = ['main', 'main_plus_viterbi', 'viterbi', 'pso']
 SCALING_SIZES = [100, 250, 500, 1000, 2500, 5000, 10000]
 STANDARD_E = [40, 45, 50, 55, 59, 64]
 TEST_GAP = 1.0  # szünet (mp) az összefűzött tesztek között, hogy ne legyen irreálisan gyors váltás két teszt határán
@@ -165,7 +165,7 @@ class FingOptTiming:
 def main():
     parser = argparse.ArgumentParser(description="Az ujjrend optimalizálók futásidejének mérése.")
     parser.add_argument("-a", "--algo", default="all", choices=ALGOS + ['all'],
-                        help="A mérendő eljárás ('all' esetén a saját és a Viterbi is).")
+                        help="A mérendő eljárás ('all' esetén mind a négy).")
     parser.add_argument("-r", "--repeats", type=int, default=10, help="Hány futás átlaga legyen egy mérés.")
     args = parser.parse_args()
 
