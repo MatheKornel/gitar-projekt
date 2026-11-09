@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 #include <fstream>
+#include <chrono>
 #include "fretboard.h"
 #include "input_notes.h"
 #include "viterbi.h"
@@ -60,7 +61,14 @@ int main(int argc, char *argv[])
     const auto input = InputNotes::LoadNotes(filePath);
 
     FretBoard::SetTuning(InputNotes::LoadTuning(filePath));
+
+    // csak magát az optimalizálást mérjük (a program indítása és a fájlbeolvasás nélkül)
+    const auto startTime = std::chrono::steady_clock::now();
     const auto result = Viterbi(input).Optimization();
+    const auto endTime = std::chrono::steady_clock::now();
+    const double elapsedMs = std::chrono::duration<double, std::milli>(endTime - startTime).count();
+    std::cerr << "Optimalizalas ideje: " << elapsedMs << " ms" << std::endl; // stderr-re, hogy a lefogások feldolgozását ne zavarja
+
     for (size_t i = 0; i < result.size(); i++)
     {
         std::cout << input[i].GetNoteName() << "\t-\t" << result[i].ToString() << std::endl;
