@@ -26,6 +26,15 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
 - C++ és CMake (Ujjrend optimalizáláshoz)
 
 ## Telepítés és futtatás
+
+### Windows: kész csomag (ajánlott)
+1. A [Releases](../../releases) oldalról töltsd le a `GitarProjekt-<verzió>-windows-x64.zip` fájlt.
+2. Csomagold ki egy tetszőleges mappába.
+3. Indítsd el a `GitarProjekt.exe` fájlt.
+
+A csomag mindent tartalmaz (Python, könyvtárak, lefordított C++ optimalizálók, LilyPond 2.24), külön semmit nem kell telepíteni. A program a kimeneteket (`MIDI_files`, `sheet_music`, `benchmark_results`) az exe melletti mappákba menti. A konzolablakban jelennek meg a program üzenetei.
+
+### Futtatás forrásból
 1. Python csomagok telepítése (Python 3.11 vagy újabb):
    ```bash
    pip install -r requirements.txt
@@ -44,6 +53,18 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
    ```bash
    python backend/python/run_fing_opt_benchmark.py -a all
    ```
+
+### Release csomag készítése
+A csomag csak kézzel indítva készül el: GitHub → **Actions** → **Release csomag** → **Run workflow**. Itt meg kell adni a verziót (pl. `v1.0`), és ha bepipálod a „Piszkozat release létrehozása” opciót, a zip egy piszkozat (draft) release-hez kerül. Ez csak akkor lesz nyilvános, ha a Releases oldalon rányomsz a **Publish release** gombra. Bepipálás nélkül csak egy letölthető artifact készül, kipróbálásra. A workflow a kész zipet kicsomagolva le is futtatja a teljes folyamatot (hangfelismerés, ujjrend, MIDI, PDF), és hiba esetén nem hoz létre release-t.
+
+Helyben (Windows, Visual Studio C++ fordítóval):
+```powershell
+pip install -r requirements.txt -r packaging/requirements-build.txt
+powershell -ExecutionPolicy Bypass -File packaging/build_release.ps1 -Version v1.0 -SmokeTestWav audio_files/A_clean.wav
+```
+Az eredmény: `dist/GitarProjekt-v1.0-windows-x64.zip`. A `-LilyPondDir D:\lilypond-2.24.4` kapcsolóval egy helyi LilyPond másolható be letöltés helyett.
+
+A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mappájában vannak, forráskódja: https://gitlab.com/lilypond/lilypond.
 
 ## Mappastruktúra
 ```text
@@ -79,6 +100,8 @@ gitar-projekt/
 ├── benchmark_results/                                # Benchmark eredmények és összesítés
 ├── MIDI_files/                                       # Eddigi tesztek során a legutóbbi generált MIDI fájlok
 ├── sheet_music/                                      # Eddigi tesztek során a legutóbbi generált kották
+├── packaging/                                        # Windowsos release csomag (PyInstaller spec, build szkript)
+├── .github/workflows/                                # CI (tesztek, benchmark) és release csomag készítése
 ├── .gitignore
 ├── requirements.txt
 └── README.md

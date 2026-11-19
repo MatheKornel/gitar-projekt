@@ -1,0 +1,4 @@
+# A Windowsos release csomag összeállításához (packaging/build_release.ps1)
+# a requirements.txt mellé:
+#   pip install -r requirements.txt -r packaging/requirements-build.txt
+pyinstaller==6.22.3

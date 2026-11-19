@@ -119,7 +119,7 @@ class SheetMusicTabExporter:
                 "  - vagy hozz létre egy lilypond_path.txt fájlt a projektben az útvonallal."
             )
 
-    def create_score(self, notes, file_basename="output", tuning="E"):
+    def create_score(self, notes, file_basename="output", tuning="E", open_pdf=True):
         tuning_midi = _tuning_midi_from_label(tuning)
         part = stream.Stream()
         part.insert(0, instrument.Guitar())
@@ -208,7 +208,7 @@ class SheetMusicTabExporter:
 
             if os.path.exists(pdf_path_full):
                 print(f"Kotta és tabulatúra sikeresen generálva: {pdf_path_full}")
-                if hasattr(os, "startfile"):
+                if open_pdf and hasattr(os, "startfile"):
                     os.startfile(pdf_path_full)
 
             if os.path.exists(ly_path_full):

@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import sys
 import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter import ttk
@@ -258,7 +259,7 @@ class GuitarProjectApp:
         file_name = os.path.splitext(base_name)[0] + ".mid"
         exporter.create_midi(self.current_notes, file_name)
 
-    def generate_sheet_music(self):
+    def generate_sheet_music(self, open_pdf=True):
         if not self.current_notes:
             print("Nincsenek felismert hangok a kottához.")
             return
@@ -271,7 +272,7 @@ class GuitarProjectApp:
         file_name = os.path.splitext(base_name)[0]
 
         exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()), paths=self.paths, config=self.config)
-        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name, tuning=self.tunings_combobox.get())
+        pdf_path = exporter.create_score(self.current_notes, file_basename=file_name, tuning=self.tunings_combobox.get(), open_pdf=open_pdf)
 
         if pdf_path:
             print(f"PDF generálva: {pdf_path}")
@@ -281,7 +282,50 @@ class GuitarProjectApp:
     def run(self):
         self.root.mainloop()
 
+    def run_smoke_test(self, wav_path):
+        """A teljes folyamat GUI kattintás nélkül, a release csomag ellenőrzéséhez.
+
+        Hangfelismerés -> ujjrend optimalizálás (Saját) -> MIDI -> PDF kotta.
+        Visszatérési érték: 0, ha minden kimenet létrejött, különben 1.
+        """
+        errors = []
+        try:
+            self.original_filepath = os.path.abspath(wav_path)
+            audio, fs = sf.read(self.original_filepath)
+            self.original_audio = audio.mean(axis=1) if len(audio.shape) > 1 else audio
+            self.fs = fs
+
+            self.show_note_rec()
+            if not self.current_notes:
+                errors.append("nincsenek felismert hangok")
+            else:
+                self.select.set(3)
+                self.finger_optimization()
+                if not any(n.opt_string_num for n in self.current_notes):
+                    errors.append("az ujjrend optimalizálás nem adott eredményt")
+
+                self.save_midi()
+                base = os.path.splitext(os.path.basename(self.original_filepath))[0]
+                if not self.paths.output_path(base + ".mid", kind="midi").is_file():
+                    errors.append("nem jött létre a MIDI fájl")
+
+                self.generate_sheet_music(open_pdf=False)
+                if not self.paths.output_path(base + ".pdf", kind="sheet").is_file():
+                    errors.append("nem jött létre a PDF kotta")
+        except Exception as e:
+            errors.append(f"kivétel: {e!r}")
+        finally:
+            self.root.destroy()
+
+        if errors:
+            print("SMOKE TEST HIBA: " + "; ".join(errors))
+            return 1
+        print("SMOKE TEST OK")
+        return 0
+
 
 if __name__ == "__main__":
     app = GuitarProjectApp()
+    if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
+        sys.exit(app.run_smoke_test(sys.argv[2]))
     app.run()

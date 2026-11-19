@@ -8,14 +8,17 @@ import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from config_paths import app_root
+
 
 # A LilyPond keresési sorrendje (lásd _resolve_lilypond_path):
 #   1. LILYPOND_PATH környezeti változó
 #   2. a projektben elhelyezett "lilypond_path.txt" (gépenként eltérhet,
 #      érdemes .gitignore-ba tenni)
-#   3. PATH
-#   4. music21 saját, felhasználónként eltárolt beállítása
-#   5. tipikus telepítési könyvtárak (Windows / macOS / Linux)
+#   3. a programmal együtt csomagolt LilyPond (<gyökér>/lilypond/bin/...)
+#   4. PATH
+#   5. music21 saját, felhasználónként eltárolt beállítása
+#   6. tipikus telepítési könyvtárak (Windows / macOS / Linux)
 _LOCAL_PATH_FILE = "lilypond_path.txt"
 
 
@@ -54,6 +57,17 @@ def _from_local_file():
                         return line
         except OSError:
             continue
+    return None
+
+
+def _from_bundled():
+    """A release csomagban a program mellé tett LilyPond."""
+    root = app_root()
+    exe = _exe_name()
+    for pattern in (root / "lilypond" / "bin" / exe, root / "lilypond*" / "bin" / exe):
+        found = [p for p in glob.glob(str(pattern)) if _is_usable(p)]
+        if found:
+            return max(found, key=_version_key)
     return None
 
 
@@ -132,7 +146,7 @@ def _from_common_locations():
 
 
 def _resolve_lilypond_path() -> str:
-    for source in (_from_env, _from_local_file, _from_path, _from_music21, _from_common_locations):
+    for source in (_from_env, _from_local_file, _from_bundled, _from_path, _from_music21, _from_common_locations):
         candidate = source()
         if _is_usable(candidate):
             return str(candidate)

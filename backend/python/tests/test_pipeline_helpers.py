@@ -29,6 +29,12 @@ def test_cpp_project_dir_uses_expected_folder_names():
     assert paths.cpp_project_dir("pso").name == "pso_fingering_optimization"
 
 
+def test_cpp_executable_name_matches_platform():
+    paths = ProjectPaths()
+    expected = "main.exe" if os.name == "nt" else "main"
+    assert paths.cpp_executable("main").name == expected
+
+
 def test_data_to_txt_converter_accepts_paths():
     paths = ProjectPaths()
     converter = DataToTxtConverter([], paths=paths)

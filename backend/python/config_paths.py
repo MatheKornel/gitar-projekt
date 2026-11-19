@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import os
+import sys
 from pathlib import Path
+
+
+def app_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[2]
+
+
+def executable_name(base: str) -> str:
+    return f"{base}.exe" if os.name == "nt" else base
 
 
 class ProjectPaths:
     def __init__(self, repo_root: str | None = None) -> None:
-        self.repo_root = Path(repo_root or Path(__file__).resolve().parents[2]).resolve()
+        self.repo_root = Path(repo_root or app_root()).resolve()
         self.backend_dir = self.repo_root / "backend"
         self.python_dir = self.backend_dir / "python"
         self.cpp_dir = self.backend_dir / "cpp"
@@ -27,7 +39,7 @@ class ProjectPaths:
         return mapping.get(algo, self.cpp_dir / f"{algo}_fingering_optimization")
 
     def cpp_executable(self, algo: str) -> Path:
-        return self.cpp_project_dir(algo) / "main.exe"
+        return self.cpp_project_dir(algo) / executable_name("main")
 
     def notes_input_path(self, algo: str) -> Path:
         return self.cpp_project_dir(algo) / "notes.txt"

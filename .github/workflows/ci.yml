@@ -1,0 +1,38 @@
+# Minden pushnál és PR-nál: C++ optimalizálók fordítása, pytest, ujjrend benchmark.
+# A benchmark eredménye a futás naplójában és letölthető artifactként is megvan.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+
+      - name: Python csomagok telepítése
+        run: python -m pip install -r requirements.txt
+
+      - name: C++ optimalizálók fordítása
+        run: |
+          cmake -S backend/cpp -B build/cpp
+          cmake --build build/cpp --config Release
+
+      - name: Tesztek
+        run: python -m pytest -q backend/python/tests
+
+      - name: Ujjrend benchmark
+        run: python backend/python/run_fing_opt_benchmark.py -a all
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-eredmenyek
+          path: benchmark_results/

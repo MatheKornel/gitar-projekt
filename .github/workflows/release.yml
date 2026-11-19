@@ -1,0 +1,61 @@
+# Windowsos release csomag. Csak kézzel indul: GitHub -> Actions ->
+# "Release csomag" -> Run workflow.
+#   - verzio: a csomag és a release neve (pl. v1.0)
+#   - release_letrehozasa: ha be van pipálva, PISZKOZAT (draft) release készül
+#     a zippel. Ez nem nyilvános, amíg a Releases oldalon nem nyomsz rá a
+#     Publish release gombra. Ha nincs bepipálva, csak letölthető artifact lesz.
+name: Release csomag
+
+on:
+  workflow_dispatch:
+    inputs:
+      verzio:
+        description: "Verzió (pl. v1.0)"
+        required: true
+        type: string
+      release_letrehozasa:
+        description: "Piszkozat release létrehozása a zippel"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+          cache: pip
+
+      - name: Python csomagok telepítése
+        run: python -m pip install -r requirements.txt -r packaging/requirements-build.txt
+
+      - name: Csomag összeállítása és smoke test
+        shell: pwsh
+        run: ./packaging/build_release.ps1 -Version "${{ inputs.verzio }}" -SmokeTestWav audio_files/A_clean.wav
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GitarProjekt-${{ inputs.verzio }}-windows-x64
+          path: dist/GitarProjekt-*-windows-x64.zip
+          if-no-files-found: error
+
+      - name: Piszkozat release létrehozása
+        if: inputs.release_letrehozasa
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.verzio }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Már létezik release ezzel a névvel: $TAG. Adj meg új verziót, vagy töröld a régit." >&2
+            exit 1
+          fi
+          gh release create "$TAG" dist/GitarProjekt-*-windows-x64.zip \
+            --draft --title "$TAG" --target "$GITHUB_SHA" --generate-notes
