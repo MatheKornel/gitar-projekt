@@ -34,6 +34,10 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
 
 A csomag mindent tartalmaz (Python, könyvtárak, lefordított C++ optimalizálók, LilyPond 2.24), külön semmit nem kell telepíteni. A program a kimeneteket (`MIDI_files`, `sheet_music`, `benchmark_results`) az exe melletti mappákba menti. A konzolablakban jelennek meg a program üzenetei.
 
+Az exe nincs digitálisan aláírva, ezért első indításkor a Windows kiírhatja, hogy „A Windows megvédte a számítógépet”. Ilyenkor: **További információ** → **Futtatás mindenképp**.
+
+A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mappájában vannak, forráskódja: https://gitlab.com/lilypond/lilypond.
+
 ### Futtatás forrásból
 1. Python csomagok telepítése (Python 3.11 vagy újabb):
    ```bash
@@ -53,18 +57,6 @@ A csomag mindent tartalmaz (Python, könyvtárak, lefordított C++ optimalizál�
    ```bash
    python backend/python/run_fing_opt_benchmark.py -a all
    ```
-
-### Release csomag készítése
-A csomag csak kézzel indítva készül el: GitHub → **Actions** → **Release csomag** → **Run workflow**. Itt meg kell adni a verziót (pl. `v1.0`), és ha bepipálod a „Piszkozat release létrehozása” opciót, a zip egy piszkozat (draft) release-hez kerül. Ez csak akkor lesz nyilvános, ha a Releases oldalon rányomsz a **Publish release** gombra. Bepipálás nélkül csak egy letölthető artifact készül, kipróbálásra. A workflow a kész zipet kicsomagolva le is futtatja a teljes folyamatot (hangfelismerés, ujjrend, MIDI, PDF), és hiba esetén nem hoz létre release-t.
-
-Helyben (Windows, Visual Studio C++ fordítóval):
-```powershell
-pip install -r requirements.txt -r packaging/requirements-build.txt
-powershell -ExecutionPolicy Bypass -File packaging/build_release.ps1 -Version v1.0 -SmokeTestWav audio_files/A_clean.wav
-```
-Az eredmény: `dist/GitarProjekt-v1.0-windows-x64.zip`. A `-LilyPondDir D:\lilypond-2.24.4` kapcsolóval egy helyi LilyPond másolható be letöltés helyett.
-
-A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mappájában vannak, forráskódja: https://gitlab.com/lilypond/lilypond.
 
 ## Mappastruktúra
 ```text
