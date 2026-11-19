@@ -71,6 +71,28 @@ def _from_bundled():
     return None
 
 
+def refresh_bundled_lilypond_cache(lilypond_path) -> None:
+    # A LilyPond induláskor ellenőrzi, hogy a lefordított .go fájlok nem régebbiek-e a .scm forrásaiknál. Ha igen, a forrást értelmezi, és ez nála hibával leáll
+    try:
+        lily_root = Path(lilypond_path).resolve().parent.parent
+        if not lily_root.is_relative_to(app_root().resolve()):
+            return
+        scm_times = [p.stat().st_mtime for p in (lily_root / "share").rglob("*.scm")]
+        go_files = list((lily_root / "lib").rglob("*.go"))
+        if not scm_times or not go_files:
+            return
+        newest_scm = max(scm_times)
+        stale = [p for p in go_files if p.stat().st_mtime <= newest_scm]
+        if not stale:
+            return
+        new_time = newest_scm + 1
+        for p in stale:
+            os.utime(p, (new_time, new_time))
+        print(f"LilyPond gyorsítótár időbélyegei javítva ({len(stale)} fájl).")
+    except OSError as e:
+        print(f"Figyelem: a LilyPond gyorsítótár időbélyegei nem javíthatók: {e}")
+
+
 def _from_path():
     return shutil.which("lilypond") or shutil.which("lilypond.exe")
 

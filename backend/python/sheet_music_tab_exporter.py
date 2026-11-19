@@ -7,7 +7,7 @@ from music21 import stream, note, duration, environment, clef, tempo, instrument
 from music21.meter.base import TimeSignature
 
 from guitar_note_freqs import GuitarNoteFreqs
-from config_parameters import ProjectConfig
+from config_parameters import ProjectConfig, refresh_bundled_lilypond_cache
 from config_paths import ProjectPaths
 from quantizing import Quantizing
 
@@ -110,6 +110,7 @@ class SheetMusicTabExporter:
         if os.path.isfile(resolved):
             self.env['lilypondPath'] = resolved
             print(f"LilyPond útvonal beállítva: {resolved}")
+            refresh_bundled_lilypond_cache(resolved)
         else:
             print(
                 f"Hiba: A LilyPond nem található ({self.config.lilypond_path}).\n"

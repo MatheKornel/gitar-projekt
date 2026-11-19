@@ -76,6 +76,13 @@ if ($SmokeTestWav) {
     if (Test-Path $SmokeDir) { Remove-Item -Recurse -Force $SmokeDir }
     New-Item -ItemType Directory -Force $SmokeDir | Out-Null
     Invoke-Checked "$env:SystemRoot\System32\tar.exe" @("-x", "-f", $ZipOut, "-C", $SmokeDir)
+    # A tar megtartja az idobelyegeket, a Windows Intezo nem: nala minden fajl a
+    # kicsomagolas idejet kapja, es a share/ mappa ujabb lesz a lib/ mappanal.
+    # Ezt utanozzuk, hogy a teszt a legrosszabb esetet is lefedje.
+    $LilySmoke = Join-Path $SmokeDir "GitarProjekt\lilypond"
+    $now = Get-Date
+    Get-ChildItem -Recurse -File (Join-Path $LilySmoke "lib") | ForEach-Object { $_.LastWriteTime = $now.AddMinutes(-1) }
+    Get-ChildItem -Recurse -File (Join-Path $LilySmoke "share") | ForEach-Object { $_.LastWriteTime = $now }
     Remove-Item Env:LILYPOND_PATH -ErrorAction SilentlyContinue
     $wav = (Resolve-Path $SmokeTestWav).Path
     Invoke-Checked (Join-Path $SmokeDir "GitarProjekt\GitarProjekt.exe") @("--smoke-test", $wav)
