@@ -22,7 +22,7 @@ function Invoke-Checked([string]$Exe, [string[]]$Arguments) {
 }
 
 Write-Host "== 1/5 C++ optimalizalok forditasa =="
-Invoke-Checked "cmake" @("-S", (Join-Path $Root "backend\cpp"), "-B", $CppBuildDir)
+Invoke-Checked "cmake" @("-S", (Join-Path $Root "backend\cpp"), "-B", $CppBuildDir, "-DCMAKE_BUILD_TYPE=Release")
 Invoke-Checked "cmake" @("--build", $CppBuildDir, "--config", "Release")
 
 Write-Host "== 2/5 PyInstaller =="
