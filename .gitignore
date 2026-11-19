@@ -84,6 +84,7 @@ backend/cpp/*/notes.txt
 build/
 dist/
 *.spec
+!packaging/*.spec
 
 # Misc
 *.bak
