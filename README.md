@@ -12,6 +12,7 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
 - **Kotta és MIDI export:** A felismert hangokból automatikus MIDI fájl, valamint LilyPond és music21 segítségével formázott PDF kotta generálása.
 - **Ujjrend optimalizálás:** Saját, kézpozíciós költségmodellen és dinamikus programozáson alapuló ujjrend optimalizálás (C++). Összehasonlításként a Viterbi, a PSO és a Saját + Viterbi algoritmus is választható.
 - **Ujjrend benchmark:** Kézzel ellenőrzött lefogásokat tartalmazó tesztek, amelyeken mind a négy optimalizáló pontossága mérhető és összesíthető.
+- **Futásidő mérés:** Mind a négy optimalizáló futásideje mérhető a benchmark tesztjein egyenként, valamint egyre hosszabb (100–10 000 hangos) bemeneteken a skálázódás vizsgálatához.
 - **Grafikus felület:** Egyelőre kezdetleges Tkinter alapú GUI a fájlok betöltéséhez, a spektrogramok összehasonlításához és a funkciók futtatásához.
 
 ## Használt technológiák
@@ -31,6 +32,8 @@ A program célja, hogy egy gitárjátékot tartalmazó audio fájlból értelmes
 1. A [Releases](../../releases) oldalról töltsd le a `GitarProjekt-<verzió>-windows-x64.zip` fájlt.
 2. Csomagold ki egy tetszőleges mappába.
 3. Indítsd el a `GitarProjekt.exe` fájlt.
+
+A kész csomag csak Windowsra készül. macOS-en és Linuxon a lenti „Futtatás forrásból” rész alapján indítható a program.
 
 A csomag mindent tartalmaz (Python, könyvtárak, lefordított C++ optimalizálók, LilyPond 2.24), külön semmit nem kell telepíteni. A program a kimeneteket (`MIDI_files`, `sheet_music`, `benchmark_results`) az exe melletti mappákba menti. A konzolablakban jelennek meg a program üzenetei.
 
@@ -57,6 +60,10 @@ A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mapp�
    ```bash
    python backend/python/run_fing_opt_benchmark.py -a all
    ```
+6. Ujjrend optimalizálók futásidejének mérése (`-a`: mint a benchmarknál, `-r`: hány futás átlaga legyen egy mérés, alapértelmezetten 10). Az eredmények a `benchmark_results/futasido_eredmenyek.txt` fájlba kerülnek:
+   ```bash
+   python backend/python/run_fing_opt_timing.py -a all -r 10
+   ```
 
 ## Mappastruktúra
 ```text
@@ -78,6 +85,7 @@ gitar-projekt/
 │    │   ├── onset_histogram.py                       # IOI hisztogram és BPM becslés
 │    │   ├── quantizing.py                            # Hangok kvantálása a kottához
 │    │   ├── run_fing_opt_benchmark.py                # Ujjrend benchmark futtatása parancssorból
+│    │   ├── run_fing_opt_timing.py                   # Ujjrend optimalizálók futásidejének mérése parancssorból
 │    │   ├── sheet_music_tab_exporter.py              # Kotta és tabulatúra generálása (music21/LilyPond)
 │    │   ├── spectrograms.py                          # Spektrogramok vizualizációja
 │    │   └── tests/                                   # Tesztek (pytest)
