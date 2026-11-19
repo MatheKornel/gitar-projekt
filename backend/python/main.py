@@ -1,3 +1,4 @@
+import io
 import os
 import re
 import subprocess
@@ -324,7 +325,15 @@ class GuitarProjectApp:
         return 0
 
 
+def _utf8_console_output():
+    # Github actions miatt kell, UTF-8-ban nem dob hibát
+    for stream in (sys.stdout, sys.stderr):
+        if isinstance(stream, io.TextIOWrapper):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 if __name__ == "__main__":
+    _utf8_console_output()
     app = GuitarProjectApp()
     if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
         sys.exit(app.run_smoke_test(sys.argv[2]))
