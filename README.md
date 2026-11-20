@@ -101,7 +101,7 @@ gitar-projekt/
 │    │   ├── spectrograms.py                          # Spektrogramok vizualizációja
 │    │   └── tests/                                   # Tesztek (pytest), benne a regressziós tesztek és a golden fájl
 │    ├── cpp/
-│    │   ├── common/                                  # Közös kód (fogólap, bemenet, benchmark)
+│    │   ├── common/                                  # Közös kód (belépési pont, fogólap, bemenet, benchmark)
 │    │   ├── main_fingering_optimization/             # C++ alapú saját ujjrend optimalizáló
 │    │   ├── main_plus_viterbi_fingering_optimization/ # C++ alapú Saját + Viterbi ujjrend optimalizáló (összehasonlításhoz)
 │    │   ├── pso_fingering_optimization/              # C++ alapú PSO ujjrend optimalizáló (összehasonlításhoz)
