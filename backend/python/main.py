@@ -7,16 +7,13 @@ import tkinter as tk
 from tkinter import filedialog as fd
 from tkinter import ttk
 
-import soundfile as sf
-
 from audio_files import Audio
 from config_paths import ProjectPaths
 from config_parameters import ProjectConfig
 from data_to_txt_converter import DataToTxtConverter
-from filter import BandpassFilter
 from midi import MidiExporter
-from note_recognition import ShortTimeFT
 from onset_histogram import OnsetHistogram
+from recognition_pipeline import load_audio, recognize
 from sheet_music_tab_exporter import SheetMusicTabExporter
 from spectrograms import Spectrogram
 from guitar_note_freqs import GuitarNoteFreqs
@@ -125,10 +122,8 @@ class GuitarProjectApp:
             self.last_opened_dir = os.path.dirname(path)
             self.original_filepath = path
             print(f"Betöltött fájl: {os.path.basename(self.original_filepath)}")
-            original, fs = sf.read(path)
+            original, fs = load_audio(path)
             print(f"Mintavételi frekvencia: {fs} Hz")
-
-            original = original.mean(axis=1) if len(original.shape) > 1 else original
             self.fs = fs
 
             self.original_audio = original
@@ -146,24 +141,13 @@ class GuitarProjectApp:
         if self.original_audio is None or self.fs is None:
             return
 
-        bpf = BandpassFilter(self.original_audio)
-        bpf_lowcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[0] * 0.85
-        bpf_highcut = GuitarNoteFreqs().select_tuning(self.tunings_combobox.get())[-1] * 2.12
-        filtered = bpf.bandpass_filter(self.original_audio, self.fs, lowcut=bpf_lowcut, highcut=bpf_highcut)
-        print("Szűrés elvégezve.")
-        
+        filtered, notes, bpm = recognize(self.original_audio, self.fs, self.tunings_combobox.get(), self.histogram)
         self.current_audio = Audio(original=self.original_audio, filtered=filtered, fs=self.fs)
-
-        stft = ShortTimeFT(self.current_audio.filtered, fs=self.fs)
-        print("Elemzés folyamatban...")
-
-        notes = stft.note_rec(5, self.histogram, self.tunings_combobox.get())
 
         test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
         converter = DataToTxtConverter(notes, paths=self.paths)
         converter.save_to_test_txt(output_txt_path=test_file_name)
 
-        bpm = self.histogram.get_bpm()
         self.bpm_entry.delete(0, tk.END)
         self.bpm_entry.insert(0, str(bpm))
 
@@ -292,9 +276,7 @@ class GuitarProjectApp:
         errors = []
         try:
             self.original_filepath = os.path.abspath(wav_path)
-            audio, fs = sf.read(self.original_filepath)
-            self.original_audio = audio.mean(axis=1) if len(audio.shape) > 1 else audio
-            self.fs = fs
+            self.original_audio, self.fs = load_audio(self.original_filepath)
 
             self.show_note_rec()
             if not self.current_notes:

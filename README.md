@@ -64,6 +64,16 @@ A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mapp�
    ```bash
    python backend/python/run_fing_opt_timing.py -a all -r 10
    ```
+7. Tesztek futtatása (a C++ optimalizálókat előtte le kell fordítani):
+   ```bash
+   python -m pytest -q backend/python/tests
+   ```
+   - **Hangfelismerés regressziós teszt:** a benchmark felvételein a felismert hangoknak (onset, offset, MIDI) pontosan egyezniük kell a `backend/python/tests/data/recognition_golden.json` fájlban eltárolt eredménnyel. A két IDMT-SMT-Guitar lick csak akkor fut, ha az adathalmaz mappáját az `IDMT_DATASET_DIR` környezeti változó vagy a projekt gyökerében lévő `idmt_path.txt` megadja, különben kimarad.
+   - **Ujjrend regressziós teszt:** a Saját, a Saját + Viterbi és a Viterbi eljárásnak a benchmarkon pontosan ugyanannyi kedvenc és elfogadható lefogást kell adnia, mint eddig. A PSO véletlenszerű, nála csak azt ellenőrzi, hogy lefut.
+   - Ha a hangfelismerés szándékosan változik (és a benchmark alapján jobb lett), a golden fájlt újra kell generálni:
+     ```bash
+     python backend/python/tests/update_recognition_golden.py
+     ```
 
 ## Mappastruktúra
 ```text
@@ -84,11 +94,12 @@ gitar-projekt/
 │    │   ├── onset_detect.py                          # Spectral Flux alapú onset detektálás
 │    │   ├── onset_histogram.py                       # IOI hisztogram és BPM becslés
 │    │   ├── quantizing.py                            # Hangok kvantálása a kottához
+│    │   ├── recognition_pipeline.py                  # A teljes hangfelismerés (szűrés, felismerés, BPM) egy függvényben
 │    │   ├── run_fing_opt_benchmark.py                # Ujjrend benchmark futtatása parancssorból
 │    │   ├── run_fing_opt_timing.py                   # Ujjrend optimalizálók futásidejének mérése parancssorból
 │    │   ├── sheet_music_tab_exporter.py              # Kotta és tabulatúra generálása (music21/LilyPond)
 │    │   ├── spectrograms.py                          # Spektrogramok vizualizációja
-│    │   └── tests/                                   # Tesztek (pytest)
+│    │   └── tests/                                   # Tesztek (pytest), benne a regressziós tesztek és a golden fájl
 │    ├── cpp/
 │    │   ├── common/                                  # Közös kód (fogólap, bemenet, benchmark)
 │    │   ├── main_fingering_optimization/             # C++ alapú saját ujjrend optimalizáló
