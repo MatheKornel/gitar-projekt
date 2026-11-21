@@ -38,7 +38,10 @@ def recognize(audio, fs, tuning="E", histogram=None):
 
     stft = ShortTimeFT(filtered, fs=fs)
     print("Elemzés folyamatban...")
-    notes = stft.note_rec(MAX_HARMONICS, histogram, tuning)
+    notes = stft.note_rec(MAX_HARMONICS, tuning)
 
+    # tempóbecslés az onsetek közti időkből (IOI hisztogram)
+    histogram.calculate_iois(stft.onsets)
+    histogram.find_optimal_gap()
     bpm = histogram.get_bpm()
     return filtered, notes, bpm
