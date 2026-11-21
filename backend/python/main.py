@@ -1,7 +1,5 @@
 import io
 import os
-import re
-import subprocess
 import sys
 import tkinter as tk
 from tkinter import filedialog as fd
@@ -10,6 +8,7 @@ from tkinter import ttk
 from audio_files import Audio
 from config_paths import ProjectPaths
 from config_parameters import ProjectConfig
+from cpp_optimizer import CppOptimizer
 from data_to_txt_converter import DataToTxtConverter
 from midi import MidiExporter
 from onset_histogram import OnsetHistogram
@@ -180,51 +179,46 @@ class GuitarProjectApp:
 
         self._select_algo()
 
-        converter = DataToTxtConverter(self.current_notes, paths=self.paths)
+        optimizer = CppOptimizer(self.algo, self.paths)
+        if not optimizer.exists():
+            print(f"Nem találom a {optimizer.cpp_exe} fájlt!")
+            return
+
+        print(f"\n[{self.algo}] Ujjrend optimalizálás indítása...")
         open_strings = GuitarNoteFreqs.open_string_midis(self.tunings_combobox.get())
-        converter.save_note_to_txt(self.algo, open_strings)
+        result = optimizer.optimize(open_strings, CppOptimizer.notes_from_events(self.current_notes))
+        print("C++ kimenet:")
+        print(result.stdout)
 
-        cpp_exe = self.paths.cpp_executable(self.algo)
-        if cpp_exe.exists():
-            print(f"\n[{self.algo}] Ujjrend optimalizálás indítása...")
-            txt_path = os.path.join(str(cpp_exe.parent), "notes.txt")
-            result = subprocess.run([str(cpp_exe), txt_path], cwd=str(cpp_exe.parent), capture_output=True, text=True)
-            print("C++ kimenet:")
-            print(result.stdout)
+        if result.returncode != 0:
+            print("C++ hiba:")
+            print(result.stderr)
+            return
 
-            if result.returncode == 0:
-                matches = re.findall(r'Hur:\s*([EADGBe])\s*Bund:\s*(\d+)', result.stdout)
-                string_map = {'e': 1, 'B': 2, 'G': 3, 'D': 4, 'A': 5, 'E': 6}
-                if matches:
-                    if len(matches) != len(self.current_notes):
-                        print(f"Figyelem: A C++ {len(matches)} sort adott vissza, de {len(self.current_notes)} hang van! A meglévők lesznek párosítva.")
-                    for i, (hur_str, bund_str) in enumerate(matches):
-                        if i < len(self.current_notes):
-                            s_val = string_map.get(hur_str)
-                            if s_val is not None:
-                                self.current_notes[i].opt_string_num = s_val
-                                self.current_notes[i].opt_fret_num = int(bund_str)
-            if result.returncode != 0:
-                print("C++ hiba:")
-                print(result.stderr)
-            elif result.stderr:
-                print("C++ figyelmeztetés:")
-                print(result.stderr)
-        else:
-            print(f"Nem találom a {cpp_exe} fájlt!")
+        if result.optimization_ms is not None:
+            print(f"Optimalizálás ideje: {result.optimization_ms:.2f} ms")
+        if result.other_stderr():
+            print("C++ figyelmeztetés:")
+            print(result.other_stderr())
+
+        if len(result.positions) != len(self.current_notes):
+            print(f"Figyelem: A C++ {len(result.positions)} sort adott vissza, de {len(self.current_notes)} hang van! A meglévők lesznek párosítva.")
+        for i in range(min(len(result.positions), len(self.current_notes))):
+            string_num, fret = result.positions[i]
+            self.current_notes[i].opt_string_num = string_num
+            self.current_notes[i].opt_fret_num = fret
 
     def finger_optimization_benchmark(self):
         # a kiválasztott eljárás benchmarkja, nem kell hozzá betöltött fájl vagy hangfelismerés
         self._select_algo()
 
-        cpp_exe = self.paths.cpp_executable(self.algo)
-        if not cpp_exe.exists():
-            print(f"Nem találom a {cpp_exe} fájlt!")
+        optimizer = CppOptimizer(self.algo, self.paths)
+        if not optimizer.exists():
+            print(f"Nem találom a {optimizer.cpp_exe} fájlt!")
             return
 
         print(f"\n[{self.algo}] Benchmark tesztek indítása...")
-        # paraméter nélküli futtatás, ami a C++ kódban a benchmarkot indítja el
-        bench_result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+        bench_result = optimizer.run_benchmark()
         print(bench_result.stdout)
         if bench_result.stderr:
             print("Benchmark figyelmeztetés / hiba:")

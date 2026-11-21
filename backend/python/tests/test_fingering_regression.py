@@ -4,7 +4,6 @@
 # (a PSO véletlenszerű, különben minden tesztfutás után módosított fájlok maradnának).
 # Ha egy eljárás szándékosan változik, az EXPECTED értékeit is frissíteni kell.
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -13,6 +12,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from config_paths import ProjectPaths
+from cpp_optimizer import CppOptimizer
 
 TOTAL_NOTES = 421
 
@@ -24,7 +24,7 @@ EXPECTED = {
 }
 
 PATHS = ProjectPaths()
-RESULTS_DIR = PATHS.repo_root / "benchmark_results"
+RESULTS_DIR = PATHS.benchmark_results_dir
 NOTE_ACCURACY_RE = re.compile(r"Hang-alapu \(Sulyozott\) pontossag:\s*[\d.]+% \((\d+)/(\d+)\)")
 
 
@@ -44,14 +44,14 @@ def keep_benchmark_results():
 # lefuttatja az eljárás benchmarkját, és a log fájlból visszaadja a hang-alapú találatokat:
 # [(kedvenc találat, összes), (elfogadható találat, összes)]
 def run_benchmark(algo):
-    cpp_exe = PATHS.cpp_executable(algo)
-    if not cpp_exe.exists():
-        pytest.skip(f"nincs lefordítva: {cpp_exe}")
+    optimizer = CppOptimizer(algo, PATHS)
+    if not optimizer.exists():
+        pytest.skip(f"nincs lefordítva: {optimizer.cpp_exe}")
 
-    result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+    result = optimizer.run_benchmark()
     assert result.returncode == 0, f"a benchmark hibával állt le:\n{result.stderr}"
 
-    log_path = RESULTS_DIR / f"{algo}_benchmark_results.txt"
+    log_path = optimizer.benchmark_log_path()
     counts = []
     for match in NOTE_ACCURACY_RE.finditer(log_path.read_text(encoding="utf-8")):
         counts.append((int(match.group(1)), int(match.group(2))))

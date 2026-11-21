@@ -1,14 +1,11 @@
 import argparse
 import os
-import re
 import shutil
 import statistics
-import subprocess
 import tempfile
-import time
 from config_paths import ProjectPaths
+from cpp_optimizer import ALGORITHMS, CppOptimizer
 
-ALGOS = ['main', 'main_plus_viterbi', 'viterbi', 'pso']
 SCALING_SIZES = [100, 250, 500, 1000, 2500, 5000, 10000]
 STANDARD_E = [40, 45, 50, 55, 59, 64]
 TEST_GAP = 1.0  # szünet (mp) az összefűzött tesztek között, hogy ne legyen irreálisan gyors váltás két teszt határán
@@ -19,8 +16,8 @@ class FingOptTiming:
         self.paths = paths
         self.algo = algo
         self.repeats = repeats
-        self.cpp_exe = paths.cpp_executable(algo)
-        self.benchmark_dir = paths.repo_root / "benchmarks"
+        self.optimizer = CppOptimizer(algo, paths)
+        self.benchmark_dir = paths.benchmarks_dir
         self.temp_dir = tempfile.mkdtemp(prefix="fing_opt_timing_")
         self.test_results = []     # (teszt neve, hangok száma, optimalizálás átlag, szórás, teljes átlag, szórás)
         self.scaling_results = []  # (hangok száma, hanganyag hossza, optimalizálás átlag, szórás, teljes átlag, szórás)
@@ -43,32 +40,21 @@ class FingOptTiming:
                 notes.append((int(parts[0]), float(parts[1]), float(parts[2]), parts[3]))
         return tuning, notes
 
-    # notes.txt formátumú bemenet írása (az alkalmazás saját notes.txt-je nem íródik felül)
-    def write_input(self, tuning, notes, file_path):
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(" ".join(str(m) for m in tuning) + "\n")
-            f.write(f"{len(notes)}\n")
-            for midi, onset, duration, name in notes:
-                f.write(f"{midi} {onset:.4f} {duration:.4f} {name}\n")
-
     # egy futtatás: teljes idő (Python, indítástól a kimenet beolvasásáig) és a C++ által mért optimalizálási idő, ms-ban
+    # a bemenet egy ideiglenes fájl, így az alkalmazás saját notes.txt-je nem íródik felül
     def run_once(self, file_path, note_count):
-        start = time.perf_counter()
-        result = subprocess.run([str(self.cpp_exe), file_path], cwd=str(self.cpp_exe.parent), capture_output=True, text=True)
-        total_ms = (time.perf_counter() - start) * 1000.0
+        result = self.optimizer.run_file(file_path)
 
         if result.returncode != 0:
             raise RuntimeError(f"A C++ program hibával állt le:\n{result.stderr}")
 
-        match = re.search(r"Optimalizalas ideje:\s*([0-9.eE+-]+)\s*ms", result.stderr)
-        if match is None:
+        if result.optimization_ms is None:
             raise RuntimeError("Nincs optimalizálási idő a C++ kimenetében, újra kell fordítani a programot!")
 
-        positions = re.findall(r"Hur:\s*\S+\s*Bund:\s*\d+", result.stdout)
-        if len(positions) != note_count:
-            print(f"[!] Figyelem: {note_count} hang helyett {len(positions)} lefogás jött vissza.")
+        if len(result.positions) != note_count:
+            print(f"[!] Figyelem: {note_count} hang helyett {len(result.positions)} lefogás jött vissza.")
 
-        return float(match.group(1)), total_ms
+        return result.optimization_ms, result.total_ms
 
     # egy bemenet mérése: 1 bemelegítő futás (eldobjuk), utána repeats darab futás átlaga és szórása
     def measure(self, file_path, note_count):
@@ -95,7 +81,7 @@ class FingOptTiming:
         input_path = os.path.join(self.temp_dir, "timing_notes.txt")
         for name in self.benchmark_files():
             tuning, notes = self.load_benchmark_case(self.benchmark_dir / name)
-            self.write_input(tuning, notes, input_path)
+            CppOptimizer.write_input(tuning, notes, input_path)
             opt_ms, opt_std, total_ms, total_std = self.measure(input_path, len(notes))
             test_name = name.replace("_fing-opt_test.txt", "")
             self.test_results.append((test_name, len(notes), opt_ms, opt_std, total_ms, total_std))
@@ -135,7 +121,7 @@ class FingOptTiming:
         input_path = os.path.join(self.temp_dir, "timing_long_notes.txt")
         for size in sizes:
             notes, audio_length = self.build_long_input(size)
-            self.write_input(STANDARD_E, notes, input_path)
+            CppOptimizer.write_input(STANDARD_E, notes, input_path)
             opt_ms, opt_std, total_ms, total_std = self.measure(input_path, len(notes))
             self.scaling_results.append((size, audio_length, opt_ms, opt_std, total_ms, total_std))
             print(f"  {size} hang ({audio_length:.1f} s): optimalizálás {opt_ms:.3f} ms, teljes {total_ms:.1f} ms")
@@ -164,19 +150,19 @@ class FingOptTiming:
 
 def main():
     parser = argparse.ArgumentParser(description="Az ujjrend optimalizálók futásidejének mérése.")
-    parser.add_argument("-a", "--algo", default="all", choices=ALGOS + ['all'],
+    parser.add_argument("-a", "--algo", default="all", choices=ALGORITHMS + ['all'],
                         help="A mérendő eljárás ('all' esetén mind a négy).")
     parser.add_argument("-r", "--repeats", type=int, default=10, help="Hány futás átlaga legyen egy mérés.")
     args = parser.parse_args()
 
     paths = ProjectPaths()
-    algos = ALGOS if args.algo == 'all' else [args.algo]
+    algos = ALGORITHMS if args.algo == 'all' else [args.algo]
 
     texts = []
     for algo in algos:
         timing = FingOptTiming(paths, algo, args.repeats)
-        if not timing.cpp_exe.exists():
-            print(f"[!] Hiba: Nem talalhato a futtathato fajl: {timing.cpp_exe}")
+        if not timing.optimizer.exists():
+            print(f"[!] Hiba: Nem talalhato a futtathato fajl: {timing.optimizer.cpp_exe}")
             continue
         print(f"[{algo.upper()}] Tesztenkénti mérés...")
         timing.measure_benchmark_tests()
@@ -185,7 +171,7 @@ def main():
         timing.cleanup()
         texts.append(timing.results_text())
 
-    result_path = paths.repo_root / "benchmark_results" / "futasido_eredmenyek.txt"
+    result_path = paths.benchmark_results_dir / "futasido_eredmenyek.txt"
     with open(result_path, "w", encoding="utf-8") as f:
         f.write("\n\n".join(texts) + "\n")
 

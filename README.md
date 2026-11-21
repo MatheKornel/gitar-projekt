@@ -84,7 +84,8 @@ gitar-projekt/
 │    │   ├── audio_files.py                           # Audio adatok kezelése
 │    │   ├── config_parameters.py                     # Beállítások (STFT, kvantálás, LilyPond elérési út)
 │    │   ├── config_paths.py                          # Projekt mappák és fájlok elérési útjai
-│    │   ├── data_to_txt_converter.py                 # Felismert hangok mentése a C++ optimalizálónak
+│    │   ├── cpp_optimizer.py                         # A C++ ujjrend optimalizálók hívása (bemenet írása, futtatás, kimenet feldolgozása)
+│    │   ├── data_to_txt_converter.py                 # Felismert hangok mentése Excelbe másolható formában
 │    │   ├── filter.py                                # Sáváteresztő szűrő
 │    │   ├── guitar_note_freqs.py                     # Gitár hangok frekvenciái és hangolások
 │    │   ├── main.py                                  # GUI és a program belépési pontja

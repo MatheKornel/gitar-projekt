@@ -25,6 +25,8 @@ class ProjectPaths:
         self.sheet_output_dir = self.repo_root / "sheet_music"
         self.test_output_dir = self.repo_root / "test_txt_to_excel"
         self.audio_input_dir = self.repo_root / "audio_files"
+        self.benchmarks_dir = self.repo_root / "benchmarks"
+        self.benchmark_results_dir = self.repo_root / "benchmark_results"
 
         for directory in [self.midi_output_dir, self.sheet_output_dir, self.test_output_dir]:
             directory.mkdir(parents=True, exist_ok=True)
