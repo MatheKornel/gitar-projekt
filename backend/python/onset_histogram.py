@@ -1,108 +1,74 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
 from scipy.ndimage import gaussian_filter1d
 
-class OnsetHistogram:
-    def __init__(self):
-        self.onsets = None # onset időpontok mp-ben
-        self.iois = [] # ioi-k
-        self.optimal_gap = 0.22 # optimális min_gap
-        self.bin_edges = None # hisztogram bin élek
-        self.hist = None # hisztogram értékek
-        self.smooth_hist = None # simított hisztogram értékek
-        self.peaks = None # hisztogram csúcsok indexei
-        self.bin_centers = None # hisztogram bin közepek
-        self.last_optimal_gap = 0.22 # előző optimális min_gap
-        self.dominant_interval = 0.5 # domináns intervallum mp-ben
+# Tempóbecslés a hangkezdetekből: az egymást követő onsetek közötti időkből (IOI, Inter-Onset Interval)
+# simított hisztogramot készítünk, és a legrövidebb gyakori időközt tekintjük egy ütés hosszának.
 
-    # IOI --> Inter-Onset Intervals kiszámítása --> szomszédos hangok távolsága
-    def calculate_iois(self, onsets, min = 0.05, max = 1.0):
-        self.onsets = np.array(onsets)
-        if len(self.onsets) < 2:
-            return []
-        diffs = np.diff(self.onsets)
-        self.iois = diffs[(diffs >= min) & (diffs <= max)]
-        return self.iois
-    
-    # az optimális min_gap meghatározása az IOI-k alapján
-    def find_optimal_gap(self):
-        if len(self.iois) < 5: # túl kevés adat
-            if self.last_optimal_gap < 0.15:
-                self.optimal_gap = min(0.18, self.last_optimal_gap * 1.2)
-                print(f"Kevés az adat a hisztogramhoz, ELŐZŐ min_gap = {self.last_optimal_gap:.3f}s lesz.")
-            else:
-                self.optimal_gap = 0.22
-                print("Kevés az adat a hisztogramhoz, min_gap = 0.22s lesz.")
-            self.last_optimal_gap = self.optimal_gap
-            return self.optimal_gap
-        
-        fastest = np.percentile(self.iois, 60)
-        if fastest < 0.18: # ha nagyon gyors hangok vannak
-            self.dominant_interval = fastest
-            self.optimal_gap = max(0.04, fastest * 0.6)
-            print(f"Gyakori gyors hangok miatt min_gap = {self.optimal_gap:.3f}s lesz.")
-            self.last_optimal_gap = self.optimal_gap
-            return self.optimal_gap
-        
-        hist, bin_edges = np.histogram(self.iois, bins=30, range=(0.03, 1.0)) # hisztogram készítése
-        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2 # megjelenítéshez a közepe kell
-        smooth_hist = gaussian_filter1d(hist, sigma=2) # hisztogram simítása
+DEFAULT_BPM = 120            # ha a becslés nem lehetséges
+MIN_IOI = 0.05               # ennél rövidebb időköz zaj (mp)
+MAX_IOI = 1.0                # ennél hosszabb időköz szünet, nem a ritmus része (mp)
+MIN_IOI_COUNT = 5            # ennél kevesebb időközből nem becslünk
+FAST_PERCENTILE = 60         # gyors daloknál az időközök ennyiedik percentilise adja az ütés hosszát
+FAST_IOI_LIMIT = 0.18        # ha ez a percentilis ennél rövidebb (mp), a dal gyors, nem kell hisztogram
+HIST_BINS = 30               # a hisztogram sávjainak száma
+HIST_RANGE = (0.03, 1.0)     # a hisztogram tartománya (mp)
+HIST_SMOOTHING = 2           # a Gauss-simítás szórása (sávban)
+NOISE_LIMIT = 0.06           # a hisztogram eleje (ennél rövidebb időközök) csak zaj, a csúcsmagasság küszöbéhez nem számít
+PEAK_HEIGHT_RATIO = 0.2      # csúcsnak csak a legmagasabb csúcs ennyiszerese feletti számít
+PEAK_PROMINENCE = 1          # a csúcs ennyivel emelkedjen ki a környezetéből
+FAST_BPM_RANGE = (100, 220)  # gyors daloknál ebbe a tartományba igazítjuk a BPM-et
+NORMAL_BPM_RANGE = (60, 160) # egyébként ebbe
 
-        valid_start_idx = np.searchsorted(bin_centers, 0.06) # kihagyjuk az elejét, mert az csak zaj
-        valid_start_idx = 0 if valid_start_idx >= len(smooth_hist) else valid_start_idx
 
-        if len(smooth_hist[valid_start_idx:]) > 0:
-            relevant_max = np.max(smooth_hist[valid_start_idx:])
-        else:
-            relevant_max = np.max(smooth_hist)
+# az egymást követő onsetek közötti idők, csak a MIN_IOI és MAX_IOI közöttiek
+def inter_onset_intervals(onsets):
+    onsets = np.array(onsets)
+    if len(onsets) < 2:
+        return np.array([])
+    diffs = np.diff(onsets)
+    return diffs[(diffs >= MIN_IOI) & (diffs <= MAX_IOI)]
 
-        peaks, _ = find_peaks(smooth_hist, height=relevant_max*0.2, prominence=1) # csúcsok keresése a hisztogramon
 
-        self.bin_edges = bin_edges
-        self.hist = hist
-        self.smooth_hist = smooth_hist
-        self.peaks = peaks
-        self.bin_centers = bin_centers
+# egy ütés hossza (mp) az időközökből, vagy None, ha nem becsülhető
+def dominant_interval(iois):
+    if len(iois) < MIN_IOI_COUNT: # túl kevés adat
+        return None
 
-        # a legmagasabb csúcs kiválasztása, ami nagyobb mint 40ms
-        if len(peaks) > 0:
-            best_peak_time = None
-            for p_idx in peaks:
-                time_val = bin_centers[p_idx]
-                if time_val > 0.04:
-                    best_peak_time = time_val
-                    break 
-            
-            if best_peak_time is not None:
-                self.dominant_interval = best_peak_time
-                self.optimal_gap = np.clip(best_peak_time * 0.6, 0.05, 0.22) # 50ms és 350ms közé szorítva
-            else:
-                print("Csak zajcsúcsok voltak, min_gap = 0.22s lesz.")
-                self.optimal_gap = 0.22
-        else:
-            print("Nem találtam csúcsot, min_gap = 0.22s lesz.")
-            self.optimal_gap = 0.22
-        self.last_optimal_gap = self.optimal_gap
-        return self.optimal_gap
+    # gyors daloknál az időközök többsége rövid: ilyenkor közvetlenül a percentilist használjuk
+    fastest = np.percentile(iois, FAST_PERCENTILE)
+    if fastest < FAST_IOI_LIMIT:
+        return fastest
 
-    # BPM kiszámítása a domináns intervallum alapján
-    def get_bpm(self):
-        if self.dominant_interval <= 0:
-            return 120
-        
-        bpm = 60.0 / self.dominant_interval
-        if self.dominant_interval < 0.18:
-            min_bpm = 100
-            max_bpm = 220
-        else:
-            min_bpm = 60
-            max_bpm = 160
+    # simított hisztogram, és annak első (legrövidebb időközhöz tartozó) elég magas csúcsa
+    hist, bin_edges = np.histogram(iois, bins=HIST_BINS, range=HIST_RANGE)
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+    smooth_hist = gaussian_filter1d(hist, sigma=HIST_SMOOTHING)
 
-        while bpm > max_bpm:
-            bpm /= 2
-        while bpm < min_bpm:
-            bpm *= 2
-        return int(round(bpm))
+    valid_start_idx = np.searchsorted(bin_centers, NOISE_LIMIT) # a csúcsmagasság küszöbét a zaj nélküli részből számoljuk
+    relevant_max = np.max(smooth_hist[valid_start_idx:])
 
-    
+    peaks, _ = find_peaks(smooth_hist, height=relevant_max * PEAK_HEIGHT_RATIO, prominence=PEAK_PROMINENCE)
+    if len(peaks) == 0:
+        return None
+    return bin_centers[peaks[0]]
+
+
+# a BPM becslése az onsetekből; a kapott értéket felezéssel / duplázással életszerű tartományba igazítja
+def estimate_bpm(onsets):
+    interval = dominant_interval(inter_onset_intervals(onsets))
+    if interval is None or interval <= 0:
+        print(f"A tempó nem becsülhető (kevés onset vagy nincs csúcs a hisztogramon), alapértelmezett: {DEFAULT_BPM} BPM.")
+        return DEFAULT_BPM
+
+    if interval < FAST_IOI_LIMIT:
+        min_bpm, max_bpm = FAST_BPM_RANGE
+    else:
+        min_bpm, max_bpm = NORMAL_BPM_RANGE
+
+    bpm = 60.0 / interval
+    while bpm > max_bpm:
+        bpm /= 2
+    while bpm < min_bpm:
+        bpm *= 2
+    return int(round(bpm))

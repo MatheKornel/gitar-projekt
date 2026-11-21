@@ -3,7 +3,7 @@ import soundfile as sf
 from filter import BandpassFilter
 from guitar_note_freqs import GuitarNoteFreqs
 from note_recognition import ShortTimeFT
-from onset_histogram import OnsetHistogram
+from onset_histogram import estimate_bpm
 
 MAX_HARMONICS = 5           # ennyi felharmonikust nézünk a hangmagasság becslésénél
 LOWCUT_FACTOR = 0.85        # a sáváteresztő alsó határa a hangolás legmélyebb hangjához képest
@@ -27,10 +27,7 @@ def filter_cutoffs(tuning):
 # a teljes hangfelismerés: szűrés, hangfelismerés és tempóbecslés
 # ezt használja a GUI és a regressziós teszt is, így a kettő biztosan ugyanazt futtatja
 # visszaad: szűrt jel, felismert hangok (NoteEvent lista), becsült BPM
-def recognize(audio, fs, tuning="E", histogram=None):
-    if histogram is None:
-        histogram = OnsetHistogram()
-
+def recognize(audio, fs, tuning="E"):
     lowcut, highcut = filter_cutoffs(tuning)
     bpf = BandpassFilter(audio)
     filtered = bpf.bandpass_filter(audio, fs, lowcut=lowcut, highcut=highcut)
@@ -41,7 +38,5 @@ def recognize(audio, fs, tuning="E", histogram=None):
     notes = stft.note_rec(MAX_HARMONICS, tuning)
 
     # tempóbecslés az onsetek közti időkből (IOI hisztogram)
-    histogram.calculate_iois(stft.onsets)
-    histogram.find_optimal_gap()
-    bpm = histogram.get_bpm()
+    bpm = estimate_bpm(stft.onsets)
     return filtered, notes, bpm

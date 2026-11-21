@@ -11,7 +11,6 @@ from config_parameters import ProjectConfig
 from cpp_optimizer import CppOptimizer
 from data_to_txt_converter import DataToTxtConverter
 from midi import MidiExporter
-from onset_histogram import OnsetHistogram
 from recognition_pipeline import load_audio, recognize
 from sheet_music_tab_exporter import SheetMusicTabExporter
 from spectrograms import Spectrogram
@@ -30,7 +29,6 @@ class GuitarProjectApp:
         self.current_notes = None
         self.original_filepath = ""
         self.last_opened_dir = None
-        self.histogram = OnsetHistogram()
         self.paths = ProjectPaths()
         self.config = ProjectConfig()
         self.algo = ""
@@ -154,7 +152,7 @@ class GuitarProjectApp:
         if self.original_audio is None or self.fs is None:
             return
 
-        filtered, notes, bpm = recognize(self.original_audio, self.fs, self.tunings_combobox.get(), self.histogram)
+        filtered, notes, bpm = recognize(self.original_audio, self.fs, self.tunings_combobox.get())
         self.current_audio = Audio(original=self.original_audio, filtered=filtered, fs=self.fs)
 
         test_file_name = os.path.splitext(os.path.basename(self.original_filepath))[0] + "_test.txt"
