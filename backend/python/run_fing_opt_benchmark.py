@@ -1,23 +1,20 @@
 import argparse
-import subprocess
 import os
 from config_paths import ProjectPaths
-
-ALGOS = ['main', 'main_plus_viterbi', 'viterbi', 'pso']
+from cpp_optimizer import ALGORITHMS, CppOptimizer
 
 
 def run_benchmark(paths, algo, print_log):
-    cpp_exe = paths.cpp_executable(algo)
+    optimizer = CppOptimizer(algo, paths)
 
-    if not cpp_exe.exists():
-        print(f"[!] Hiba: Nem talalhato a futtathato fajl: {cpp_exe}")
+    if not optimizer.exists():
+        print(f"[!] Hiba: Nem talalhato a futtathato fajl: {optimizer.cpp_exe}")
         print("Ellenorizd, hogy leforditottad-e a C++ kodot ehhez az algoritmushoz!")
         return
 
     print(f"[{algo.upper()}] Benchmark inditasa a hatterben...")
 
-    # paraméter nélküli futtatás, ami a C++ kódban a benchmarkot indítja el
-    result = subprocess.run([str(cpp_exe)], cwd=str(cpp_exe.parent), capture_output=True, text=True)
+    result = optimizer.run_benchmark()
 
     # ha a C++ program írt a standard outputra vagy errorra, azt kiírjuk
     if result.stdout.strip():
@@ -30,8 +27,7 @@ def run_benchmark(paths, algo, print_log):
         return
 
     # megkeressük és beolvassuk a legenerált log fájlt
-    log_path = os.path.join(str(cpp_exe.parent), f"../../../benchmark_results/{algo}_benchmark_results.txt")
-    log_path = os.path.normpath(log_path)
+    log_path = optimizer.benchmark_log_path()
 
     if os.path.exists(log_path):
         print("\n" + "="*50)
@@ -46,7 +42,7 @@ def run_benchmark(paths, algo, print_log):
 def main():
     parser = argparse.ArgumentParser(description="Gitár ujjrend optimalizáló benchmark futtatása.")
     parser.add_argument("-a", "--algo", required=True,
-                        choices=ALGOS + ['all'],
+                        choices=ALGORITHMS + ['all'],
                         help="Az optimalizáló eljárás neve ('all' esetén mind a négy lefut).")
     args = parser.parse_args()
 
@@ -57,10 +53,10 @@ def main():
         return
 
     # mind a négy eljárás lefut, a végén csak az összesítő táblázatot írjuk ki
-    for algo in ALGOS:
+    for algo in ALGORITHMS:
         run_benchmark(paths, algo, False)
 
-    summary_path = os.path.normpath(os.path.join(str(paths.cpp_executable('main').parent), "../../../benchmark_results/osszesitett_eredmenyek.txt"))
+    summary_path = CppOptimizer('main', paths).benchmark_summary_path()
     if os.path.exists(summary_path):
         print("\n" + "="*50)
         print(" OSSZESITETT EREDMENYEK")

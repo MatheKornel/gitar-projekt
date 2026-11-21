@@ -64,6 +64,16 @@ A csomagolt LilyPond GPL licencű, a licencei a csomag `lilypond/licenses` mapp�
    ```bash
    python backend/python/run_fing_opt_timing.py -a all -r 10
    ```
+7. Tesztek futtatása (a C++ optimalizálókat előtte le kell fordítani):
+   ```bash
+   python -m pytest -q backend/python/tests
+   ```
+   - **Hangfelismerés regressziós teszt:** a benchmark felvételein a felismert hangoknak (onset, offset, MIDI) pontosan egyezniük kell a `backend/python/tests/data/recognition_golden.json` fájlban eltárolt eredménnyel. A két IDMT-SMT-Guitar lick csak akkor fut, ha az adathalmaz mappáját az `IDMT_DATASET_DIR` környezeti változó vagy a projekt gyökerében lévő `idmt_path.txt` megadja, különben kimarad.
+   - **Ujjrend regressziós teszt:** a Saját, a Saját + Viterbi és a Viterbi eljárásnak a benchmarkon pontosan ugyanannyi kedvenc és elfogadható lefogást kell adnia, mint eddig. A PSO véletlenszerű, nála csak azt ellenőrzi, hogy lefut.
+   - Ha a hangfelismerés szándékosan változik (és a benchmark alapján jobb lett), a golden fájlt újra kell generálni:
+     ```bash
+     python backend/python/tests/update_recognition_golden.py
+     ```
 
 ## Mappastruktúra
 ```text
@@ -72,11 +82,13 @@ gitar-projekt/
 ├── backend/                                          # Program fő fájlai
 │    ├── python/
 │    │   ├── audio_files.py                           # Audio adatok kezelése
-│    │   ├── config_parameters.py                     # Beállítások (STFT, kvantálás, LilyPond elérési út)
+│    │   ├── config_parameters.py                     # A kotta generálásának beállításai (LilyPond elérési út, ütemmutató)
 │    │   ├── config_paths.py                          # Projekt mappák és fájlok elérési útjai
-│    │   ├── data_to_txt_converter.py                 # Felismert hangok mentése a C++ optimalizálónak
+│    │   ├── cpp_optimizer.py                         # A C++ ujjrend optimalizálók hívása (bemenet írása, futtatás, kimenet feldolgozása)
+│    │   ├── data_to_txt_converter.py                 # Felismert hangok mentése Excelbe másolható formában
 │    │   ├── filter.py                                # Sáváteresztő szűrő
 │    │   ├── guitar_note_freqs.py                     # Gitár hangok frekvenciái és hangolások
+│    │   ├── lilypond_locator.py                      # A LilyPond megkeresése (környezeti változó, lilypond_path.txt, csomagolt, PATH stb.)
 │    │   ├── main.py                                  # GUI és a program belépési pontja
 │    │   ├── midi.py                                  # MIDI fájl exportálása
 │    │   ├── note_event.py                            # Felismert hangok adatmodellje
@@ -84,13 +96,14 @@ gitar-projekt/
 │    │   ├── onset_detect.py                          # Spectral Flux alapú onset detektálás
 │    │   ├── onset_histogram.py                       # IOI hisztogram és BPM becslés
 │    │   ├── quantizing.py                            # Hangok kvantálása a kottához
+│    │   ├── recognition_pipeline.py                  # A teljes hangfelismerés (szűrés, felismerés, BPM) egy függvényben
 │    │   ├── run_fing_opt_benchmark.py                # Ujjrend benchmark futtatása parancssorból
 │    │   ├── run_fing_opt_timing.py                   # Ujjrend optimalizálók futásidejének mérése parancssorból
 │    │   ├── sheet_music_tab_exporter.py              # Kotta és tabulatúra generálása (music21/LilyPond)
 │    │   ├── spectrograms.py                          # Spektrogramok vizualizációja
-│    │   └── tests/                                   # Tesztek (pytest)
+│    │   └── tests/                                   # Tesztek (pytest), benne a regressziós tesztek és a golden fájl
 │    ├── cpp/
-│    │   ├── common/                                  # Közös kód (fogólap, bemenet, benchmark)
+│    │   ├── common/                                  # Közös kód (belépési pont, fogólap, bemenet, benchmark)
 │    │   ├── main_fingering_optimization/             # C++ alapú saját ujjrend optimalizáló
 │    │   ├── main_plus_viterbi_fingering_optimization/ # C++ alapú Saját + Viterbi ujjrend optimalizáló (összehasonlításhoz)
 │    │   ├── pso_fingering_optimization/              # C++ alapú PSO ujjrend optimalizáló (összehasonlításhoz)

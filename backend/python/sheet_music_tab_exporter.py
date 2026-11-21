@@ -7,7 +7,8 @@ from music21 import stream, note, duration, environment, clef, tempo, instrument
 from music21.meter.base import TimeSignature
 
 from guitar_note_freqs import GuitarNoteFreqs
-from config_parameters import ProjectConfig, refresh_bundled_lilypond_cache
+from config_parameters import ProjectConfig
+from lilypond_locator import refresh_bundled_lilypond_cache
 from config_paths import ProjectPaths
 from quantizing import Quantizing
 

@@ -19,7 +19,8 @@ add_library(CommonLib STATIC
 target_include_directories(CommonLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
 
 add_executable(MainOpt
-    main_fingering_optimization/main.cpp
+    common/src/app_main.cpp
+    main_fingering_optimization/algorithm.cpp
     main_fingering_optimization/note_position.cpp
     main_fingering_optimization/optimization.cpp
     )
@@ -32,7 +33,8 @@ set_target_properties(MainOpt PROPERTIES
 )
 
 add_executable(PsoOpt
-    pso_fingering_optimization/main.cpp
+    common/src/app_main.cpp
+    pso_fingering_optimization/algorithm.cpp
     pso_fingering_optimization/note_position.cpp
     pso_fingering_optimization/particle.cpp
     pso_fingering_optimization/pso.cpp
@@ -46,7 +48,8 @@ set_target_properties(PsoOpt PROPERTIES
 )
 
 add_executable(ViterbiOpt
-    viterbi_fingering_optimization/main.cpp
+    common/src/app_main.cpp
+    viterbi_fingering_optimization/algorithm.cpp
     viterbi_fingering_optimization/note_position.cpp
     viterbi_fingering_optimization/viterbi.cpp
     )
@@ -59,7 +62,8 @@ set_target_properties(ViterbiOpt PROPERTIES
 )
 
 add_executable(MainPlusViterbiOpt
-    main_plus_viterbi_fingering_optimization/main.cpp
+    common/src/app_main.cpp
+    main_plus_viterbi_fingering_optimization/algorithm.cpp
     main_plus_viterbi_fingering_optimization/note_position.cpp
     main_plus_viterbi_fingering_optimization/optimization.cpp
     )
