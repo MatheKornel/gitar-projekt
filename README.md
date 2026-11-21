@@ -82,12 +82,13 @@ gitar-projekt/
 ├── backend/                                          # Program fő fájlai
 │    ├── python/
 │    │   ├── audio_files.py                           # Audio adatok kezelése
-│    │   ├── config_parameters.py                     # Beállítások (STFT, kvantálás, LilyPond elérési út)
+│    │   ├── config_parameters.py                     # A kotta generálásának beállításai (LilyPond elérési út, ütemmutató)
 │    │   ├── config_paths.py                          # Projekt mappák és fájlok elérési útjai
 │    │   ├── cpp_optimizer.py                         # A C++ ujjrend optimalizálók hívása (bemenet írása, futtatás, kimenet feldolgozása)
 │    │   ├── data_to_txt_converter.py                 # Felismert hangok mentése Excelbe másolható formában
 │    │   ├── filter.py                                # Sáváteresztő szűrő
 │    │   ├── guitar_note_freqs.py                     # Gitár hangok frekvenciái és hangolások
+│    │   ├── lilypond_locator.py                      # A LilyPond megkeresése (környezeti változó, lilypond_path.txt, csomagolt, PATH stb.)
 │    │   ├── main.py                                  # GUI és a program belépési pontja
 │    │   ├── midi.py                                  # MIDI fájl exportálása
 │    │   ├── note_event.py                            # Felismert hangok adatmodellje

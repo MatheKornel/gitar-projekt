@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import config_parameters
+import lilypond_locator
 from config_paths import ProjectPaths
 from data_to_txt_converter import DataToTxtConverter
 from quantizing import Quantizing
@@ -58,16 +58,16 @@ def _fake_lilypond(root, scm_time, go_time):
 def test_refresh_bundled_lilypond_cache_makes_go_newer(tmp_path, monkeypatch):
     # Windows Intézős kicsomagolás után a .scm újabb, mint a .go
     exe, scm, go = _fake_lilypond(tmp_path, scm_time=2_000_000, go_time=1_000_000)
-    monkeypatch.setattr(config_parameters, "app_root", lambda: tmp_path)
-    config_parameters.refresh_bundled_lilypond_cache(exe)
+    monkeypatch.setattr(lilypond_locator, "app_root", lambda: tmp_path)
+    lilypond_locator.refresh_bundled_lilypond_cache(exe)
     assert go.stat().st_mtime > scm.stat().st_mtime
 
 
 def test_refresh_bundled_lilypond_cache_ignores_installed_lilypond(tmp_path, monkeypatch):
     # a gépre telepített (nem a program mellé csomagolt) LilyPondhoz nem nyúlunk
     exe, scm, go = _fake_lilypond(tmp_path / "installed", scm_time=2_000_000, go_time=1_000_000)
-    monkeypatch.setattr(config_parameters, "app_root", lambda: tmp_path / "app")
-    config_parameters.refresh_bundled_lilypond_cache(exe)
+    monkeypatch.setattr(lilypond_locator, "app_root", lambda: tmp_path / "app")
+    lilypond_locator.refresh_bundled_lilypond_cache(exe)
     assert go.stat().st_mtime == 1_000_000
 
 
