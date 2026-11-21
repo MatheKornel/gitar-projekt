@@ -86,22 +86,36 @@ class GuitarProjectApp:
         self.tunings_combobox.current(0)
         self.tunings_combobox.place(x=160, y=30)
 
+        self.loaded_file_label = ttk.Label(self.root)
+        self.loaded_file_label.place(x=0, y=180)
+        self.note_rec_status_label = ttk.Label(self.root)
+        self.note_rec_status_label.place(x=0, y=200)
+
     def refresh_ui(self):
         if self.original_audio is not None:
             loaded_file_text = f"Betöltött fájl: {os.path.basename(self.original_filepath)}"
         else:
             loaded_file_text = "Betöltött fájl: nincs"
-
-        loaded_file_label = ttk.Label(self.root, text=loaded_file_text)
-        loaded_file_label.place(x=0, y=180)
+        self.loaded_file_label.config(text=loaded_file_text)
 
         if self.is_note_rec_done:
             is_note_rec_done_text = "Hangfelismerés: kész"
         else:
             is_note_rec_done_text = "Hangfelismerés: nincs"
+        self.note_rec_status_label.config(text=is_note_rec_done_text)
 
-        is_note_rec_done_label = ttk.Label(self.root, text=is_note_rec_done_text)
-        is_note_rec_done_label.place(x=0, y=200)
+    # a BPM mező értéke egész számként, vagy None, ha nem érvényes (ilyenkor üzenetet is ír)
+    def _read_bpm(self):
+        text = self.bpm_entry.get().strip()
+        try:
+            bpm = int(text)
+        except ValueError:
+            print(f"Érvénytelen BPM érték: '{text}'. Egész számot adj meg (pl. 120).")
+            return None
+        if bpm <= 0:
+            print(f"Érvénytelen BPM érték: {bpm}. A BPM-nek pozitívnak kell lennie.")
+            return None
+        return bpm
 
     def file_load(self):
         if self.last_opened_dir:
@@ -233,7 +247,11 @@ class GuitarProjectApp:
             print("Nincs eredeti fájlnév a mentéshez.")
             return
 
-        exporter = MidiExporter(tempo=int(self.bpm_entry.get()), paths=self.paths)
+        bpm = self._read_bpm()
+        if bpm is None:
+            return
+
+        exporter = MidiExporter(tempo=bpm, paths=self.paths)
         base_name = os.path.basename(self.original_filepath)
         file_name = os.path.splitext(base_name)[0] + ".mid"
         exporter.create_midi(self.current_notes, file_name)
@@ -247,10 +265,14 @@ class GuitarProjectApp:
             print("Nincs eredeti fájlnév a mentéshez.")
             return
 
+        bpm = self._read_bpm()
+        if bpm is None:
+            return
+
         base_name = os.path.basename(self.original_filepath)
         file_name = os.path.splitext(base_name)[0]
 
-        exporter = SheetMusicTabExporter(audio_tempo=int(self.bpm_entry.get()), paths=self.paths, config=self.config)
+        exporter = SheetMusicTabExporter(audio_tempo=bpm, paths=self.paths, config=self.config)
         pdf_path = exporter.create_score(self.current_notes, file_basename=file_name, tuning=self.tunings_combobox.get(), open_pdf=open_pdf)
 
         if pdf_path:
